@@ -4,7 +4,13 @@ const { getCatalogProducts } = require('./products.service');
 
 router.get('/', async (req, res) => {
   try {
-    const products = await getCatalogProducts();
+    const filters = {
+      category: req.query.category,
+      manufacturer: req.query.manufacturer,
+      priceSort: req.query.priceSort,
+      weightSort: req.query.weightSort
+    };
+    const products = await getCatalogProducts(filters);
     res.json(products);
   } catch (e) {
     console.error(e);
