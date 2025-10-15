@@ -151,8 +151,7 @@ BEGIN
     WHERE order_id = v_order_id;
 
     UPDATE orders
-    SET total_amount = v_total,
-        updated_at = now()
+    SET total_amount = v_total
     WHERE order_id = v_order_id;
 
     RETURN NULL;
@@ -177,12 +176,12 @@ BEGIN
             IF LOWER(NEW.status) = 'paid' THEN
                 SELECT status_id INTO v_new_status_id FROM order_statuses WHERE code = 'processing' LIMIT 1;
                 IF v_new_status_id IS NOT NULL THEN
-                    UPDATE orders SET status_id = v_new_status_id, updated_at = now() WHERE order_id = NEW.order_id;
+                    UPDATE orders SET status_id = v_new_status_id WHERE order_id = NEW.order_id;
                 END IF;
             ELSIF LOWER(NEW.status) = 'failed' THEN
                 SELECT status_id INTO v_new_status_id FROM order_statuses WHERE code = 'canceled' LIMIT 1;
                 IF v_new_status_id IS NOT NULL THEN
-                    UPDATE orders SET status_id = v_new_status_id, updated_at = now() WHERE order_id = NEW.order_id;
+                    UPDATE orders SET status_id = v_new_status_id WHERE order_id = NEW.order_id;
                 END IF;
             END IF;
         END IF;
@@ -217,9 +216,9 @@ BEGIN
         RAISE EXCEPTION 'Order status code "new" not found in order_statuses';
     END IF;
 
-    INSERT INTO orders (user_id, address_id, status_id, total_amount, created_at, updated_at)
-    VALUES (p_user_id, p_address_id, v_status_new, 0, now(), now())
-    RETURNING order_id INTO v_order_id;
+    INSERT INTO orders (user_id, address_id, status_id, total_amount, created_at)
+	VALUES (p_user_id, p_address_id, v_status_new, 0, now())
+	RETURNING order_id INTO v_order_id;
 
     FOR elem IN SELECT * FROM json_array_elements(p_items)
     LOOP
@@ -234,8 +233,7 @@ BEGIN
         INSERT INTO order_items (order_id, product_id, quantity, price)
         VALUES (v_order_id, v_product_id, v_quantity, v_price);
     END LOOP;
-
-    PERFORM fn_recalculate_order_total() FROM order_items WHERE order_id = v_order_id; -- вызов триггерной логики через ручной вызов
+	
     RETURN v_order_id;
 END;
 $$;
@@ -312,6 +310,23 @@ INSERT INTO products (product_id, name_product, description, price, weight_grams
 (5, 'Чизкейк «Red Velvet Oreo»', 'Этот изысканный десерт сочетает в себе нежность чизкейка, насыщенный вкус красного бархата и хрустящую текстуру печенья Oreo. Основа из измельченных Oreo создает контраст с кремовым слоем, а яркий красный цвет и вишневый соус делают его настоящим украшением стола. Украшение из взбитых сливок, печенья и вишен завершает этот кулинарный шедевр, превращая его в идеальный выбор для особых случаев.', 219.00, 300, 'C:\Users\Lenovo\shop\first-site\public\images\sweet8.jpg', 4, 1, 'BC300'),
 (6, 'Торт «Красный бархат»', 'Торт «Красный бархат» — это классический американский десерт, который отличается насыщенным красным цветом, нежным вкусом и бархатистой текстурой. Его история уходит корнями в XIX век, когда он был известен под разными названиями, такими как «Красный Уолдорфский торт» или «Красный ковровый торт».', 189.00, 280, 'C:\Users\Lenovo\shop\first-site\public\images\sweet9.jpg', 3, 2, 'OC280');
 
+INSERT INTO order_statuses (status_id, code, name_orderstatuses, description) VALUES
+(1, 'new', 'Новый', 'Новый заказ'),
+(2, 'processing', 'В обработке', 'Заказ обрабатывается'),
+(3, 'shipped', 'Отправлен', 'Заказ отправлен'),
+(4, 'delivered', 'Доставлен', 'Заказ доставлен'),
+(5, 'canceled', 'Отменён', 'Заказ отменён');
+
+INSERT INTO payments (payment_id, order_id, amount, method_payments, status) VALUES
+(1, 5, 497.50, 'card', 'paid'),
+(2, 6, 607.50, 'paypal', 'pending');
+
+
+
 select * from products
 
 select * from manufacturers
+
+select * from orders
+
+select * from users
