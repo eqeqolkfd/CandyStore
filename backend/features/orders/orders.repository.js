@@ -5,14 +5,16 @@ async function insertOrderWithAddress({ userId, address, deliveryMethod, payment
   try {
     await client.query('BEGIN');
 
-    const userCheck = await client.query('SELECT user_id FROM users WHERE user_id = $1', [userId]);
+    const userCheck = await client.query('SELECT 1 FROM users WHERE user_id = $1', [userId]);
     if (userCheck.rows.length === 0) {
-      await client.query(
-        `INSERT INTO users (user_id, first_name, last_name, email, password_hash, created_at)
-         VALUES ($1, 'Test', 'User', 'test@example.com', 'dummy', now())
-         ON CONFLICT (user_id) DO NOTHING`,
-        [userId]
-      );
+      throw new Error('User not found');
+    }
+
+    const houseValue = (address?.house && String(address.house).trim())
+      ? String(address.house).trim()
+      : ((address?.apartment && String(address.apartment).trim()) ? String(address.apartment).trim() : null);
+    if (!houseValue) {
+      throw new Error('Address house or apartment is required');
     }
 
     const addressRes = await client.query(
@@ -23,7 +25,7 @@ async function insertOrderWithAddress({ userId, address, deliveryMethod, payment
         userId,
         address?.city || null,
         address?.street || null,
-        address?.house || null,
+        houseValue,
         address?.apartment || null,
         address?.postalCode || null,
         address?.fullName || null
@@ -60,8 +62,16 @@ async function insertOrderWithAddress({ userId, address, deliveryMethod, payment
   }
 }
 
-async function fetchOrdersByUser(userId) {
-  const ordersRes = await pool.query(
+async function fetchOrdersByUser(userId, orderId) {
+  let ordersRes, userClause = '', params = [], idx = 1;
+  if (orderId) {
+    userClause = 'o.order_id = $1';
+    params = [orderId];
+  } else {
+    userClause = 'o.user_id = $1';
+    params = [userId];
+  }
+  ordersRes = await pool.query(
     `SELECT
        o.order_id,
        o.user_id,
@@ -75,9 +85,9 @@ async function fetchOrdersByUser(userId) {
      FROM orders o
      LEFT JOIN order_statuses s ON s.status_id = o.status_id
      LEFT JOIN addresses a ON a.address_id = o.address_id
-     WHERE o.user_id = $1
+     WHERE ${userClause}
      ORDER BY o.created_at DESC`,
-    [userId]
+    params
   );
 
   if (ordersRes.rows.length === 0) return [];
@@ -90,7 +100,9 @@ async function fetchOrdersByUser(userId) {
        oi.product_id,
        oi.quantity,
        oi.price,
-       p.name_product
+       p.name_product,
+       p.description as product_description,
+       p.photo_url
      FROM order_items oi
      LEFT JOIN products p ON p.product_id = oi.product_id
      WHERE oi.order_id = ANY($1::int[])`,

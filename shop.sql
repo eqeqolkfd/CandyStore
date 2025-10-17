@@ -9,7 +9,6 @@ CREATE TABLE users (
     last_name     VARCHAR(50) NOT NULL,
     email         VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    avatar_url    TEXT,
     created_at    TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
@@ -317,16 +316,37 @@ INSERT INTO order_statuses (status_id, code, name_orderstatuses, description) VA
 (4, 'delivered', 'Доставлен', 'Заказ доставлен'),
 (5, 'canceled', 'Отменён', 'Заказ отменён');
 
-INSERT INTO payments (payment_id, order_id, amount, method_payments, status) VALUES
-(1, 5, 497.50, 'card', 'paid'),
-(2, 6, 607.50, 'paypal', 'pending');
+INSERT INTO users (first_name, last_name, email, password_hash)
+VALUES
+  ('Admin', 'User', 'emilka560@mail.ru', 'admin12345');
+  
+  
+SELECT setval('users_user_id_seq', 1, true);
+  
+INSERT INTO user_roles (user_id, role_id)
+SELECT 1, role_id FROM roles WHERE name_role = 'admin'
 
 
+INSERT INTO order_statuses (status_id, code, name_orderstatuses, description) VALUES
+(1, 'new', 'Новый', 'Новый заказ'),
+(2, 'processing', 'В обработке', 'Заказ обрабатывается'),
+(3, 'shipped', 'Отправлен', 'Заказ отправлен'),
+(4, 'delivered', 'Доставлен', 'Заказ доставлен'),
+(5, 'canceled', 'Отменён', 'Заказ отменён');
 
-select * from products
 
-select * from manufacturers
+select * from order_statuses;
 
-select * from orders
+select * from products;
 
-select * from users
+select * from manufacturers;
+
+select * from orders;
+
+select * from users;
+
+select * from payments;
+
+select * from roles;
+
+select * from user_roles;
