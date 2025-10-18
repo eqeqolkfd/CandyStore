@@ -19,7 +19,7 @@ router.get('/', async (req, res) => {
     res.json(orders);
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: 'Failed to fetch orders' });
+    res.status(500).json({ error: 'Не удалось загрузить заказы' });
   }
 });
 

@@ -25,17 +25,19 @@ function Header() {
         </div>
         <ul className="list-header-right">
           {isAuthorized && <li className="menu-button"><Link to="/profile">Профиль</Link></li>}
-          <button
-            className="logout-button"
-            onClick={() => {
-              try {
-                localStorage.removeItem('currentUser');
-              } catch (_) {}
-              navigate('/');
-            }}
-          >
-            Выход
-          </button>
+          {isAuthorized && (
+            <button
+              className="logout-button"
+              onClick={() => {
+                try {
+                  localStorage.removeItem('currentUser');
+                } catch (_) {}
+                navigate('/');
+              }}
+            >
+              Выход
+            </button>
+          )}
         </ul>
       </nav>
     </header>

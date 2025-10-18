@@ -3,8 +3,83 @@
   margin: 24px auto;
   padding: 0 16px;
 }
+
+/* Адаптивные стили для основного контейнера ProfileClient */
+@media (max-width: 768px) {
+  .profile-client {
+    margin: 16px auto;
+    padding: 0 12px;
+  }
+  .profile-card {
+    padding: 12px;
+    margin-bottom: 20px;
+  }
+  .profile-row {
+    flex-direction: column;
+    gap: 4px;
+    padding: 6px 0;
+  }
+  .profile-label {
+    width: auto;
+    font-weight: 600;
+  }
+  .profile-value {
+    font-weight: 500;
+  }
+  .profile-edit-input {
+    width: 100%;
+    max-width: 250px;
+  }
+  .profile-password-section {
+    gap: 8px;
+  }
+  .profile-edit-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .profile-save-btn,
+  .profile-cancel-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .profile-client {
+    margin: 12px auto;
+    padding: 0 8px;
+  }
+  .profile-title {
+    font-size: 20px;
+  }
+  .profile-card {
+    padding: 10px;
+    border-radius: 8px;
+  }
+}
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
 .profile-title {
-  margin: 0 0 16px;
+  margin: 0;
+}
+
+.profile-edit-btn {
+  background: #9E8279;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.profile-edit-btn:hover {
+  background: #7f685f;
 }
 .profile-card {
   background: #fff;
@@ -23,15 +98,169 @@
 .profile-row:last-child { border-bottom: none; }
 .profile-label { width: 180px; color: #666; }
 .profile-value { color: #222; font-weight: 600; }
+.profile-value--readonly { color: #888; }
+
+.profile-edit-input {
+  height: 44px;
+  border: 1px solid #e2e2e2;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  width: 200px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.profile-edit-input:focus {
+  border-color: #9E8279;
+  box-shadow: 0 0 0 4px rgba(158,130,121,0.15);
+}
+
+.profile-edit-input--password {
+  padding-right: 40px;
+}
+
+.profile-edit-field-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-password-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.profile-password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.profile-field-error {
+  color: #d2322d;
+  font-size: 13px;
+  margin-top: 2px;
+  margin-left: 1px;
+}
+
+.profile-field-loading {
+  color: #666;
+  font-size: 13px;
+  margin-top: 2px;
+  margin-left: 1px;
+  font-style: italic;
+}
+
+/* Стили для полей пароля ProfileClient (аналогично Register.css, но с уникальными названиями) */
+.profile-password-input-wrapper input[type="password"],
+.profile-password-input-wrapper input[type="text"] {
+  flex: 1;
+  padding-right: 40px;
+}
+
+.profile-password-toggle-btn {
+  background: none;
+  border: none;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  height: 28px;
+  width: 28px;
+}
+
+.profile-password-toggle-btn:focus {
+  outline: 2px solid #9E8279;
+}
+
+.profile-edit-error {
+  color: #d32f2f;
+  font-size: 14px;
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: #ffebee;
+  border: 1px solid #ffcdd2;
+  border-radius: 4px;
+}
+
+.profile-edit-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #f2f2f2;
+}
+
+.profile-save-btn {
+  background: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.profile-save-btn:hover:not(:disabled) {
+  background: #45a049;
+}
+
+.profile-save-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.profile-cancel-btn {
+  background: #f44336;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.profile-cancel-btn:hover:not(:disabled) {
+  background: #da190b;
+}
+
+.profile-cancel-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
 .profile-loading, .profile-error, .profile-unauth { text-align: center; padding: 24px; }
 
-.payments-title { margin: 0 0 12px; }
-.payments-counter { margin-bottom: 8px; color: #666; }
-.payments-empty { text-align: center; color: #666; padding: 16px; }
 .payments-list { display: grid; gap: 12px; }
 .payments-list--grid3 { grid-template-columns: repeat(3, 1fr); }
-@media (max-width: 900px) { .payments-list--grid3 { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 600px) { .payments-list--grid3 { grid-template-columns: 1fr; } }
+
+/* Адаптивные стили для списка платежей ProfileClient */
+@media (max-width: 900px) { 
+  .payments-list--grid3 { 
+    grid-template-columns: repeat(2, 1fr); 
+  } 
+}
+
+@media (max-width: 600px) { 
+  .payments-list--grid3 { 
+    grid-template-columns: 1fr; 
+  }
+  .payment-item {
+    min-height: 100px;
+    padding: 10px;
+  }
+  .profile-details-btn {
+    padding: 4px 10px;
+    font-size: 14px;
+  }
+}
 .payment-item {
   color: #222;
   background: #fff;
@@ -66,13 +295,15 @@
   justify-content: center;
 }
 .profile-modal-card {
-  min-width:320px; max-width: min(95vw, 600px);
+  min-width:320px; max-width: min(95vw, 700px);
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 8px 32px 4px rgba(60,48,46,0.11);
   padding: 28px 20px 20px 20px;
-  max-height: 85vh;
-  display: flex; flex-direction: column;
+  max-height: 90vh;
+  display: flex; 
+  flex-direction: column;
+  overflow: hidden;
 }
 .profile-modal-title { margin: 0 0 12px; font-size: 21px; }
 .profile-modal-products-grid {
@@ -80,6 +311,29 @@
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: 16px;
   margin-bottom: 20px;
+  max-height: 60vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 8px;
+}
+
+/* Стилизация скроллбара для WebKit браузеров */
+.profile-modal-products-grid::-webkit-scrollbar {
+  width: 6px;
+}
+
+.profile-modal-products-grid::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.profile-modal-products-grid::-webkit-scrollbar-thumb {
+  background: #9E8279;
+  border-radius: 3px;
+}
+
+.profile-modal-products-grid::-webkit-scrollbar-thumb:hover {
+  background: #7f685f;
 }
 .profile-modal-product-card {
   border: 1px solid #e5e0dc;
@@ -127,3 +381,179 @@
 .profile-modal-footer { text-align: right; }
 .profile-modal-close { background: #9E8279; color: #fff; border: none; border-radius: 6px; padding: 6px 18px; cursor:pointer; font-size:16px; }
 .profile-modal-close:hover { background: #7f685f; }
+
+/* Адаптивные стили для ProfileClient модального окна товаров */
+/* Большие экраны - 1200px и больше */
+@media (max-width: 1200px) {
+  .profile-modal-products-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    max-height: 55vh;
+  }
+  .profile-modal-product-card {
+    padding: 10px;
+    gap: 10px;
+  }
+}
+
+/* Очень большие экраны - больше 1200px */
+@media (min-width: 1201px) {
+  .profile-modal-card {
+    max-width: min(95vw, 800px);
+  }
+  .profile-modal-products-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 18px;
+    max-height: 65vh;
+  }
+}
+
+/* Средние экраны - 992px - 1199px */
+@media (max-width: 992px) {
+  .profile-modal-card {
+    min-width: 280px;
+    max-width: min(90vw, 500px);
+    padding: 24px 16px 16px 16px;
+    max-height: 85vh;
+  }
+  .profile-modal-products-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    max-height: 50vh;
+  }
+  .profile-modal-product-card {
+    padding: 8px;
+    gap: 8px;
+  }
+  .profile-modal-product-img,
+  .profile-modal-product-img--placeholder {
+    width: 50px;
+    height: 50px;
+  }
+  .profile-modal-product-name {
+    font-size: 15px;
+  }
+  .profile-modal-product-row {
+    font-size: 13px;
+  }
+}
+
+/* Планшеты - 768px - 991px */
+@media (max-width: 768px) {
+  .profile-modal-card {
+    min-width: 260px;
+    max-width: min(85vw, 450px);
+    padding: 20px 14px 14px 14px;
+    max-height: 85vh;
+  }
+  .profile-modal-title {
+    font-size: 19px;
+  }
+  .profile-modal-products-grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
+    max-height: 50vh;
+  }
+  .profile-modal-product-card {
+    padding: 6px;
+    gap: 6px;
+  }
+  .profile-modal-product-img,
+  .profile-modal-product-img--placeholder {
+    width: 45px;
+    height: 45px;
+    font-size: 12px;
+  }
+  .profile-modal-product-name {
+    font-size: 14px;
+  }
+  .profile-modal-product-row {
+    font-size: 12px;
+  }
+}
+
+/* Мобильные устройства - 576px - 767px */
+@media (max-width: 576px) {
+  .profile-modal-card {
+    min-width: 240px;
+    max-width: min(80vw, 400px);
+    padding: 16px 12px 12px 12px;
+    max-height: 90vh;
+  }
+  .profile-modal-title {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  .profile-modal-products-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    max-height: 60vh;
+  }
+  .profile-modal-product-card {
+    padding: 8px;
+    gap: 8px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .profile-modal-product-img,
+  .profile-modal-product-img--placeholder {
+    width: 60px;
+    height: 60px;
+    font-size: 13px;
+  }
+  .profile-modal-product-info {
+    width: 100%;
+  }
+  .profile-modal-product-name {
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+  .profile-modal-product-row {
+    font-size: 13px;
+    margin-bottom: 2px;
+  }
+  .profile-modal-close {
+    padding: 8px 20px;
+    font-size: 15px;
+  }
+}
+
+/* Очень маленькие экраны - до 400px */
+@media (max-width: 400px) {
+  .profile-modal-card {
+    min-width: 200px;
+    max-width: 95vw;
+    padding: 12px 8px 8px 8px;
+    margin: 10px;
+  }
+  .profile-modal-title {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+  .profile-modal-products-grid {
+    gap: 6px;
+    max-height: 55vh;
+  }
+  .profile-modal-product-card {
+    padding: 6px;
+    gap: 6px;
+  }
+  .profile-modal-product-img,
+  .profile-modal-product-img--placeholder {
+    width: 50px;
+    height: 50px;
+    font-size: 11px;
+  }
+  .profile-modal-product-name {
+    font-size: 14px;
+  }
+  .profile-modal-product-row {
+    font-size: 12px;
+  }
+  .profile-modal-close {
+    padding: 6px 16px;
+    font-size: 14px;
+    width: 100%;
+  }
+}

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { createPaymentForOrder } = require('./payments.service');
-const pool = require('../../db');
+const pool = require('../../db.js');
 
 router.post('/', async (req, res) => {
   try {

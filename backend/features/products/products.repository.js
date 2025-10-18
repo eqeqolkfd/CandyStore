@@ -1,4 +1,4 @@
-const pool = require('../../db');
+const pool = require('../../db.js');
 
 async function findAllProducts(filters = {}) {
   let sql = `

@@ -449,7 +449,7 @@ function Cart() {
                         type="text"
                         placeholder="10"
                         value={address.house}
-                        maxLength={50}
+                        maxLength={5}
                         onChange={(e) => {
                           const v = e.target.value;
                           setAddress({ ...address, house: v, apartment: '' });
@@ -467,7 +467,7 @@ function Cart() {
                         type="text"
                         placeholder="45"
                         value={address.apartment}
-                        maxLength={50}
+                        maxLength={5}
                         onChange={(e) => {
                           const v = e.target.value;
                           setAddress({ ...address, apartment: v, house: '' });
