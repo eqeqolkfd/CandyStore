@@ -19,8 +19,8 @@ async function getAuditLogs({ page, limit, action, user, sortBy, sortOrder }) {
     let query = `
       SELECT 
         al.audit_id as id,
-        al.timestamp,
-        al.action,
+        al."timestamp",
+        al."action",
         al.user_id,
         u.first_name || ' ' || u.last_name as user_name,
         al.target_type,
@@ -39,7 +39,7 @@ async function getAuditLogs({ page, limit, action, user, sortBy, sortOrder }) {
     let paramIndex = 1;
     
     if (action) {
-      query += ` AND al.action = $${paramIndex++}`;
+      query += ` AND al."action" = $${paramIndex++}`;
       params.push(action);
     }
     
@@ -53,7 +53,13 @@ async function getAuditLogs({ page, limit, action, user, sortBy, sortOrder }) {
     const validSortFields = ['timestamp', 'action', 'user_name', 'severity'];
     const sortField = validSortFields.includes(sortBy) ? sortBy : 'timestamp';
     const sortDirection = sortOrder === 'asc' ? 'ASC' : 'DESC';
-    query += ` ORDER BY ${sortField} ${sortDirection}`;
+    
+    // Добавляем кавычки для timestamp и action
+    const sortFieldWithQuotes = (sortField === 'timestamp' || sortField === 'action') 
+      ? `"${sortField}"` 
+      : sortField;
+    
+    query += ` ORDER BY ${sortFieldWithQuotes} ${sortDirection}`;
     
     // Пагинация
     const offset = (page - 1) * limit;
@@ -74,7 +80,7 @@ async function getAuditLogs({ page, limit, action, user, sortBy, sortOrder }) {
     let countParamIndex = 1;
     
     if (action) {
-      countQuery += ` AND al.action = $${countParamIndex++}`;
+      countQuery += ` AND al."action" = $${countParamIndex++}`;
       countParams.push(action);
     }
     
@@ -112,14 +118,27 @@ async function getAuditLogs({ page, limit, action, user, sortBy, sortOrder }) {
   }
 }
 
-async function createAuditLog({ action, userId, targetType, targetId, targetName, details, severity }) {
+async function createAuditLog({ action, userId, targetType, targetId, targetName, details, severity, ipAddress, userAgent }) {
+  console.log('🔍 createAuditLog вызвана:', { action, userId, targetName });
   const client = await pool.connect();
   try {
     const query = `
-      INSERT INTO audit_logs (action, user_id, target_type, target_id, target_name, details, severity)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      INSERT INTO audit_logs ("action", user_id, target_type, target_id, target_name, details, severity, ip_address, user_agent)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *
     `;
+    
+    console.log('🔍 Выполняем SQL запрос с параметрами:', [
+      action,
+      userId,
+      targetType,
+      targetId,
+      targetName,
+      JSON.stringify(details),
+      severity,
+      ipAddress,
+      userAgent
+    ]);
     
     const result = await client.query(query, [
       action,
@@ -128,10 +147,16 @@ async function createAuditLog({ action, userId, targetType, targetId, targetName
       targetId,
       targetName,
       JSON.stringify(details),
-      severity
+      severity,
+      ipAddress,
+      userAgent
     ]);
     
+    console.log('✅ SQL запрос выполнен успешно, результат:', result.rows[0]);
     return result.rows[0];
+  } catch (error) {
+    console.error('❌ Ошибка в createAuditLog:', error);
+    throw error;
   } finally {
     client.release();
   }

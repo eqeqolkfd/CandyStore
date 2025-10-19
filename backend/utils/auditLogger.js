@@ -25,18 +25,22 @@ async function logAuditEvent({
   ipAddress = null,
   userAgent = null
 }) {
+  console.log('🔍 logAuditEvent вызвана:', { action, userId, targetName });
   try {
-    await createAuditLog({
+    const result = await createAuditLog({
       action,
       userId,
       targetType,
       targetId,
       targetName,
       details,
-      severity
+      severity,
+      ipAddress,
+      userAgent
     });
+    console.log('✅ Запись аудита создана успешно:', result);
   } catch (error) {
-    console.error('Ошибка записи в журнал аудита:', error);
+    console.error('❌ Ошибка записи в журнал аудита:', error);
     // Не прерываем выполнение основного кода при ошибке аудита
   }
 }

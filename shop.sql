@@ -133,8 +133,8 @@ CREATE INDEX idx_products_name ON products(name_product);
 -- Таблица журнала аудита
 CREATE TABLE audit_logs (
     audit_id        SERIAL PRIMARY KEY,
-    timestamp       TIMESTAMP WITH TIME ZONE DEFAULT now(),
-    action          VARCHAR(50) NOT NULL,
+    timestamp_logs TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    action_logs          VARCHAR(50) NOT NULL,
     user_id         INT REFERENCES users(user_id) ON DELETE SET NULL,
     target_type     VARCHAR(20), -- USER, PRODUCT, ORDER, etc.
     target_id       INT,
@@ -146,12 +146,248 @@ CREATE TABLE audit_logs (
     created_at      TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
+ALTER TABLE audit_logs
+    ADD COLUMN IF NOT EXISTS before_data JSONB,
+    ADD COLUMN IF NOT EXISTS after_data  JSONB;
+
 -- Индексы для оптимизации запросов журнала аудита
 CREATE INDEX idx_audit_logs_timestamp ON audit_logs(timestamp);
 CREATE INDEX idx_audit_logs_action ON audit_logs(action);
 CREATE INDEX idx_audit_logs_user_id ON audit_logs(user_id);
 CREATE INDEX idx_audit_logs_target_type ON audit_logs(target_type);
 CREATE INDEX idx_audit_logs_severity ON audit_logs(severity);
+
+
+CREATE OR REPLACE FUNCTION fn_insert_audit(
+    p_action       TEXT,
+    p_user_id      INT DEFAULT NULL,
+    p_target_type  TEXT DEFAULT NULL,
+    p_target_id    INT DEFAULT NULL,
+    p_target_name  TEXT DEFAULT NULL,
+    p_before       JSONB DEFAULT NULL,
+    p_after        JSONB DEFAULT NULL,
+    p_details      JSONB DEFAULT NULL,
+    p_severity     VARCHAR DEFAULT 'LOW',
+    p_ip           INET DEFAULT NULL,
+    p_user_agent   TEXT DEFAULT NULL
+) RETURNS VOID
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    INSERT INTO audit_logs(
+        timestamp,
+        action,
+        user_id,
+        target_type,
+        target_id,
+        target_name,
+        details,
+        before_data,
+        after_data,
+        severity,
+        ip_address,
+        user_agent,
+        created_at
+    ) VALUES (
+        now(),
+        p_action,
+        p_user_id,
+        p_target_type,
+        p_target_id,
+        p_target_name,
+        p_details,
+        p_before,
+        p_after,
+        p_severity,
+        p_ip,
+        p_user_agent,
+        now()
+    );
+END;
+$$;
+
+
+-- 3) Универсальная триггер-функция для автоматического логирования изменений строк
+--    - извлекает текущего "актора" из session config: current_setting('audit.user_id', true)
+--    - извлекает ip и user_agent при наличии (current_setting('audit.ip', true), current_setting('audit.user_agent', true))
+--    - убирает чувствительные поля (password, password_hash, token, secret)
+CREATE OR REPLACE FUNCTION fn_audit_row_change()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_op            TEXT := TG_OP;                 -- INSERT / UPDATE / DELETE
+    v_table         TEXT := TG_TABLE_NAME;
+    v_before        JSONB;
+    v_after         JSONB;
+    v_actor_txt     TEXT;
+    v_actor_id      INT;
+    v_ip_txt        TEXT;
+    v_user_agent_txt TEXT;
+    v_json          JSONB;
+    v_target_id_txt TEXT;
+    v_target_id     INT;
+    v_target_name   TEXT;
+    v_singular      TEXT;
+    sensitive_cols  TEXT[] := ARRAY['password','password_hash','secret','token'];
+    col TEXT;
+BEGIN
+    -- Build before/after JSONB
+    IF TG_OP = 'INSERT' THEN
+        v_before := NULL;
+        v_after  := to_jsonb(NEW);
+    ELSIF TG_OP = 'DELETE' THEN
+        v_before := to_jsonb(OLD);
+        v_after  := NULL;
+    ELSE -- UPDATE
+        v_before := to_jsonb(OLD);
+        v_after  := to_jsonb(NEW);
+    END IF;
+
+    -- Remove sensitive keys if present
+    FOREACH col IN ARRAY sensitive_cols LOOP
+        IF v_before IS NOT NULL THEN v_before := v_before - col; END IF;
+        IF v_after  IS NOT NULL THEN v_after  := v_after  - col; END IF;
+    END LOOP;
+
+    -- Try get actor/user id and other context from session GUCs set by application
+    v_actor_txt := current_setting('audit.user_id', true);
+    IF v_actor_txt IS NOT NULL THEN
+        BEGIN
+            v_actor_id := v_actor_txt::INT;
+        EXCEPTION WHEN others THEN
+            v_actor_id := NULL;
+        END;
+    END IF;
+
+    v_ip_txt := current_setting('audit.ip', true);
+    v_user_agent_txt := current_setting('audit.user_agent', true);
+
+    -- Determine target_id: try common patterns: <table>_id, id, singular_table + _id
+    v_json := COALESCE(v_after, v_before);
+    v_singular := regexp_replace(v_table, 's$', ''); -- very simple singularization
+
+    IF v_json IS NOT NULL THEN
+        v_target_id_txt := COALESCE(
+            v_json ->> (v_table || '_id'),
+            v_json ->> 'id',
+            v_json ->> (v_singular || '_id')
+        );
+
+        IF v_target_id_txt IS NOT NULL AND v_target_id_txt ~ '^[0-9]+$' THEN
+            v_target_id := v_target_id_txt::INT;
+        END IF;
+
+        -- Try to get a human-friendly name field if exists
+        v_target_name := COALESCE(
+            v_json ->> 'name',
+            (v_json ->> 'first_name') || ' ' || (v_json ->> 'last_name'),
+            v_json ->> 'title',
+            NULL
+        );
+        -- Trim 'NULL' combos
+        IF v_target_name IS NOT NULL THEN
+            v_target_name := regexp_replace(v_target_name, '(^\s+|\s+$)', '', 'g');
+            IF v_target_name ~ '^null' THEN v_target_name := NULL; END IF;
+        END IF;
+    END IF;
+
+    -- Call common insert function
+    PERFORM fn_insert_audit(
+        p_action      => v_op,
+        p_user_id     => v_actor_id,
+        p_target_type => upper(v_table),
+        p_target_id   => v_target_id,
+        p_target_name => v_target_name,
+        p_before      => v_before,
+        p_after       => v_after,
+        p_details     => jsonb_build_object('table', v_table, 'tg_op', v_op),
+        p_severity    => 'LOW',
+        p_ip          => CASE WHEN v_ip_txt IS NOT NULL THEN v_ip_txt::inet ELSE NULL END,
+        p_user_agent  => v_user_agent_txt
+    );
+
+    -- AFTER trigger: return NULL
+    RETURN NULL;
+END;
+$$;
+
+
+-- 4) Триггеры для выбранных таблиц — добавьте другие таблицы по аналогии
+--    Здесь примеры для users, products, categories, manufacturers, orders, order_items, payments, reviews
+
+CREATE TRIGGER trg_audit_users_all
+AFTER INSERT OR UPDATE OR DELETE ON users
+FOR EACH ROW
+EXECUTE FUNCTION fn_audit_row_change();
+
+CREATE TRIGGER trg_audit_products_all
+AFTER INSERT OR UPDATE OR DELETE ON products
+FOR EACH ROW
+EXECUTE FUNCTION fn_audit_row_change();
+
+CREATE TRIGGER trg_audit_categories_all
+AFTER INSERT OR UPDATE OR DELETE ON categories
+FOR EACH ROW
+EXECUTE FUNCTION fn_audit_row_change();
+
+CREATE TRIGGER trg_audit_manufacturers_all
+AFTER INSERT OR UPDATE OR DELETE ON manufacturers
+FOR EACH ROW
+EXECUTE FUNCTION fn_audit_row_change();
+
+CREATE TRIGGER trg_audit_orders_all
+AFTER INSERT OR UPDATE OR DELETE ON orders
+FOR EACH ROW
+EXECUTE FUNCTION fn_audit_row_change();
+
+CREATE TRIGGER trg_audit_order_items_all
+AFTER INSERT OR UPDATE OR DELETE ON order_items
+FOR EACH ROW
+EXECUTE FUNCTION fn_audit_row_change();
+
+CREATE TRIGGER trg_audit_payments_all
+AFTER INSERT OR UPDATE OR DELETE ON payments
+FOR EACH ROW
+EXECUTE FUNCTION fn_audit_row_change();
+
+CREATE TRIGGER trg_audit_reviews_all
+AFTER INSERT OR UPDATE OR DELETE ON reviews
+FOR EACH ROW
+EXECUTE FUNCTION fn_audit_row_change();
+
+
+-- 5) Функция для ручной записи аудита (например, при логине/аутентификации, т.к. логин обычно обрабатывает приложение)
+CREATE OR REPLACE FUNCTION fn_log_manual_event(
+    p_action TEXT,
+    p_user_id INT DEFAULT NULL,
+    p_target_type TEXT DEFAULT NULL,
+    p_target_id INT DEFAULT NULL,
+    p_target_name TEXT DEFAULT NULL,
+    p_details JSONB DEFAULT NULL,
+    p_severity VARCHAR DEFAULT 'LOW',
+    p_ip INET DEFAULT NULL,
+    p_user_agent TEXT DEFAULT NULL
+) RETURNS VOID
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    PERFORM fn_insert_audit(
+        p_action      => p_action,
+        p_user_id     => p_user_id,
+        p_target_type => p_target_type,
+        p_target_id   => p_target_id,
+        p_target_name => p_target_name,
+        p_before      => NULL,
+        p_after       => NULL,
+        p_details     => p_details,
+        p_severity    => p_severity,
+        p_ip          => p_ip,
+        p_user_agent  => p_user_agent
+    );
+END;
+$$;
+
 
 CREATE OR REPLACE FUNCTION fn_recalculate_order_total()
 RETURNS TRIGGER
@@ -307,6 +543,255 @@ BEGIN
 END;
 $$;
 
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='audit_logs' AND column_name='timestamp_logs') THEN
+        ALTER TABLE audit_logs RENAME COLUMN timestamp_logs TO "timestamp";
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='audit_logs' AND column_name='action_logs') THEN
+        ALTER TABLE audit_logs RENAME COLUMN action_logs TO "action";
+    END IF;
+END$$;
+
+DO $$
+BEGIN
+    -- безопасно удаляем индексы, если они есть
+    IF EXISTS (SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE c.relname='idx_audit_logs_timestamp') THEN
+        DROP INDEX idx_audit_logs_timestamp;
+    END IF;
+    IF EXISTS (SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE c.relname='idx_audit_logs_action') THEN
+        DROP INDEX idx_audit_logs_action;
+    END IF;
+END$$;
+
+CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON audit_logs("timestamp");
+CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON audit_logs("action");
+
+CREATE OR REPLACE FUNCTION fn_insert_audit(
+    p_action       TEXT,
+    p_user_id      INT DEFAULT NULL,
+    p_target_type  TEXT DEFAULT NULL,
+    p_target_id    INT DEFAULT NULL,
+    p_target_name  TEXT DEFAULT NULL,
+    p_before       JSONB DEFAULT NULL,
+    p_after        JSONB DEFAULT NULL,
+    p_details      JSONB DEFAULT NULL,
+    p_severity     VARCHAR DEFAULT 'LOW',
+    p_ip           INET DEFAULT NULL,
+    p_user_agent   TEXT DEFAULT NULL
+) RETURNS VOID
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    INSERT INTO audit_logs(
+        "timestamp",
+        "action",
+        user_id,
+        target_type,
+        target_id,
+        target_name,
+        details,
+        before_data,
+        after_data,
+        severity,
+        ip_address,
+        user_agent,
+        created_at
+    ) VALUES (
+        now(),
+        p_action,
+        p_user_id,
+        p_target_type,
+        p_target_id,
+        p_target_name,
+        p_details,
+        p_before,
+        p_after,
+        p_severity,
+        p_ip,
+        p_user_agent,
+        now()
+    );
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION fn_audit_row_change()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_op            TEXT := TG_OP;                 -- INSERT / UPDATE / DELETE
+    v_table         TEXT := TG_TABLE_NAME;
+    v_before        JSONB;
+    v_after         JSONB;
+    v_actor_txt     TEXT;
+    v_actor_id      INT;
+    v_ip_txt        TEXT;
+    v_user_agent_txt TEXT;
+    v_json          JSONB;
+    v_target_id_txt TEXT;
+    v_target_id     INT;
+    v_target_name   TEXT;
+    v_singular      TEXT;
+    sensitive_cols  TEXT[] := ARRAY['password','password_hash','secret','token'];
+    col TEXT;
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        v_before := NULL;
+        v_after  := to_jsonb(NEW);
+    ELSIF TG_OP = 'DELETE' THEN
+        v_before := to_jsonb(OLD);
+        v_after  := NULL;
+    ELSE
+        v_before := to_jsonb(OLD);
+        v_after  := to_jsonb(NEW);
+    END IF;
+
+    FOREACH col IN ARRAY sensitive_cols LOOP
+        IF v_before IS NOT NULL THEN v_before := v_before - col; END IF;
+        IF v_after  IS NOT NULL THEN v_after  := v_after  - col; END IF;
+    END LOOP;
+
+    v_actor_txt := current_setting('audit.user_id', true);
+    IF v_actor_txt IS NOT NULL THEN
+        BEGIN
+            v_actor_id := v_actor_txt::INT;
+        EXCEPTION WHEN others THEN
+            v_actor_id := NULL;
+        END;
+    END IF;
+
+    v_ip_txt := current_setting('audit.ip', true);
+    v_user_agent_txt := current_setting('audit.user_agent', true);
+
+    v_json := COALESCE(v_after, v_before);
+    v_singular := regexp_replace(v_table, 's$', '');
+
+    IF v_json IS NOT NULL THEN
+        v_target_id_txt := COALESCE(
+            v_json ->> (v_table || '_id'),
+            v_json ->> 'id',
+            v_json ->> (v_singular || '_id')
+        );
+
+        IF v_target_id_txt IS NOT NULL AND v_target_id_txt ~ '^[0-9]+$' THEN
+            v_target_id := v_target_id_txt::INT;
+        END IF;
+
+        v_target_name := COALESCE(
+            v_json ->> 'name',
+            (v_json ->> 'first_name') || ' ' || (v_json ->> 'last_name'),
+            v_json ->> 'title',
+            NULL
+        );
+
+        IF v_target_name IS NOT NULL THEN
+            v_target_name := regexp_replace(v_target_name, '(^\s+|\s+$)', '', 'g');
+            IF v_target_name ~ '^null' THEN v_target_name := NULL; END IF;
+        END IF;
+    END IF;
+
+    PERFORM fn_insert_audit(
+        p_action      => v_op,
+        p_user_id     => v_actor_id,
+        p_target_type => upper(v_table),
+        p_target_id   => v_target_id,
+        p_target_name => v_target_name,
+        p_before      => v_before,
+        p_after       => v_after,
+        p_details     => jsonb_build_object('table', v_table, 'tg_op', v_op),
+        p_severity    => 'LOW',
+        p_ip          => CASE WHEN v_ip_txt IS NOT NULL THEN v_ip_txt::inet ELSE NULL END,
+        p_user_agent  => v_user_agent_txt
+    );
+
+    RETURN NULL;
+END;
+$$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='trg_audit_users_all') THEN
+        EXECUTE 'CREATE TRIGGER trg_audit_users_all AFTER INSERT OR UPDATE OR DELETE ON users FOR EACH ROW EXECUTE FUNCTION fn_audit_row_change()';
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='trg_audit_products_all') THEN
+        EXECUTE 'CREATE TRIGGER trg_audit_products_all AFTER INSERT OR UPDATE OR DELETE ON products FOR EACH ROW EXECUTE FUNCTION fn_audit_row_change()';
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='trg_audit_categories_all') THEN
+        EXECUTE 'CREATE TRIGGER trg_audit_categories_all AFTER INSERT OR UPDATE OR DELETE ON categories FOR EACH ROW EXECUTE FUNCTION fn_audit_row_change()';
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='trg_audit_manufacturers_all') THEN
+        EXECUTE 'CREATE TRIGGER trg_audit_manufacturers_all AFTER INSERT OR UPDATE OR DELETE ON manufacturers FOR EACH ROW EXECUTE FUNCTION fn_audit_row_change()';
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='trg_audit_orders_all') THEN
+        EXECUTE 'CREATE TRIGGER trg_audit_orders_all AFTER INSERT OR UPDATE OR DELETE ON orders FOR EACH ROW EXECUTE FUNCTION fn_audit_row_change()';
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='trg_audit_order_items_all') THEN
+        EXECUTE 'CREATE TRIGGER trg_audit_order_items_all AFTER INSERT OR UPDATE OR DELETE ON order_items FOR EACH ROW EXECUTE FUNCTION fn_audit_row_change()';
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='trg_audit_payments_all') THEN
+        EXECUTE 'CREATE TRIGGER trg_audit_payments_all AFTER INSERT OR UPDATE OR DELETE ON payments FOR EACH ROW EXECUTE FUNCTION fn_audit_row_change()';
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='trg_audit_reviews_all') THEN
+        EXECUTE 'CREATE TRIGGER trg_audit_reviews_all AFTER INSERT OR UPDATE OR DELETE ON reviews FOR EACH ROW EXECUTE FUNCTION fn_audit_row_change()';
+    END IF;
+END$$;
+
+
+CREATE OR REPLACE FUNCTION fn_log_manual_event(
+    p_action TEXT,
+    p_user_id INT DEFAULT NULL,
+    p_target_type TEXT DEFAULT NULL,
+    p_target_id INT DEFAULT NULL,
+    p_target_name TEXT DEFAULT NULL,
+    p_details JSONB DEFAULT NULL,
+    p_severity VARCHAR DEFAULT 'LOW',
+    p_ip INET DEFAULT NULL,
+    p_user_agent TEXT DEFAULT NULL
+) RETURNS VOID
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    PERFORM fn_insert_audit(
+        p_action      => p_action,
+        p_user_id     => p_user_id,
+        p_target_type => p_target_type,
+        p_target_id   => p_target_id,
+        p_target_name => p_target_name,
+        p_before      => NULL,
+        p_after       => NULL,
+        p_details     => p_details,
+        p_severity    => p_severity,
+        p_ip          => p_ip,
+        p_user_agent  => p_user_agent
+    );
+END;
+$$;
+
+CREATE OR REPLACE VIEW v_audit_logs_readable AS
+SELECT
+    a.audit_id,
+    a."timestamp"           AS event_ts,
+    a."action"              AS action_type,
+    a.severity,
+    a.target_type,
+    a.target_id,
+    a.target_name,
+    a.ip_address,
+    a.user_agent,
+    a.details,
+    a.before_data,
+    a.after_data,
+    u.user_id               AS actor_id,
+    (u.first_name || ' ' || u.last_name) AS actor_name,
+    u.email                 AS actor_email,
+    a.created_at
+FROM audit_logs a
+LEFT JOIN users u ON a.user_id = u.user_id
+ORDER BY a."timestamp" DESC;
+
+CREATE OR REPLACE VIEW v_audit_latest_100 AS
+SELECT * FROM v_audit_logs_readable LIMIT 100;
 
 INSERT INTO roles (role_id, name_role) VALUES
 (1, 'admin'),
@@ -349,28 +834,6 @@ SELECT setval('users_user_id_seq', 1, true);
 INSERT INTO user_roles (user_id, role_id)
 SELECT 1, role_id FROM roles WHERE name_role = 'admin';
 
--- Тестовые данные для журнала аудита
-INSERT INTO audit_logs (action, user_id, target_type, target_id, target_name, details, severity, ip_address, user_agent) VALUES
-('LOGIN', 1, 'USER', 1, 'Admin User', '{"ipAddress": "192.168.1.100", "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}', 'LOW', '192.168.1.100', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'),
-('CREATE_USER', 1, 'USER', 2, 'Test User', '{"oldValues": null, "newValues": {"role": "client", "status": "active"}}', 'MEDIUM', '192.168.1.100', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'),
-('UPDATE_USER', 1, 'USER', 2, 'Test User', '{"oldValues": {"role": "client"}, "newValues": {"role": "manager"}}', 'MEDIUM', '192.168.1.100', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'),
-('CREATE_PRODUCT', 1, 'PRODUCT', 1, 'Капкейки с черникой', '{"oldValues": null, "newValues": {"name": "Капкейки с черникой", "price": 199.50}}', 'LOW', '192.168.1.100', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'),
-('UPDATE_PRODUCT', 1, 'PRODUCT', 1, 'Капкейки с черникой', '{"oldValues": {"price": 199.50}, "newValues": {"price": 219.50}}', 'LOW', '192.168.1.100', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'),
-('DELETE_PRODUCT', 1, 'PRODUCT', 1, 'Капкейки с черникой', '{"oldValues": {"name": "Капкейки с черникой", "price": 219.50}, "newValues": null}', 'HIGH', '192.168.1.100', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'),
-('CHANGE_ROLE', 1, 'USER', 2, 'Test User', '{"oldValues": {"role": "client"}, "newValues": {"role": "manager"}}', 'HIGH', '192.168.1.100', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'),
-('CHANGE_PASSWORD', 1, 'USER', 1, 'Admin User', '{"oldValues": {"passwordChanged": false}, "newValues": {"passwordChanged": true}}', 'MEDIUM', '192.168.1.100', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'),
-('UPDATE_PROFILE', 1, 'USER', 1, 'Admin User', '{"oldValues": {"lastName": "User"}, "newValues": {"lastName": "Administrator"}}', 'LOW', '192.168.1.100', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'),
-('LOGOUT', 1, 'USER', 1, 'Admin User', '{"ipAddress": "192.168.1.100"}', 'LOW', '192.168.1.100', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'),
-('LOGIN', 1, 'USER', 1, 'Admin User', '{"ipAddress": "192.168.1.101", "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"}', 'LOW', '192.168.1.101', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'),
-('CREATE_PRODUCT', 1, 'PRODUCT', 2, 'Черничный чизкейк', '{"oldValues": null, "newValues": {"name": "Черничный чизкейк", "price": 499.00}}', 'LOW', '192.168.1.101', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'),
-('UPDATE_PRODUCT', 1, 'PRODUCT', 2, 'Черничный чизкейк', '{"oldValues": {"weight_grams": 250}, "newValues": {"weight_grams": 300}}', 'LOW', '192.168.1.101', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'),
-('CREATE_USER', 1, 'USER', 3, 'Manager User', '{"oldValues": null, "newValues": {"role": "manager", "status": "active"}}', 'MEDIUM', '192.168.1.101', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'),
-('CHANGE_ROLE', 1, 'USER', 3, 'Manager User', '{"oldValues": {"role": "manager"}, "newValues": {"role": "client"}}', 'HIGH', '192.168.1.101', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'),
-('DELETE_USER', 1, 'USER', 3, 'Manager User', '{"oldValues": {"role": "client", "status": "active"}, "newValues": null}', 'HIGH', '192.168.1.101', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'),
-('CREATE_PRODUCT', 1, 'PRODUCT', 3, 'Неаполитанские капкейки', '{"oldValues": null, "newValues": {"name": "Неаполитанские капкейки", "price": 149.00}}', 'LOW', '192.168.1.101', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'),
-('UPDATE_PRODUCT', 1, 'PRODUCT', 3, 'Неаполитанские капкейки', '{"oldValues": {"category": "Капкейк"}, "newValues": {"category": "Торты"}}', 'LOW', '192.168.1.101', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'),
-('CHANGE_PASSWORD', 1, 'USER', 1, 'Admin User', '{"oldValues": {"passwordChanged": true}, "newValues": {"passwordChanged": true}}', 'MEDIUM', '192.168.1.101', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'),
-('LOGOUT', 1, 'USER', 1, 'Admin User', '{"ipAddress": "192.168.1.101"}', 'LOW', '192.168.1.101', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36');
 
 
 INSERT INTO order_statuses (status_id, code, name_orderstatuses, description) VALUES
