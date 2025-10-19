@@ -14,39 +14,12 @@ const Audit = () => {
     dateTo: ''
   });
   const [searchUser, setSearchUser] = useState(''); // Отдельное состояние для поиска пользователя
-  const [searchDateFrom, setSearchDateFrom] = useState(''); // Отдельное состояние для даты от
-  const [searchDateTo, setSearchDateTo] = useState(''); // Отдельное состояние для даты до
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [sortBy, setSortBy] = useState('timestamp');
   const [sortOrder, setSortOrder] = useState('desc');
+  const [isSearching, setIsSearching] = useState(false); // Состояние для индикатора поиска
 
-  // Debounce для поиска пользователя
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setFilters(prev => ({ ...prev, user: searchUser }));
-    }, 500); // Задержка 500мс
-
-    return () => clearTimeout(timeoutId);
-  }, [searchUser]);
-
-  // Debounce для даты от
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setFilters(prev => ({ ...prev, dateFrom: searchDateFrom }));
-    }, 500);
-
-    return () => clearTimeout(timeoutId);
-  }, [searchDateFrom]);
-
-  // Debounce для даты до
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setFilters(prev => ({ ...prev, dateTo: searchDateTo }));
-    }, 500);
-
-    return () => clearTimeout(timeoutId);
-  }, [searchDateTo]);
 
   // Загрузка журнала аудита
   useEffect(() => {
@@ -56,6 +29,7 @@ const Audit = () => {
   const loadAuditLogs = async () => {
     setLoading(true);
     setError('');
+    setIsSearching(true);
     
     try {
       const token = localStorage.getItem('token');
@@ -93,6 +67,7 @@ const Audit = () => {
       setTotalPages(1);
     } finally {
       setLoading(false);
+      setIsSearching(false);
     }
   };
 
@@ -100,14 +75,19 @@ const Audit = () => {
   const handleFilterChange = (field, value) => {
     if (field === 'user') {
       setSearchUser(value);
-    } else if (field === 'dateFrom') {
-      setSearchDateFrom(value);
-    } else if (field === 'dateTo') {
-      setSearchDateTo(value);
     } else {
       setFilters(prev => ({ ...prev, [field]: value }));
       setCurrentPage(1);
     }
+  };
+
+  // Функция для выполнения поиска
+  const handleSearch = () => {
+    setFilters(prev => ({
+      ...prev,
+      user: searchUser
+    }));
+    setCurrentPage(1);
   };
 
   const handleSort = (field) => {
@@ -164,8 +144,6 @@ const Audit = () => {
       dateTo: ''
     });
     setSearchUser('');
-    setSearchDateFrom('');
-    setSearchDateTo('');
     setCurrentPage(1);
   };
 
@@ -212,77 +190,27 @@ const Audit = () => {
 
         <div className="audit-filter-group">
           <label>Пользователь:</label>
-          <div style={{ position: 'relative' }}>
-            <input
-              type="text"
-              value={searchUser}
-              onChange={(e) => handleFilterChange('user', e.target.value)}
-              placeholder="Поиск по имени пользователя"
-            />
-            {searchUser !== filters.user && (
-              <div style={{
-                position: 'absolute',
-                right: '8px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                fontSize: '12px',
-                color: '#666'
-              }}>
-                Поиск...
-              </div>
-            )}
-          </div>
+          <input
+            type="text"
+            value={searchUser}
+            onChange={(e) => handleFilterChange('user', e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+            placeholder="Поиск по имени пользователя"
+          />
         </div>
 
-        <div className="audit-filter-group">
-          <label>С даты:</label>
-          <div style={{ position: 'relative' }}>
-            <input
-              type="datetime-local"
-              value={searchDateFrom}
-              onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
-            />
-            {searchDateFrom !== filters.dateFrom && (
-              <div style={{
-                position: 'absolute',
-                right: '8px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                fontSize: '12px',
-                color: '#666'
-              }}>
-                Поиск...
-              </div>
-            )}
-          </div>
+        <div className="audit-filter-actions">
+          <button 
+            className="audit-search-btn" 
+            onClick={handleSearch}
+            disabled={isSearching}
+          >
+            {isSearching ? 'Поиск...' : 'Поиск'}
+          </button>
+          <button className="audit-clear-filters" onClick={clearFilters}>
+            Очистить фильтры
+          </button>
         </div>
-
-        <div className="audit-filter-group">
-          <label>По дату:</label>
-          <div style={{ position: 'relative' }}>
-            <input
-              type="datetime-local"
-              value={searchDateTo}
-              onChange={(e) => handleFilterChange('dateTo', e.target.value)}
-            />
-            {searchDateTo !== filters.dateTo && (
-              <div style={{
-                position: 'absolute',
-                right: '8px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                fontSize: '12px',
-                color: '#666'
-              }}>
-                Поиск...
-              </div>
-            )}
-          </div>
-        </div>
-
-        <button className="audit-clear-filters" onClick={clearFilters}>
-          Очистить фильтры
-        </button>
       </div>
 
       {/* Статистика */}

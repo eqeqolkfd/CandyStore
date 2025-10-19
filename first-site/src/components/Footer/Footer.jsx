@@ -25,10 +25,10 @@ function Footer() {
         <div className="footer-section footer-contacts">
           <h4 className="footer-subtitle">Контакты</h4>
           <div className="contact-info">
-            <p>📍 ул. Сладкая, 123, Москва</p>
-            <p>📱 +7 (495) 999-99-99</p>
-            <p>✉️ info@sweetshop.ru</p>
-            <p>🕦 Пн-Пт: 10:00 - 22:00</p>
+            <p>ул. Сладкая, 123, Москва</p>
+            <p>+7 (495) 999-99-99</p>
+            <p>info@sweetshop.ru</p>
+            <p>Пн-Пт: 10:00 - 22:00</p>
           </div>
         </div>
       </div>

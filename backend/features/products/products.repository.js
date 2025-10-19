@@ -9,6 +9,7 @@ async function findAllProducts(filters = {}) {
       p.price,
       p.weight_grams,
       p.photo_url,
+      p.sku,
       c.name_categories   AS category_name,
       m.name_manufacturers AS manufacturer_name
     FROM products p

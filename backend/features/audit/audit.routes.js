@@ -10,15 +10,13 @@ const {
 // Получить журнал аудита
 router.get('/', async (req, res) => {
   try {
-    const { page = 1, limit = 50, action, user, dateFrom, dateTo, sortBy = 'timestamp', sortOrder = 'desc' } = req.query;
+    const { page = 1, limit = 50, action, user, sortBy = 'timestamp', sortOrder = 'desc' } = req.query;
     
     const result = await getAuditLogs({
       page: parseInt(page),
       limit: parseInt(limit),
       action,
       user,
-      dateFrom,
-      dateTo,
       sortBy,
       sortOrder
     });

@@ -315,7 +315,7 @@ function Catalog() {
             <div className="catalog-modal-body">
               <h3 className="catalog-modal-title">{selectedProduct.name}</h3>
 
-              {(selectedProduct.category || selectedProduct.manufacturer || selectedProduct.weightGrams) && (
+              {(selectedProduct.category || selectedProduct.manufacturer || selectedProduct.weightGrams || selectedProduct.sku) && (
                 <div className="catalog-modal-meta">
                   {selectedProduct.category && (
                     <span className="catalog-meta-chip">Категория: {selectedProduct.category}</span>
@@ -325,6 +325,9 @@ function Catalog() {
                   )}
                   {selectedProduct.weightGrams && (
                     <span className="catalog-meta-chip">Вес: {selectedProduct.weightGrams}г</span>
+                  )}
+                  {selectedProduct.sku && (
+                    <span className="catalog-meta-chip">Артикул: {selectedProduct.sku}</span>
                   )}
                 </div>
               )}

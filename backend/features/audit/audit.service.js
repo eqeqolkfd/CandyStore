@@ -1,7 +1,7 @@
 // audit.service.js
 const pool = require('../../db');
 
-async function getAuditLogs({ page, limit, action, user, dateFrom, dateTo, sortBy, sortOrder }) {
+async function getAuditLogs({ page, limit, action, user, sortBy, sortOrder }) {
   const client = await pool.connect();
   try {
     // Проверяем, существует ли таблица audit_logs
@@ -49,16 +49,6 @@ async function getAuditLogs({ page, limit, action, user, dateFrom, dateTo, sortB
       paramIndex++;
     }
     
-    if (dateFrom) {
-      query += ` AND al.timestamp >= $${paramIndex++}`;
-      params.push(dateFrom);
-    }
-    
-    if (dateTo) {
-      query += ` AND al.timestamp <= $${paramIndex++}`;
-      params.push(dateTo);
-    }
-    
     // Сортировка
     const validSortFields = ['timestamp', 'action', 'user_name', 'severity'];
     const sortField = validSortFields.includes(sortBy) ? sortBy : 'timestamp';
@@ -92,16 +82,6 @@ async function getAuditLogs({ page, limit, action, user, dateFrom, dateTo, sortB
       countQuery += ` AND (u.first_name ILIKE $${countParamIndex} OR u.last_name ILIKE $${countParamIndex})`;
       countParams.push(`%${user}%`);
       countParamIndex++;
-    }
-    
-    if (dateFrom) {
-      countQuery += ` AND al.timestamp >= $${countParamIndex++}`;
-      countParams.push(dateFrom);
-    }
-    
-    if (dateTo) {
-      countQuery += ` AND al.timestamp <= $${countParamIndex++}`;
-      countParams.push(dateTo);
     }
     
     const countResult = await client.query(countQuery, countParams);

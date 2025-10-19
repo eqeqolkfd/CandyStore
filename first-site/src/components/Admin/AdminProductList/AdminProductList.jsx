@@ -369,6 +369,7 @@ const AdminProductList = () => {
                     { (p.category || p.category_name) && <span className="admin-meta-chip">Категория: {p.category || p.category_name}</span> }
                     { (p.manufacturer || p.manufacturer_name) && <span className="admin-meta-chip">Производитель: {p.manufacturer || p.manufacturer_name}</span> }
                     { (p.weightGrams || p.weight_grams) && <span className="admin-meta-chip">Вес: {p.weightGrams || p.weight_grams} г</span> }
+                    { p.sku && <span className="admin-meta-chip">Артикул: {p.sku}</span> }
                   </div>
 
                   <div className="admin-product-footer">

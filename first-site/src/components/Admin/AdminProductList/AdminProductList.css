@@ -164,14 +164,21 @@
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 8px;
+  max-width: 100%;
 }
 
 .admin-meta-chip {
   background: #f1f1f1;
   color: #666;
   border-radius: 5px;
-  padding: 4px 8px;
-  font-size: 12px;
+  padding: 6px 10px;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  flex-shrink: 1;
+  line-height: 1.2;
 }
 
 .admin-product-footer {
@@ -271,6 +278,15 @@
   }
   .admin-product-title { font-size: 14px; }
   .admin-product-desc  { -webkit-line-clamp: 3; min-height: calc(1.35em * 3); }
+  
+  .admin-meta-grid {
+    gap: 6px;
+  }
+  
+  .admin-meta-chip {
+    font-size: 10px;
+    padding: 4px 6px;
+  }
 }
 
 @media (min-width: 1400px) {
