@@ -102,6 +102,10 @@ async function getPaymentsByUserId(userId) {
   return result.rows;
 }
 
+async function deleteUserById(userId) {
+  await pool.query('DELETE FROM users WHERE user_id = $1', [userId]);
+}
+
 module.exports = {
   getUserRoleByEmailOrId,
   getUserByEmail,
@@ -112,6 +116,7 @@ module.exports = {
   getAdminEmail,
   getUserProfileById,
   getPaymentsByUserId,
+  deleteUserById,
   pool,
 };
 

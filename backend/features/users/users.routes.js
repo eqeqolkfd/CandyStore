@@ -8,6 +8,8 @@ const {
   getUserPayments,
   updateProfile,
   checkPassword,
+  deleteUserAccount,
+  sendPasswordResetEmail,
 } = require('./users.service');
 
 // Получить роль пользователя по email или userId
@@ -100,6 +102,30 @@ router.post('/check-password', async (req, res) => {
   try {
     const isValid = await checkPassword(userId, password);
     res.json({ isValid });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Удаление пользователя (и всего связанного)
+router.delete('/delete', async (req, res) => {
+  const { userId } = req.body || {};
+  if (!userId) return res.status(400).json({ error: 'userId is required' });
+  try {
+    await deleteUserAccount(userId);
+    res.json({ success: true });
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Отправка письма для восстановления пароля
+router.post('/forgot-password', async (req, res) => {
+  const { email } = req.body || {};
+  if (!email) return res.status(400).json({ error: 'email is required' });
+  try {
+    const result = await sendPasswordResetEmail(email);
+    res.json(result);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

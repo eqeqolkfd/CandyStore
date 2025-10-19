@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
+const bcrypt = require('bcrypt');
 const {
   getUserRoleByEmailOrId,
   getUserByEmail,
@@ -10,6 +11,7 @@ const {
   getAdminEmail,
   getUserProfileById,
   getPaymentsByUserId,
+  deleteUserById, // импорт
   pool,
 } = require('./users.repository');
 
@@ -26,8 +28,18 @@ async function getUserRole({ email, userId }) {
 async function loginUser({ email, password }) {
   const user = await getUserByEmail(email);
   if (!user) return null;
-  if (String(user.password_hash) !== String(password)) return null;
-  return { userId: user.user_id, email: user.email, role: user.role || null };
+  
+  // Проверяем пароль (может быть хешированный или новый сгенерированный)
+  if (await bcrypt.compare(password, user.password_hash)) {
+    return { userId: user.user_id, email: user.email, role: user.role || null };
+  }
+  
+  // Если bcrypt не сработал, проверяем как обычную строку (для новых сгенерированных паролей)
+  if (password === user.password_hash) {
+    return { userId: user.user_id, email: user.email, role: user.role || null };
+  }
+  
+  return null;
 }
 
 async function registerUser({ firstName, lastName, email, password }) {
@@ -40,7 +52,8 @@ async function registerUser({ firstName, lastName, email, password }) {
       return { conflict: true };
     }
 
-    const inserted = await insertUser(client, { firstName, lastName, email, password });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const inserted = await insertUser(client, { firstName, lastName, email, password: hashedPassword });
     const roleId = await getRoleIdByName(client, 'client');
     if (!roleId) throw new Error('Role client not found');
     await assignUserRole(client, inserted.user_id, roleId);
@@ -69,9 +82,9 @@ async function registerUser({ firstName, lastName, email, password }) {
     await transporter.sendMail({
       from: adminEmail,
       to: email,
-      subject: 'Успешная регистрация',
-      text: `Здравствуйте, ${firstName}! Ваша регистрация в SweetShop прошла успешно.`,
-      html: `<p>Здравствуйте, <b>${firstName}</b>!<br/>Ваша регистрация в SweetShop прошла успешно.</p>`
+      subject: 'Добро пожаловать в SweetShop!',
+      text: `Здравствуйте, ${firstName}! Ваш профиль в SweetShop успешно создан. Ваш пароль: ${password}\nЕго хеш: ${hashedPassword}`,
+      html: `<p>Здравствуйте, <b>${firstName}</b>!<br/>Ваш профиль в SweetShop успешно создан.<br/><b>Ваш пароль: </b>${password}<br/><b>Его хеш: </b>${hashedPassword}</p>`
     });
 
     return { userId: inserted.user_id, email, role: 'client', token };
@@ -239,6 +252,112 @@ async function checkPassword(userId, password) {
   }
 }
 
+async function deleteUserAccount(userId) {
+  return deleteUserById(userId);
+}
+
+// Функция для генерации случайного пароля по валидации (строго 16 символов)
+function generateRandomPassword() {
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  const numbers = '0123456789';
+  
+  let password = '';
+  
+  // Добавляем минимум одну букву и одну цифру
+  password += letters[Math.floor(Math.random() * letters.length)];
+  password += numbers[Math.floor(Math.random() * numbers.length)];
+  
+  // Добавляем остальные символы (всего 16 символов)
+  const remainingLength = 14; // 14 дополнительных символов для получения 16
+  const allChars = letters + numbers;
+  
+  for (let i = 0; i < remainingLength; i++) {
+    password += allChars[Math.floor(Math.random() * allChars.length)];
+  }
+  
+  // Перемешиваем символы
+  return password.split('').sort(() => Math.random() - 0.5).join('');
+}
+
+// Функция для отправки письма восстановления пароля
+async function sendPasswordResetEmail(email) {
+  const user = await getUserByEmail(email);
+  if (!user) {
+    throw new Error('Пользователь с таким email не найден');
+  }
+
+  // Проверяем, что пользователь имеет роль клиента
+  if (user.role !== 'client') {
+    throw new Error('Восстановление пароля доступно только для клиентов');
+  }
+
+  // Генерируем новый случайный пароль (16 символов)
+  const newPassword = generateRandomPassword();
+  
+  // Заменяем хешированный пароль на новый сгенерированный пароль
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    
+    // Обновляем пароль пользователя на новый сгенерированный пароль
+    await client.query(
+      'UPDATE users SET password_hash = $1 WHERE user_id = $2',
+      [newPassword, user.user_id]
+    );
+    
+    await client.query('COMMIT');
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+  
+  // Получаем email администратора для отправки письма
+  const adminEmail = await getAdminEmail();
+  
+  // Отправляем письмо через nodemailer (как при регистрации)
+  try {
+    const transporter = nodemailer.createTransport({
+      host: ensureEnv('SMTP_HOST'),
+      port: Number(ensureEnv('SMTP_PORT')),
+      secure: ensureEnv('SMTP_SECURE') === 'true',
+      auth: {
+        user: ensureEnv('SMTP_USER'),
+        pass: ensureEnv('SMTP_PASS')
+      }
+    });
+
+    await transporter.sendMail({
+      from: adminEmail,
+      to: email,
+      subject: 'Восстановление пароля - Кондитерская',
+      text: `Здравствуйте, ${user.first_name}! По вашему запросу администратор сгенерировал новый пароль для вашего аккаунта. Ваш новый пароль: ${newPassword}`,
+      html: `<p>Здравствуйте, <b>${user.first_name}</b>!<br/>По вашему запросу администратор сгенерировал новый пароль для вашего аккаунта.<br/><b>Ваш новый пароль: </b>${newPassword}<br/>Используйте этот пароль для входа в систему.<br/>Рекомендуем изменить пароль в личном кабинете после входа.</p>`
+    });
+    
+    console.log('✅ Email успешно отправлен на:', email);
+    
+  } catch (emailError) {
+    console.error('❌ Ошибка отправки email:', emailError.message);
+    // Не прерываем выполнение, так как пароль уже сгенерирован и сохранен
+  }
+  
+  // Логирование для отладки
+  console.log('=== ВОССТАНОВЛЕНИЕ ПАРОЛЯ ===');
+  console.log(`От: ${adminEmail} (Администратор)`);
+  console.log(`Кому: ${email} (Клиент: ${user.first_name} ${user.last_name})`);
+  console.log(`Новый пароль: ${newPassword}`);
+  console.log('===============================');
+  
+  return { 
+    success: true, 
+    message: 'Письмо с новым паролем отправлено на вашу почту от администратора',
+    newPassword: newPassword // В реальном приложении пароль не должен возвращаться
+  };
+}
+
+
 module.exports = {
   getUserRole,
   loginUser,
@@ -247,6 +366,8 @@ module.exports = {
   getUserPayments,
   updateProfile,
   checkPassword,
+  deleteUserAccount,
+  sendPasswordResetEmail
 };
 
 

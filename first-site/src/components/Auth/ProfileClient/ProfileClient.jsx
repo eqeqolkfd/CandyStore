@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import './ProfileClient.css';
+import { useNavigate } from 'react-router-dom';
 
 function ProfileClient() {
   const stored = typeof window !== 'undefined' ? localStorage.getItem('currentUser') : null;
@@ -32,6 +33,11 @@ function ProfileClient() {
     newPassword: false
   });
   const [passwordCheckLoading, setPasswordCheckLoading] = useState(false);
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+
+  const navigate = useNavigate();
 
   const methodLabel = (m) => {
     const key = String(m || '').toLowerCase();
@@ -313,6 +319,29 @@ function ProfileClient() {
     }
   };
 
+  async function handleDeleteAccount() {
+    setDeleteError('');
+    try {
+      const response = await fetch('http://localhost:5000/api/users/delete', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId })
+      });
+      if (!response.ok) {
+        const err = await response.json();
+        setDeleteError(err?.error || 'Ошибка при удалении аккаунта');
+        return;
+      }
+      localStorage.removeItem('currentUser');
+      setShowDeleteModal(false);
+      navigate('/');
+    } catch(e) {
+      setDeleteError('Ошибка связи с сервером: ' + (e.message || ''));
+    }
+  }
+
   useEffect(() => {
     async function load() {
       try {
@@ -357,11 +386,14 @@ function ProfileClient() {
     <div className="profile-client">
       <div className="profile-header">
         <h2 className="profile-title">Профиль</h2>
+        <div className="profile-header-btns">
         {!isEditing && (
-          <button className="profile-edit-btn" onClick={handleEditStart}>
-            Редактировать
-          </button>
+          <>
+          <button className="profile-edit-btn" onClick={handleEditStart}>Редактировать</button>
+          <button className="profile-delete-btn" onClick={()=>setShowDeleteModal(true)}>Удалить аккаунт</button>
+          </>
         )}
+        </div>
       </div>
       
       <div className="profile-card">
@@ -613,6 +645,21 @@ function ProfileClient() {
             )}
             <div className="profile-modal-footer">
               <button className="profile-modal-close" onClick={()=>setModalOrder(null)}>Закрыть</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showDeleteModal && (
+        <div className="profile-delete-modal-backdrop">
+          <div className="profile-delete-modal-card">
+            <div className="profile-delete-modal-title">Удалить аккаунт?</div>
+            <div className="profile-delete-modal-text">
+              Все ваши данные и история заказов будут удалены безвозвратно. Действие необратимо.
+            </div>
+            {deleteError && <div className="profile-delete-modal-error">{deleteError}</div>}
+            <div className="profile-delete-modal-actions">
+              <button className="profile-delete-modal-confirm" onClick={handleDeleteAccount}>Точно удалить</button>
+              <button className="profile-delete-modal-cancel" onClick={()=>setShowDeleteModal(false)}>Отмена</button>
             </div>
           </div>
         </div>

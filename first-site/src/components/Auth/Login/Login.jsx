@@ -114,7 +114,10 @@ function Login() {
           {serverError && <div className="field-error">{serverError}</div>}
           <div className="form-actions">
             <button type="submit" className="auth-button">Войти</button>
-            <Link to="/register" className="link-secondary">Нет аккаунта? Регистрация</Link>
+            <div className="auth-links">
+              <Link to="/register" className="link-secondary">Нет аккаунта? Регистрация</Link>
+              <Link to="/forgot-password" className="link-secondary">Не помните пароль?</Link>
+            </div>
           </div>
         </form>
       </div>

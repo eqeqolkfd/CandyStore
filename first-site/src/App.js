@@ -8,6 +8,7 @@ import Orders from './components/Orders/Orders';
 import Login from './components/Auth/Login/Login';
 import Register from './components/Auth/Register/Register';
 import ProfileClient from './components/Auth/ProfileClient/ProfileClient';
+import ForgotPassword from './components/Auth/Login/ForgotPassword/ForgotPassword';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 
@@ -177,6 +178,7 @@ function App() {
           <Route path="/profile" element={<ProfileClient />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
         </Routes>
 
       </main>
