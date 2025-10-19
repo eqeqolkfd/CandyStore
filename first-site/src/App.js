@@ -1,14 +1,17 @@
 import './App.css';
-import Header from './components/Header/Header';
-import Footer from './components/Footer/Footer';
-import Catalog from './components/Catalog/Catalog';
-import Cart from './components/Cart/Cart';
-import Favorites from './components/Favorites/Favorites';
-import Orders from './components/Orders/Orders';
-import Login from './components/Auth/Login/Login';
-import Register from './components/Auth/Register/Register';
-import ProfileClient from './components/Auth/ProfileClient/ProfileClient';
-import ForgotPassword from './components/Auth/Login/ForgotPassword/ForgotPassword';
+import Header from './components/Header/Header.jsx';
+import Footer from './components/Footer/Footer.jsx';
+import Catalog from './components/Catalog/Catalog.jsx';
+import Cart from './components/Cart/Cart.jsx';
+import Favorites from './components/Favorites/Favorites.jsx';
+import Orders from './components/Orders/Orders.jsx';
+import Login from './components/Auth/Login/Login.jsx';
+import Register from './components/Auth/Register/Register.jsx';
+import ProfileClient from './components/Auth/ProfileClient/ProfileClient.jsx';
+import ForgotPassword from './components/Auth/Login/ForgotPassword/ForgotPassword.jsx';
+import AdminProductList from './components/Admin/AdminProductList/AdminProductList.jsx';
+import Users from './components/Admin/Users/Users.jsx';
+import Audit from './components/Admin/Audit/Audit.jsx';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 
@@ -179,6 +182,9 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/admin/products" element={<AdminProductList />} />
+          <Route path="/admin/users" element={<Users />} />
+          <Route path="/admin/audit" element={<Audit />} />
         </Routes>
 
       </main>

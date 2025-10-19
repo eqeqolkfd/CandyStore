@@ -382,6 +382,8 @@ function ProfileClient() {
   if (error) return <div className="profile-error">{error}</div>;
   if (!profile) return null;
 
+  const isAdmin = currentUser && currentUser.role === 'admin';
+
   return (
     <div className="profile-client">
       <div className="profile-header">
@@ -594,60 +596,58 @@ function ProfileClient() {
         )}
       </div>
 
-      <h3 className="payments-title">Платежи</h3>
-        <div className="payments-list payments-list--grid3">
-          {payments.map(p => (
-            <div className="payment-item" key={p.payment_id}>
-              <div>Платёж №{p.payment_id} по заказу №{p.order_id}</div>
-              <div>Сумма: {Number(p.amount).toLocaleString('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 })}</div>
-              <div>Метод: {methodLabel(p.method_payments)}</div>
-              <div>Статус платежа: {paymentStatusLabel(p.payment_status)}</div>
-              <div>Статус заказа: {p.order_status_name || '—'}</div>
-              <div>Дата: {new Date(p.created_at).toLocaleString('ru-RU')}</div>
-              <button className="profile-details-btn" onClick={() => {setModalOrder(p.order_id); fetchOrderProducts(p.order_id);}}>Подробнее</button>
-            </div>
-          ))}
-        </div>
-      {modalOrder && (
-        <div className="profile-modal-backdrop" onClick={() => setModalOrder(null)}>
-          <div
-            className="profile-modal-card"
-            onClick={e => e.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-          >
-            <h3 className="profile-modal-title">Детали заказа №{modalOrder}</h3>
-            {modalLoading ? (
-              <div style={{padding: 16}}>Загрузка...</div>
-            ) : modalProducts.length === 0 ? (
-              <div style={{padding: 16}}>Нет информации о товарах заказа</div>
-            ) : modalProducts[0].error ? (
-              <div style={{padding: 16}}>{modalProducts[0].error}</div>
-            ) : (
-              <div className="profile-modal-products-grid">
-                {modalProducts.map((prod, idx) => (
-                  <div key={idx} className="profile-modal-product-card">
-                    {prod.photo_url ? (
-                      <img src={normalizeImg(prod.photo_url)} alt={prod.name_product || prod.name || 'Товар'} className="profile-modal-product-img" />
-                    ) : (
-                      <div className="profile-modal-product-img profile-modal-product-img--placeholder">Нет фото</div>
-                    )}
-                    <div className="profile-modal-product-info">
-                      <div className="profile-modal-product-name">{prod.name_product || prod.name || 'Товар'}</div>
-                      <div className="profile-modal-product-row">Цена за 1: {prod.price ? Number(prod.price).toLocaleString('ru-RU', {style:'currency',currency:'RUB'}) : '—'}</div>
-                      <div className="profile-modal-product-row">Количество: {prod.quantity || 1}</div>
-                      <div className="profile-modal-product-row">Всего: {(prod.price && prod.quantity) ? (Number(prod.price) * Number(prod.quantity)).toLocaleString('ru-RU', {style:'currency',currency:'RUB'}) : '—'}</div>
-                      {/* описание скрыто по требованию */}
-                    </div>
-                  </div>
-                ))}
+      {!isAdmin && (
+        <>
+          <h3 className="payments-title">Платежи</h3>
+          <div className="payments-list payments-list--grid3">
+            {payments.map(p => (
+              <div className="payment-item" key={p.payment_id}>
+                <div>Платёж №{p.payment_id} по заказу №{p.order_id}</div>
+                <div>Сумма: {Number(p.amount).toLocaleString('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 })}</div>
+                <div>Метод: {methodLabel(p.method_payments)}</div>
+                <div>Статус платежа: {paymentStatusLabel(p.payment_status)}</div>
+                <div>Статус заказа: {p.order_status_name || '—'}</div>
+                <div>Дата: {new Date(p.created_at).toLocaleString('ru-RU')}</div>
+                <button className="profile-details-btn" onClick={() => {setModalOrder(p.order_id); fetchOrderProducts(p.order_id);}}>Подробнее</button>
               </div>
-            )}
-            <div className="profile-modal-footer">
-              <button className="profile-modal-close" onClick={()=>setModalOrder(null)}>Закрыть</button>
-            </div>
+            ))}
           </div>
-        </div>
+          {modalOrder && (
+            <div className="profile-modal-backdrop" onClick={() => setModalOrder(null)}>
+              <div className="profile-modal-card" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true">
+                <h3 className="profile-modal-title">Детали заказа №{modalOrder}</h3>
+                {modalLoading ? (
+                  <div style={{padding: 16}}>Загрузка...</div>
+                ) : modalProducts.length === 0 ? (
+                  <div style={{padding: 16}}>Нет информации о товарах заказа</div>
+                ) : modalProducts[0].error ? (
+                  <div style={{padding: 16}}>{modalProducts[0].error}</div>
+                ) : (
+                  <div className="profile-modal-products-grid">
+                    {modalProducts.map((prod, idx) => (
+                      <div key={idx} className="profile-modal-product-card">
+                        {prod.photo_url ? (
+                          <img src={normalizeImg(prod.photo_url)} alt={prod.name_product || prod.name || 'Товар'} className="profile-modal-product-img" />
+                        ) : (
+                          <div className="profile-modal-product-img profile-modal-product-img--placeholder">Нет фото</div>
+                        )}
+                        <div className="profile-modal-product-info">
+                          <div className="profile-modal-product-name">{prod.name_product || prod.name || 'Товар'}</div>
+                          <div className="profile-modal-product-row">Цена за 1: {prod.price ? Number(prod.price).toLocaleString('ru-RU', {style:'currency',currency:'RUB'}) : '—'}</div>
+                          <div className="profile-modal-product-row">Количество: {prod.quantity || 1}</div>
+                          <div className="profile-modal-product-row">Всего: {(prod.price && prod.quantity) ? (Number(prod.price) * Number(prod.quantity)).toLocaleString('ru-RU', {style:'currency',currency:'RUB'}) : '—'}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="profile-modal-footer">
+                  <button className="profile-modal-close" onClick={()=>setModalOrder(null)}>Закрыть</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
       )}
       {showDeleteModal && (
         <div className="profile-delete-modal-backdrop">

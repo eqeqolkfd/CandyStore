@@ -51,9 +51,9 @@ CREATE TABLE addresses (
     user_id      INT REFERENCES users(user_id) ON DELETE CASCADE,
     city         VARCHAR(100) NOT NULL,
     street       VARCHAR(200) NOT NULL,
-    house        VARCHAR(50) NOT NULL,
-    apartment    VARCHAR(50),
-    postal_code  VARCHAR(20),
+    house        VARCHAR(5) NOT NULL,
+    apartment    VARCHAR(5),
+    postal_code  VARCHAR(6),
     full_name    VARCHAR(150),
     is_default   BOOLEAN DEFAULT FALSE,
     created_at   TIMESTAMP WITH TIME ZONE DEFAULT now()
@@ -129,6 +129,29 @@ CREATE TABLE feedback (
 
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_products_name ON products(name_product);
+
+-- Таблица журнала аудита
+CREATE TABLE audit_logs (
+    audit_id        SERIAL PRIMARY KEY,
+    timestamp       TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    action          VARCHAR(50) NOT NULL,
+    user_id         INT REFERENCES users(user_id) ON DELETE SET NULL,
+    target_type     VARCHAR(20), -- USER, PRODUCT, ORDER, etc.
+    target_id       INT,
+    target_name     VARCHAR(255),
+    details         JSONB,
+    severity        VARCHAR(10) DEFAULT 'LOW' CHECK (severity IN ('LOW', 'MEDIUM', 'HIGH')),
+    ip_address      INET,
+    user_agent      TEXT,
+    created_at      TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+-- Индексы для оптимизации запросов журнала аудита
+CREATE INDEX idx_audit_logs_timestamp ON audit_logs(timestamp);
+CREATE INDEX idx_audit_logs_action ON audit_logs(action);
+CREATE INDEX idx_audit_logs_user_id ON audit_logs(user_id);
+CREATE INDEX idx_audit_logs_target_type ON audit_logs(target_type);
+CREATE INDEX idx_audit_logs_severity ON audit_logs(severity);
 
 CREATE OR REPLACE FUNCTION fn_recalculate_order_total()
 RETURNS TRIGGER
@@ -324,7 +347,30 @@ VALUES
 SELECT setval('users_user_id_seq', 1, true);
   
 INSERT INTO user_roles (user_id, role_id)
-SELECT 1, role_id FROM roles WHERE name_role = 'admin'
+SELECT 1, role_id FROM roles WHERE name_role = 'admin';
+
+-- Тестовые данные для журнала аудита
+INSERT INTO audit_logs (action, user_id, target_type, target_id, target_name, details, severity, ip_address, user_agent) VALUES
+('LOGIN', 1, 'USER', 1, 'Admin User', '{"ipAddress": "192.168.1.100", "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}', 'LOW', '192.168.1.100', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'),
+('CREATE_USER', 1, 'USER', 2, 'Test User', '{"oldValues": null, "newValues": {"role": "client", "status": "active"}}', 'MEDIUM', '192.168.1.100', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'),
+('UPDATE_USER', 1, 'USER', 2, 'Test User', '{"oldValues": {"role": "client"}, "newValues": {"role": "manager"}}', 'MEDIUM', '192.168.1.100', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'),
+('CREATE_PRODUCT', 1, 'PRODUCT', 1, 'Капкейки с черникой', '{"oldValues": null, "newValues": {"name": "Капкейки с черникой", "price": 199.50}}', 'LOW', '192.168.1.100', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'),
+('UPDATE_PRODUCT', 1, 'PRODUCT', 1, 'Капкейки с черникой', '{"oldValues": {"price": 199.50}, "newValues": {"price": 219.50}}', 'LOW', '192.168.1.100', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'),
+('DELETE_PRODUCT', 1, 'PRODUCT', 1, 'Капкейки с черникой', '{"oldValues": {"name": "Капкейки с черникой", "price": 219.50}, "newValues": null}', 'HIGH', '192.168.1.100', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'),
+('CHANGE_ROLE', 1, 'USER', 2, 'Test User', '{"oldValues": {"role": "client"}, "newValues": {"role": "manager"}}', 'HIGH', '192.168.1.100', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'),
+('CHANGE_PASSWORD', 1, 'USER', 1, 'Admin User', '{"oldValues": {"passwordChanged": false}, "newValues": {"passwordChanged": true}}', 'MEDIUM', '192.168.1.100', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'),
+('UPDATE_PROFILE', 1, 'USER', 1, 'Admin User', '{"oldValues": {"lastName": "User"}, "newValues": {"lastName": "Administrator"}}', 'LOW', '192.168.1.100', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'),
+('LOGOUT', 1, 'USER', 1, 'Admin User', '{"ipAddress": "192.168.1.100"}', 'LOW', '192.168.1.100', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'),
+('LOGIN', 1, 'USER', 1, 'Admin User', '{"ipAddress": "192.168.1.101", "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"}', 'LOW', '192.168.1.101', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'),
+('CREATE_PRODUCT', 1, 'PRODUCT', 2, 'Черничный чизкейк', '{"oldValues": null, "newValues": {"name": "Черничный чизкейк", "price": 499.00}}', 'LOW', '192.168.1.101', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'),
+('UPDATE_PRODUCT', 1, 'PRODUCT', 2, 'Черничный чизкейк', '{"oldValues": {"weight_grams": 250}, "newValues": {"weight_grams": 300}}', 'LOW', '192.168.1.101', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'),
+('CREATE_USER', 1, 'USER', 3, 'Manager User', '{"oldValues": null, "newValues": {"role": "manager", "status": "active"}}', 'MEDIUM', '192.168.1.101', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'),
+('CHANGE_ROLE', 1, 'USER', 3, 'Manager User', '{"oldValues": {"role": "manager"}, "newValues": {"role": "client"}}', 'HIGH', '192.168.1.101', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'),
+('DELETE_USER', 1, 'USER', 3, 'Manager User', '{"oldValues": {"role": "client", "status": "active"}, "newValues": null}', 'HIGH', '192.168.1.101', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'),
+('CREATE_PRODUCT', 1, 'PRODUCT', 3, 'Неаполитанские капкейки', '{"oldValues": null, "newValues": {"name": "Неаполитанские капкейки", "price": 149.00}}', 'LOW', '192.168.1.101', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'),
+('UPDATE_PRODUCT', 1, 'PRODUCT', 3, 'Неаполитанские капкейки', '{"oldValues": {"category": "Капкейк"}, "newValues": {"category": "Торты"}}', 'LOW', '192.168.1.101', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'),
+('CHANGE_PASSWORD', 1, 'USER', 1, 'Admin User', '{"oldValues": {"passwordChanged": true}, "newValues": {"passwordChanged": true}}', 'MEDIUM', '192.168.1.101', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'),
+('LOGOUT', 1, 'USER', 1, 'Admin User', '{"ipAddress": "192.168.1.101"}', 'LOW', '192.168.1.101', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36');
 
 
 INSERT INTO order_statuses (status_id, code, name_orderstatuses, description) VALUES
@@ -350,3 +396,5 @@ select * from payments;
 select * from roles;
 
 select * from user_roles;
+
+select * from audit_logs;

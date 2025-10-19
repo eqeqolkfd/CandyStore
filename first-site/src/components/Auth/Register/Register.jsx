@@ -9,7 +9,7 @@ function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [repeatPassword, setRepeatPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [showRepeatPassword, setShowRepeatPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
@@ -133,8 +133,7 @@ function Register() {
               placeholder="example@example.ru"
               onChange={(e) => {
                 setEmail(e.target.value);
-                const lenErr = validateEmailLength(e.target.value);
-                setErrors({ ...errors, email: lenErr });
+                setErrors({ ...errors, email: validateEmail(e.target.value) });
               }}
               required
             />

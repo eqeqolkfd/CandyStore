@@ -1,3 +1,4 @@
+// users.service.js
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
@@ -11,7 +12,9 @@ const {
   getAdminEmail,
   getUserProfileById,
   getPaymentsByUserId,
-  deleteUserById, // импорт
+  getAllUsers,
+  setUserRole,        // <-- новый репозиторный метод
+  deleteUserById,
   pool,
 } = require('./users.repository');
 
@@ -96,6 +99,34 @@ async function registerUser({ firstName, lastName, email, password }) {
   }
 }
 
+// Новая функция для регистрации без отправки писем (для админов)
+async function registerUserWithoutEmail({ firstName, lastName, email, password, role = 'client' }) {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const exists = await emailExists(client, email);
+    if (exists) {
+      await client.query('ROLLBACK');
+      return { conflict: true };
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const inserted = await insertUser(client, { firstName, lastName, email, password: hashedPassword });
+    const roleId = await getRoleIdByName(client, role);
+    if (!roleId) throw new Error(`Role ${role} not found`);
+    await assignUserRole(client, inserted.user_id, roleId);
+
+    await client.query('COMMIT');
+
+    return { userId: inserted.user_id, email, role };
+  } catch (e) {
+    try { await client.query('ROLLBACK'); } catch (_) {}
+    throw e;
+  } finally {
+    client.release();
+  }
+}
+
 async function getProfile(userId) {
   const profile = await getUserProfileById(userId);
   return profile;
@@ -108,15 +139,12 @@ async function getUserPayments(userId) {
 async function updateProfile({ userId, first_name, last_name, oldPassword, newPassword }) {
   const client = await pool.connect();
   try {
-    // Проверяем, существует ли пользователь
     const existingUser = await getUserProfileById(userId);
     if (!existingUser) {
       return null;
     }
 
-    // Если пытаемся изменить пароль, проверяем старый пароль
     if (oldPassword && newPassword) {
-      // Получаем текущий пароль пользователя
       const userResult = await client.query(
         'SELECT password_hash FROM users WHERE user_id = $1',
         [userId]
@@ -128,13 +156,11 @@ async function updateProfile({ userId, first_name, last_name, oldPassword, newPa
       
       const currentPasswordHash = userResult.rows[0].password_hash;
       
-      // Проверяем, совпадает ли старый пароль с текущим
       if (String(currentPasswordHash) !== String(oldPassword)) {
         throw new Error('Неверный старый пароль');
       }
     }
 
-    // Подготавливаем запрос обновления
     const updateFields = [];
     const updateValues = [];
     let paramIndex = 1;
@@ -155,10 +181,9 @@ async function updateProfile({ userId, first_name, last_name, oldPassword, newPa
     }
 
     if (updateFields.length === 0) {
-      return existingUser; // Ничего не обновляем
+      return existingUser;
     }
 
-    // Добавляем userId в конец для WHERE условия
     updateValues.push(userId);
 
     const query = `
@@ -176,10 +201,8 @@ async function updateProfile({ userId, first_name, last_name, oldPassword, newPa
 
     const updatedUser = result.rows[0];
     
-    // Получаем роль пользователя
     const role = await getUserRoleByEmailOrId(null, userId);
 
-    // == Отправка уведомления о смене пароля клиенты ==
     if (
       newPassword &&
       role === 'client' &&
@@ -224,7 +247,6 @@ async function updateProfile({ userId, first_name, last_name, oldPassword, newPa
 
 async function checkPassword(userId, password) {
   try {
-    // Получаем текущий пароль пользователя
     const result = await pool.query(
       'SELECT password_hash FROM users WHERE user_id = $1',
       [userId]
@@ -232,18 +254,15 @@ async function checkPassword(userId, password) {
     
     if (result.rows.length === 0) {
       console.log('Пользователь не найден:', userId);
-      return false; // Пользователь не найден
+      return false;
     }
     
     const currentPasswordHash = result.rows[0].password_hash;
-    
-    // Добавляем логирование для отладки
     console.log('Проверка пароля для userId:', userId);
     console.log('Хранимый пароль:', currentPasswordHash);
     console.log('Введенный пароль:', password);
     console.log('Сравнение:', String(currentPasswordHash) === String(password));
     
-    // Сравниваем пароли точно так же, как в loginUser
     return String(currentPasswordHash) === String(password);
     
   } catch (error) {
@@ -256,55 +275,65 @@ async function deleteUserAccount(userId) {
   return deleteUserById(userId);
 }
 
-// Функция для генерации случайного пароля по валидации (строго 16 символов)
+// Возвращает список пользователей (без password_hash), с ролью
+async function listUsers() {
+  const rows = await getAllUsers();
+  return rows;
+}
+
+// Обновление роли пользователя (admin action)
+// Валидация роли и делегирование репозиторию
+async function updateUserRole({ userId, role }) {
+  if (!userId) throw new Error('userId required');
+  if (!role) throw new Error('role required');
+
+  const allowed = ['client', 'manager', 'admin'];
+  if (!allowed.includes(String(role).toLowerCase())) {
+    throw new Error('Invalid role');
+  }
+
+  // Репозиторий выполнит транзакцию: удалит старые роли и добавит новую
+  const updated = await setUserRole(userId, String(role).toLowerCase());
+  return updated; // { userId, role }
+}
+
+
+// Функции для восстановления пароля и генерации
 function generateRandomPassword() {
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
   const numbers = '0123456789';
   
   let password = '';
-  
-  // Добавляем минимум одну букву и одну цифру
   password += letters[Math.floor(Math.random() * letters.length)];
   password += numbers[Math.floor(Math.random() * numbers.length)];
-  
-  // Добавляем остальные символы (всего 16 символов)
-  const remainingLength = 14; // 14 дополнительных символов для получения 16
+  const remainingLength = 14;
   const allChars = letters + numbers;
   
   for (let i = 0; i < remainingLength; i++) {
     password += allChars[Math.floor(Math.random() * allChars.length)];
   }
   
-  // Перемешиваем символы
   return password.split('').sort(() => Math.random() - 0.5).join('');
 }
 
-// Функция для отправки письма восстановления пароля
 async function sendPasswordResetEmail(email) {
   const user = await getUserByEmail(email);
   if (!user) {
     throw new Error('Пользователь с таким email не найден');
   }
 
-  // Проверяем, что пользователь имеет роль клиента
   if (user.role !== 'client') {
     throw new Error('Восстановление пароля доступно только для клиентов');
   }
 
-  // Генерируем новый случайный пароль (16 символов)
   const newPassword = generateRandomPassword();
-  
-  // Заменяем хешированный пароль на новый сгенерированный пароль
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-    
-    // Обновляем пароль пользователя на новый сгенерированный пароль
     await client.query(
       'UPDATE users SET password_hash = $1 WHERE user_id = $2',
       [newPassword, user.user_id]
     );
-    
     await client.query('COMMIT');
   } catch (error) {
     await client.query('ROLLBACK');
@@ -312,11 +341,8 @@ async function sendPasswordResetEmail(email) {
   } finally {
     client.release();
   }
-  
-  // Получаем email администратора для отправки письма
+
   const adminEmail = await getAdminEmail();
-  
-  // Отправляем письмо через nodemailer (как при регистрации)
   try {
     const transporter = nodemailer.createTransport({
       host: ensureEnv('SMTP_HOST'),
@@ -333,42 +359,36 @@ async function sendPasswordResetEmail(email) {
       to: email,
       subject: 'Восстановление пароля - Кондитерская',
       text: `Здравствуйте, ${user.first_name}! По вашему запросу администратор сгенерировал новый пароль для вашего аккаунта. Ваш новый пароль: ${newPassword}`,
-      html: `<p>Здравствуйте, <b>${user.first_name}</b>!<br/>По вашему запросу администратор сгенерировал новый пароль для вашего аккаунта.<br/><b>Ваш новый пароль: </b>${newPassword}<br/>Используйте этот пароль для входа в систему.<br/>Рекомендуем изменить пароль в личном кабинете после входа.</p>`
+      html: `<p>Здравствуйте, <b>${user.first_name}</b>!<br/>По вашему запросу администратор сгенерировал новый пароль для вашего аккаунта.<br/><b>Ваш новый пароль: </b>${newPassword}</p>`
     });
-    
-    console.log('✅ Email успешно отправлен на:', email);
-    
   } catch (emailError) {
-    console.error('❌ Ошибка отправки email:', emailError.message);
-    // Не прерываем выполнение, так как пароль уже сгенерирован и сохранен
+    console.error('Ошибка отправки email:', emailError.message);
   }
-  
-  // Логирование для отладки
+
   console.log('=== ВОССТАНОВЛЕНИЕ ПАРОЛЯ ===');
-  console.log(`От: ${adminEmail} (Администратор)`);
-  console.log(`Кому: ${email} (Клиент: ${user.first_name} ${user.last_name})`);
+  console.log(`От: ${adminEmail}`);
+  console.log(`Кому: ${email}`);
   console.log(`Новый пароль: ${newPassword}`);
   console.log('===============================');
-  
+
   return { 
     success: true, 
     message: 'Письмо с новым паролем отправлено на вашу почту от администратора',
-    newPassword: newPassword // В реальном приложении пароль не должен возвращаться
+    newPassword: newPassword
   };
 }
-
 
 module.exports = {
   getUserRole,
   loginUser,
   registerUser,
+  registerUserWithoutEmail,  // <-- новая функция
   getProfile,
   getUserPayments,
   updateProfile,
   checkPassword,
   deleteUserAccount,
+  listUsers,
+  updateUserRole,      // <-- экспортируем
   sendPasswordResetEmail
 };
-
-
-

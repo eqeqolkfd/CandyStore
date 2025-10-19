@@ -1,0 +1,552 @@
+/* AdminProductList.css
+   Адаптированный стиль каталога для админской панели
+   (поиск на всю ширину + фильтры под поиском)
+   Модальное окно и связанные стили удалены.
+*/
+
+.admin-product-list {
+  max-width: 1200px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+
+.admin-list-title {
+  margin: 0 0 16px;
+  color: #333;
+}
+
+/* --- Поиск (на всю ширину, как в каталоге) --- */
+.admin-search {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: left;
+  width: 100%;
+}
+
+.search-input {
+  width: 100%;
+  max-width: 1200px;
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-input:focus {
+  border-color: #9E8279;
+}
+
+.search-input::placeholder {
+  color: #999;
+}
+
+/* --- Фильтры (под поиском) --- */
+.admin-filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filter-select {
+  padding: 8px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+  min-width: 140px;
+}
+
+.filter-select:focus { outline: none; border-color: #9E8279; }
+.filter-select:hover { border-color: #9E8279; }
+
+/* --- Контейнер для фильтров на мобильных (чтобы занимал всю ширину) --- */
+.admin-filter-full {
+  flex: 1 1 100%;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Сетка карточек */
+.admin-catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+/* Карточка товара (админ) */
+.admin-product-card {
+  background: #ffffff;
+  border: 1px solid #ececec;
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: default; /* карточка не кликабельна для открытия модалки */
+}
+
+.admin-product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 18px rgba(0,0,0,0.08);
+}
+
+/* Превью изображения */
+.admin-product-thumb {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #fafafa;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-product-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.3s ease;
+}
+
+.admin-product-card:hover .admin-product-thumb img {
+  transform: scale(1.04);
+}
+
+.admin-thumb-placeholder {
+  width: 100%;
+  height: 100%;
+  color: #999;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Тело карточки */
+.admin-product-body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.admin-product-title {
+  margin: 0;
+  font-size: 16px;
+  color: #222;
+}
+
+.admin-product-desc {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: calc(1.35em * 2);
+}
+
+/* Мета-инфо */
+.admin-meta-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.admin-meta-chip {
+  background: #f1f1f1;
+  color: #666;
+  border-radius: 5px;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.admin-product-footer {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;               /* уменьшен gap */
+  flex-wrap: wrap;        /* разрешаем перенос элементов */
+  font-weight: 700;
+  color: #222;
+  font-size: 16px;
+}
+
+.admin-product-price {
+  color: #222;
+  font-weight: 800;
+  font-size: 16px;
+}
+
+/* Кнопки действий: менее "тяжёлые", помещаются в узкие карточки */
+.admin-product-actions {
+  display: flex;
+  gap: 6px;               /* уменьшен gap между кнопками */
+  flex-shrink: 0;
+  align-items: center;
+}
+
+/* Общий стиль кнопок (уменьшено padding и шрифт, запрет переноса) */
+.admin-action-btn {
+  padding: 6px 8px;       /* уменьшенный padding */
+  background: #9E8279;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;        /* уменьшенный размер шрифта */
+  line-height: 1;
+  white-space: nowrap;    /* не ломаем текст на строки */
+  min-width: 0;           /* важно для flex-basis */
+  transition: background-color 0.18s, transform 0.12s;
+}
+
+/* Delete — вариант кнопки */
+.admin-action-delete {
+  background: #c84e44;
+}
+
+.admin-action-btn:hover { background: #A78E85; transform: translateY(-1px); }
+.admin-action-delete:hover { background: #b5352f; transform: translateY(-1px); }
+
+/* Пустое состояние и загрузка */
+.admin-list-empty {
+  color: #888;
+  font-size: 16px;
+  grid-column: 1 / -1;
+  padding: 40px 0;
+  text-align: center;
+}
+
+.admin-list-loading {
+  color: #333;
+  font-size: 18px;
+  padding: 32px 0;
+  text-align: center;
+}
+
+/* --- Responsive rules --- */
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .admin-catalog-grid {
+    gap: 14px;
+  }
+  .admin-product-thumb { height: 200px; max-height: 200px; }
+}
+
+@media (max-width: 768px) {
+  .admin-filters {
+    gap: 8px;
+  }
+  .admin-filter-full { flex: 1 1 100%; }
+}
+
+@media (max-width: 480px) {
+  .admin-catalog-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    justify-content: stretch;
+  }
+  .admin-product-card {
+    max-width: none;
+    min-width: 0;
+  }
+  .admin-product-thumb {
+    height: 160px;
+    max-height: 160px;
+  }
+  .admin-product-title { font-size: 14px; }
+  .admin-product-desc  { -webkit-line-clamp: 3; min-height: calc(1.35em * 3); }
+}
+
+@media (min-width: 1400px) {
+  .admin-catalog-grid {
+    gap: 20px;
+    justify-content: start;
+  }
+}
+
+/* Touch fallback */
+@media (hover: none) {
+  .admin-product-card:hover { transform: none; box-shadow: none; }
+  .admin-product-card .admin-product-thumb img { transform: none; }
+}
+
+/* === СТИЛИ ДЛЯ МОДАЛЬНЫХ ОКОН === */
+
+.admin-header {
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.admin-header h2 {
+  margin: 0;
+  color: white;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.admin-add-btn {
+  background-color: #8882c9;;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(158, 130, 121, 0.3);
+}
+
+.admin-add-btn:hover {
+  transform: scale(1.05);
+  transition: all (0.4s);
+  box-shadow: 0 4px 12px rgba(158, 130, 121, 0.4);
+}
+
+.admin-add-btn:active {
+  transform: translateY(0);
+}
+
+/* Модальное окно */
+.admin-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.admin-modal-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.admin-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e0e0e0;
+  background: #f8f9fa;
+  border-radius: 12px 12px 0 0;
+}
+
+.admin-modal-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.admin-modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.admin-modal-close:hover {
+  background-color: #e9ecef;
+  color: #333;
+}
+
+.admin-modal-body {
+  padding: 24px;
+}
+
+/* Форма */
+.admin-form-group {
+  margin-bottom: 20px;
+}
+
+.admin-form-group label {
+  display: block;
+  margin-bottom: 6px;
+  color: #333;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.admin-form-group input,
+.admin-form-group textarea,
+.admin-form-group select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.admin-form-group input:focus,
+.admin-form-group textarea:focus,
+.admin-form-group select:focus {
+  border-color: #9E8279;
+}
+
+.admin-form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.admin-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.admin-form-error {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.admin-modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.admin-modal-actions button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+}
+
+.admin-modal-actions button[type="button"] {
+  background-color: #6c757d;
+  color: white;
+}
+
+.admin-modal-actions button[type="button"]:hover:not(:disabled) {
+  background-color: #5a6268;
+}
+
+.admin-modal-actions button[type="submit"] {
+  background: linear-gradient(135deg, #9E8279, #8B6F47);
+  color: white;
+}
+
+.admin-modal-actions button[type="submit"]:hover:not(:disabled) {
+  background: linear-gradient(135deg, #8B6F47, #9E8279);
+}
+
+.admin-modal-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Модальное окно удаления */
+.admin-delete-modal {
+  max-width: 400px;
+}
+
+.admin-delete-modal .admin-modal-body {
+  text-align: center;
+}
+
+.admin-delete-modal p {
+  margin: 0 0 16px;
+  color: #333;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.admin-delete-warning {
+  color: #dc3545 !important;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.admin-delete-btn {
+  background-color: #dc3545 !important;
+  color: white !important;
+}
+
+.admin-delete-btn:hover:not(:disabled) {
+  background-color: #c82333 !important;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .admin-form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .admin-modal-card {
+    margin: 10px;
+    max-height: calc(100vh - 20px);
+  }
+  
+  .admin-modal-actions {
+    flex-direction: column;
+  }
+  
+  .admin-modal-actions button {
+    width: 100%;
+  }
+}

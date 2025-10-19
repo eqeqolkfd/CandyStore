@@ -1,3 +1,4 @@
+// users.repository.js
 const pool = require('../../db');
 
 async function getUserRoleByEmailOrId(email, userId) {
@@ -102,6 +103,61 @@ async function getPaymentsByUserId(userId) {
   return result.rows;
 }
 
+/**
+ * Возвращает всех пользователей, вместе с их ролью (если есть).
+ * Не возвращаем password_hash.
+ */
+async function getAllUsers() {
+  const result = await pool.query(
+    `SELECT u.user_id,
+            u.first_name,
+            u.last_name,
+            u.email,
+            u.created_at,
+            (SELECT r.name_role
+               FROM user_roles ur
+               JOIN roles r ON r.role_id = ur.role_id
+               WHERE ur.user_id = u.user_id
+               LIMIT 1) AS role
+       FROM users u
+       ORDER BY u.user_id ASC`
+  );
+  return result.rows;
+}
+
+/**
+ * Удаляет все записи user_roles и присваивает новую роль (транзакция).
+ * Принимает userId и roleName (например 'admin', 'client', 'manager').
+ * Возвращает { userId, role: roleName } при успехе.
+ */
+async function setUserRole(userId, roleName) {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // Получаем role_id
+    const r = await client.query('SELECT role_id FROM roles WHERE name_role = $1 LIMIT 1', [roleName]);
+    const roleId = r.rows[0]?.role_id;
+    if (!roleId) {
+      throw new Error('Role not found: ' + roleName);
+    }
+
+    // Удаляем старые роли
+    await client.query('DELETE FROM user_roles WHERE user_id = $1', [userId]);
+
+    // Вставляем новую
+    await client.query('INSERT INTO user_roles (user_id, role_id) VALUES ($1,$2)', [userId, roleId]);
+
+    await client.query('COMMIT');
+    return { userId, role: roleName };
+  } catch (e) {
+    try { await client.query('ROLLBACK'); } catch (_) {}
+    throw e;
+  } finally {
+    client.release();
+  }
+}
+
 async function deleteUserById(userId) {
   await pool.query('DELETE FROM users WHERE user_id = $1', [userId]);
 }
@@ -116,9 +172,8 @@ module.exports = {
   getAdminEmail,
   getUserProfileById,
   getPaymentsByUserId,
+  getAllUsers,
+  setUserRole,         // <-- экспортируем новую функцию
   deleteUserById,
-  pool,
+  pool
 };
-
-
-

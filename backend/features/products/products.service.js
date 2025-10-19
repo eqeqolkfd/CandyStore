@@ -11,7 +11,7 @@ async function getCatalogProducts(filters = {}) {
     weightGrams: r.weight_grams,
     image_url: toPublicImagePath(r.photo_url),
     category: r.category_name || null,
-    manufacturer: r.manufacturer_name || null,
+    manufacturer: r.manufacturer_name || null
   }));
 }
 
