@@ -49,10 +49,6 @@ function Login() {
         setServerError(data?.error || 'Ошибка входа');
         return;
       }
-      if (data.role !== 'client') {
-        setServerError('Доступ разрешён только пользователям с ролью клиента');
-        return;
-      }
       localStorage.setItem('currentUser', JSON.stringify({ userId: data.userId, email: data.email, role: data.role }));
       navigate('/');
     } catch (err) {

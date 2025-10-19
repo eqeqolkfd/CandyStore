@@ -19,8 +19,8 @@ function Header() {
             {isAuthorized && <li className="menu-button"><Link to="/favorites">Избранное</Link></li>}
             {isAuthorized && <li className="menu-button"><Link to="/cart">Корзина</Link></li>}
             {isAuthorized && <li className="menu-button"><Link to="/orders">Мои заказы</Link></li>}
-            {!isClient && <li className="menu-button"><Link to="/register">Регистрация</Link></li>}
-            {!isClient && <li className="menu-button"><Link to="/login">Авторизация</Link></li>}
+            {!isAuthorized && <li className="menu-button"><Link to="/register">Регистрация</Link></li>}
+            {!isAuthorized && <li className="menu-button"><Link to="/login">Авторизация</Link></li>}
           </ul>
         </div>
         <ul className="list-header-right">
