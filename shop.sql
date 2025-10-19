@@ -830,6 +830,8 @@ VALUES
   
   
 SELECT setval('users_user_id_seq', 1, true);
+
+SELECT setval('products_product_id_seq', (SELECT MAX(product_id) FROM products), true);
   
 INSERT INTO user_roles (user_id, role_id)
 SELECT 1, role_id FROM roles WHERE name_role = 'admin';

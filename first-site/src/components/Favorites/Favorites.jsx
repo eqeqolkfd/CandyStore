@@ -48,6 +48,13 @@ function Favorites() {
     setConfirmRemove(null);
   };
 
+  const normalizeImg = (url) => {
+    if (!url) return '';
+    const m = url.match(/[/\\]images[/\\][^/\\]+$/i);
+    if (m) return '/images/' + m[0].split(/[/\\]/g).pop();
+    return url.replace(/^.*(\/images\/[^/]+)$/i, '$1').replace(/\\/g, '/');
+  };
+
   const addToCart = (product) => {
     setConfirmAdd(product);
   };
@@ -112,7 +119,7 @@ function Favorites() {
               
               <div className="favorite-thumb">
                 {product.image_url ? (
-                  <img src={product.image_url} alt={product.name} />
+                  <img src={normalizeImg(product.image_url)} alt={product.name} />
                 ) : (
                   <div className="favorite-thumb--placeholder">Нет фото</div>
                 )}

@@ -566,3 +566,45 @@
     width: 100%;
   }
 }
+
+/* Стили для загрузки файлов */
+.admin-file-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.admin-file-input:hover {
+  border-color: #9E8279;
+}
+
+.admin-file-input:focus {
+  outline: none;
+  border-color: #9E8279;
+  box-shadow: 0 0 0 2px rgba(158, 130, 121, 0.2);
+}
+
+.admin-image-preview {
+  margin-top: 12px;
+  text-align: center;
+}
+
+.admin-image-preview img {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 8px;
+  border: 2px solid #e0e0e0;
+  object-fit: cover;
+}
+
+.admin-current-image-text {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #666;
+  font-style: italic;
+}

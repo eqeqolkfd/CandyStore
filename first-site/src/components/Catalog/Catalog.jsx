@@ -37,6 +37,13 @@ function Catalog() {
     }));
   };
 
+  const normalizeImg = (url) => {
+    if (!url) return '';
+    const m = url.match(/[/\\]images[/\\][^/\\]+$/i);
+    if (m) return '/images/' + m[0].split(/[/\\]/g).pop();
+    return url.replace(/^.*(\/images\/[^/]+)$/i, '$1').replace(/\\/g, '/');
+  };
+
   const addToCart = (product) => {
     const user = getCurrentUser();
     if (!user) {
@@ -243,7 +250,7 @@ function Catalog() {
             >
               <div className="product-thumb">
                 {p.image_url ? (
-                  <img src={p.image_url} alt={p.name} />
+                  <img src={normalizeImg(p.image_url)} alt={p.name} />
                 ) : (
                   <div className="product-thumb--placeholder">Нет фото</div>
                 )}
@@ -306,7 +313,7 @@ function Catalog() {
 
             <div className="catalog-modal-thumb">
               {selectedProduct.image_url ? (
-                <img src={selectedProduct.image_url} alt={selectedProduct.name} />
+                <img src={normalizeImg(selectedProduct.image_url)} alt={selectedProduct.name} />
               ) : (
                 <div className="product-thumb--placeholder">Нет фото</div>
               )}

@@ -20,6 +20,13 @@ function Cart() {
   const [formErrors, setFormErrors] = useState({});
   const [unitType, setUnitType] = useState('house'); // 'house' | 'apartment'
 
+  const normalizeImg = (url) => {
+    if (!url) return '';
+    const m = url.match(/[/\\]images[/\\][^/\\]+$/i);
+    if (m) return '/images/' + m[0].split(/[/\\]/g).pop();
+    return url.replace(/^.*(\/images\/[^/]+)$/i, '$1').replace(/\\/g, '/');
+  };
+
   const storedUser = typeof window !== 'undefined' ? localStorage.getItem('currentUser') : null;
   const currentUser = storedUser ? JSON.parse(storedUser) : null;
   const userId = currentUser?.userId || null;
@@ -160,7 +167,7 @@ function Cart() {
               <div key={item.id} className="cart-item">
                  <div className="cart-item-image">
                     {item.image_url ? (
-                        <img src={item.image_url} alt={item.name} />
+                        <img src={normalizeImg(item.image_url)} alt={item.name} />
                     ) : (
                     <div className="cart-item-placeholder">Нет фото</div>
                     )}

@@ -36,6 +36,8 @@ const AdminProductList = () => {
   });
   const [formErrors, setFormErrors] = useState({});
   const [formLoading, setFormLoading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   const updateFilters = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));
@@ -111,6 +113,8 @@ const AdminProductList = () => {
       imageUrl: ''
     });
     setFormErrors({});
+    setSelectedFile(null);
+    setImagePreview(null);
     setShowAddModal(true);
   };
 
@@ -126,6 +130,8 @@ const AdminProductList = () => {
       imageUrl: product.image_url || product.photo_url || ''
     });
     setFormErrors({});
+    setSelectedFile(null);
+    setImagePreview(null);
     setSelectedProduct(product);
     setShowEditModal(true);
   };
@@ -154,6 +160,11 @@ const AdminProductList = () => {
     if (productForm.price && Number(productForm.price) < 0) errors.price = 'Цена не может быть отрицательной';
     if (productForm.weight && Number(productForm.weight) < 0) errors.weight = 'Вес не может быть отрицательным';
     
+    // Для создания товара изображение обязательно
+    if (showAddModal && !selectedFile && !productForm.imageUrl) {
+      errors.image = 'Изображение обязательно';
+    }
+    
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -166,12 +177,56 @@ const AdminProductList = () => {
     }
   };
 
+  // Обработка выбора файла
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      
+      // Создаем превью изображения
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Загрузка изображения на сервер
+  const uploadImage = async (file) => {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const response = await fetch('http://localhost:5000/api/upload/product-image', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!response.ok) {
+      throw new Error('Ошибка загрузки изображения');
+    }
+
+    const result = await response.json();
+    return result.imageUrl;
+  };
+
   // Создание товара
   const handleCreateProduct = async () => {
     if (!validateForm()) return;
     
     setFormLoading(true);
     try {
+      let imageUrl = null;
+      
+      // Если выбран файл, загружаем его
+      if (selectedFile) {
+        imageUrl = await uploadImage(selectedFile);
+      } else if (productForm.imageUrl) {
+        imageUrl = productForm.imageUrl;
+      } else {
+        throw new Error('Изображение обязательно для создания товара');
+      }
+      
       const res = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -183,7 +238,7 @@ const AdminProductList = () => {
           category: productForm.category,
           manufacturer: productForm.manufacturer,
           sku: productForm.sku,
-          image_url: productForm.imageUrl
+          image_url: imageUrl
         })
       });
 
@@ -209,6 +264,13 @@ const AdminProductList = () => {
     
     setFormLoading(true);
     try {
+      let imageUrl = productForm.imageUrl;
+      
+      // Если выбран новый файл, загружаем его
+      if (selectedFile) {
+        imageUrl = await uploadImage(selectedFile);
+      }
+      
       const id = selectedProduct.product_id || selectedProduct.id;
       const res = await fetch(`${API_URL}/${id}`, {
         method: 'PUT',
@@ -221,7 +283,7 @@ const AdminProductList = () => {
           category: productForm.category,
           manufacturer: productForm.manufacturer,
           sku: productForm.sku,
-          image_url: productForm.imageUrl
+          image_url: imageUrl
         })
       });
 
@@ -498,13 +560,19 @@ const AdminProductList = () => {
                   </div>
 
                   <div className="admin-form-group">
-                    <label>URL изображения</label>
+                    <label>Изображение товара *</label>
                     <input
-                      type="url"
-                      value={productForm.imageUrl}
-                      onChange={(e) => handleFormChange('imageUrl', e.target.value)}
-                      placeholder="https://example.com/image.jpg"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                      className="admin-file-input"
+                      required
                     />
+                    {imagePreview && (
+                      <div className="admin-image-preview">
+                        <img src={imagePreview} alt="Превью" />
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -621,13 +689,25 @@ const AdminProductList = () => {
                   </div>
 
                   <div className="admin-form-group">
-                    <label>URL изображения</label>
+                    <label>Изображение товара</label>
                     <input
-                      type="url"
-                      value={productForm.imageUrl}
-                      onChange={(e) => handleFormChange('imageUrl', e.target.value)}
-                      placeholder="https://example.com/image.jpg"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                      className="admin-file-input"
                     />
+                    {imagePreview && (
+                      <div className="admin-image-preview">
+                        <img src={imagePreview} alt="Превью" />
+                      </div>
+                    )}
+                    {!imagePreview && productForm.imageUrl && (
+                      <div className="admin-image-preview">
+                        <img src={productForm.imageUrl} alt="Текущее изображение" />
+                        <p className="admin-current-image-text">Текущее изображение</p>
+                      </div>
+                    )}
+                    {formErrors.image && <div className="admin-form-error">{formErrors.image}</div>}
                   </div>
                 </div>
 
