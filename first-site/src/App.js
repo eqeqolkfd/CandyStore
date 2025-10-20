@@ -13,6 +13,7 @@ import AdminProductList from './components/Admin/AdminProductList/AdminProductLi
 import Users from './components/Admin/Users/Users.jsx';
 import Audit from './components/Admin/Audit/Audit.jsx';
 import OrdersAdmin from './components/Admin/OrdersAdmin/OrdersAdmin.jsx';
+import ManagerDashboard from './components/Manager/ManagerDashboard.jsx';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 
@@ -187,6 +188,7 @@ function App() {
           <Route path="/admin/users" element={<Users />} />
           <Route path="/admin/orders" element={<OrdersAdmin />} />
           <Route path="/admin/audit" element={<Audit />} />
+          <Route path="/manager" element={<ManagerDashboard />} />
         </Routes>
 
       </main>

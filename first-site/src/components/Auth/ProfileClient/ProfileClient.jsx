@@ -605,7 +605,7 @@ function ProfileClient() {
         )}
       </div>
 
-      {!isAdmin && (
+      {!isAdmin && currentUser?.role !== 'manager' && (
         <>
           <h3 className="payments-title">Платежи</h3>
           <div className="payments-list payments-list--grid3">

@@ -7,6 +7,7 @@ function Header() {
   const stored = typeof window !== 'undefined' ? localStorage.getItem('currentUser') : null;
   const currentUser = stored ? JSON.parse(stored) : null;
   const isClient = !!(currentUser && currentUser.role === 'client');
+  const isManager = !!(currentUser && currentUser.role === 'manager');
   const isAuthorized = !!(currentUser && currentUser.userId);
   const isAdmin = !!(currentUser && currentUser.role === 'admin');
   return (
@@ -18,12 +19,13 @@ function Header() {
             <li className="menu-button"><Link to="/">Главная</Link></li>
             {isAdmin && <li className="menu-button"><Link to="/admin/products">Товары</Link></li>}
             {isAdmin && <li className="menu-button"><Link to="/admin/users">Пользователи</Link></li>}
+            {isManager && <li className="menu-button"><Link to="/manager">Отчетность</Link></li>}
             {isAdmin && <li className="menu-button"><Link to="/admin/orders">Заказы</Link></li>}
             {isAdmin && <li className="menu-button"><Link to="/admin/audit">Журнал аудита</Link></li>}
-            {!isAdmin && <li className="menu-button"><Link to="/catalog">Каталог</Link></li>}
-            {!isAdmin && isAuthorized && <li className="menu-button"><Link to="/favorites">Избранное</Link></li>}
-            {!isAdmin && isAuthorized && <li className="menu-button"><Link to="/cart">Корзина</Link></li>}
-            {!isAdmin && isAuthorized && <li className="menu-button"><Link to="/orders">Мои заказы</Link></li>}
+            {!isAdmin && !isManager && <li className="menu-button"><Link to="/catalog">Каталог</Link></li>}
+            {!isAdmin && !isManager && isAuthorized && <li className="menu-button"><Link to="/favorites">Избранное</Link></li>}
+            {!isAdmin && !isManager && isAuthorized && <li className="menu-button"><Link to="/cart">Корзина</Link></li>}
+            {!isAdmin && !isManager && isAuthorized && <li className="menu-button"><Link to="/orders">Мои заказы</Link></li>}
             {!isAuthorized && <li className="menu-button"><Link to="/register">Регистрация</Link></li>}
             {!isAuthorized && <li className="menu-button"><Link to="/login">Авторизация</Link></li>}
           </ul>
