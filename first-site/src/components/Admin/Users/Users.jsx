@@ -373,7 +373,29 @@ function Users() {
       }
 
       closeEditModal();
-      window.location.reload();
+      
+      // Если текущий пользователь изменил свою роль, перенаправляем его
+      const currentUserId = currentUser?.userId || currentUser?.user_id;
+      if (currentUserId && String(currentUserId) === String(id)) {
+        // Пользователь изменил свою роль - обновляем localStorage
+        const updatedUser = {
+          ...currentUser,
+          role: editRole
+        };
+        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+        
+        // Перенаправляем на соответствующую страницу
+        if (editRole === 'admin') {
+          navigate('/admin/users');
+        } else if (editRole === 'manager') {
+          navigate('/manager');
+        } else if (editRole === 'client') {
+          navigate('/catalog');
+        }
+      } else {
+        // Обычное обновление списка пользователей
+        window.location.reload();
+      }
     } catch (e) {
       console.error('Ошибка сохранения пользователя:', e);
       setEditError('Не удалось сохранить изменения. Подробнее в консоли.');
