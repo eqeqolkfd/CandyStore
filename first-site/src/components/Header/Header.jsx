@@ -16,18 +16,18 @@ function Header() {
         <div className="block-header-left">
           <h1>SweetShop</h1>
           <ul className="list-header-left">
-            <li className="menu-button"><Link to="/">Главная</Link></li>
-            {isAdmin && <li className="menu-button"><Link to="/admin/products">Товары</Link></li>}
-            {isAdmin && <li className="menu-button"><Link to="/admin/users">Пользователи</Link></li>}
-            {isManager && <li className="menu-button"><Link to="/manager">Отчетность</Link></li>}
-            {isAdmin && <li className="menu-button"><Link to="/admin/orders">Заказы</Link></li>}
-            {isAdmin && <li className="menu-button"><Link to="/admin/audit">Журнал аудита</Link></li>}
-            {!isAdmin && !isManager && <li className="menu-button"><Link to="/catalog">Каталог</Link></li>}
-            {!isAdmin && !isManager && isAuthorized && <li className="menu-button"><Link to="/favorites">Избранное</Link></li>}
-            {!isAdmin && !isManager && isAuthorized && <li className="menu-button"><Link to="/cart">Корзина</Link></li>}
-            {!isAdmin && !isManager && isAuthorized && <li className="menu-button"><Link to="/orders">Мои заказы</Link></li>}
-            {!isAuthorized && <li className="menu-button"><Link to="/register">Регистрация</Link></li>}
-            {!isAuthorized && <li className="menu-button"><Link to="/login">Авторизация</Link></li>}
+            <li className="menu-button"><Link to="/">Главная <kbd>Alt+1</kbd></Link></li>
+            {isAdmin && <li className="menu-button"><Link to="/admin/products">Товары <kbd>Alt+9</kbd></Link></li>}
+            {isAdmin && <li className="menu-button"><Link to="/admin/users">Пользователи <kbd>Alt+0</kbd></Link></li>}
+            {isManager && <li className="menu-button"><Link to="/manager">Отчетность <kbd>Alt+8</kbd></Link></li>}
+            {isAdmin && <li className="menu-button"><Link to="/admin/orders">Заказы <kbd>Shift+!</kbd></Link></li>}
+            {isAdmin && <li className="menu-button"><Link to="/admin/audit">Журнал аудита <kbd>Shift+@</kbd></Link></li>}
+            {!isAdmin && !isManager && <li className="menu-button"><Link to="/catalog">Каталог <kbd>Alt+2</kbd></Link></li>}
+            {!isAdmin && !isManager && isAuthorized && <li className="menu-button"><Link to="/favorites">Избранное <kbd>Alt+5</kbd></Link></li>}
+            {!isAdmin && !isManager && isAuthorized && <li className="menu-button"><Link to="/cart">Корзина <kbd>Alt+6</kbd></Link></li>}
+            {!isAdmin && !isManager && isAuthorized && <li className="menu-button"><Link to="/orders">Мои заказы <kbd>Alt+7</kbd></Link></li>}
+            {!isAuthorized && <li className="menu-button"><Link to="/register">Регистрация <kbd>Alt+3</kbd></Link></li>}
+            {!isAuthorized && <li className="menu-button"><Link to="/login">Авторизация <kbd>Alt+4</kbd></Link></li>}
           </ul>
         </div>
         <ul className="list-header-right">

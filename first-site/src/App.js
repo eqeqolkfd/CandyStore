@@ -16,11 +16,17 @@ import OrdersAdmin from './components/Admin/OrdersAdmin/OrdersAdmin.jsx';
 import ManagerDashboard from './components/Manager/ManagerDashboard.jsx';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
+import useHotkeys from './hooks/useHotkeys';
 
 function App() {
   const location = useLocation();
   const [currentSlide, setCurrentSlide] = useState(0);
   const intervalRef = useRef(null);
+  
+  const stored = typeof window !== 'undefined' ? localStorage.getItem('currentUser') : null;
+  const userRole = stored ? JSON.parse(stored).role : null;
+  
+  useHotkeys(userRole);
 
   const slides = [
     { src: "/images/sweet1.jpg"},
