@@ -246,3 +246,309 @@
     font-size: 11px;
   }
 }
+
+/* Дополнительная адаптивность для Footer */
+@media (max-width: 1024px) {
+  .footer-content {
+    max-width: 1000px;
+    padding: 36px 18px 18px;
+    gap: 26px;
+  }
+  
+  .footer-title {
+    font-size: 22px;
+  }
+  
+  .footer-subtitle {
+    font-size: 15px;
+  }
+  
+  .footer-description {
+    font-size: 13px;
+  }
+  
+  .social-link {
+    width: 34px;
+    height: 34px;
+    line-height: 34px;
+    font-size: 15px;
+  }
+  
+  .footer-links a {
+    font-size: 13px;
+  }
+  
+  .contact-info p {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 768px) {
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 30px 15px 15px;
+    justify-items: center;
+    text-align: center;
+  }
+  
+  .footer-title {
+    font-size: 20px;
+  }
+  
+  .footer-subtitle {
+    font-size: 14px;
+  }
+  
+  .footer-description {
+    font-size: 13px;
+  }
+  
+  .social-links {
+    gap: 10px;
+    justify-content: center;
+  }
+  
+  .social-link {
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+    font-size: 14px;
+  }
+  
+  .footer-links {
+    text-align: center;
+  }
+  
+  .footer-links a {
+    font-size: 13px;
+  }
+  
+  .contact-info {
+    text-align: center;
+  }
+  
+  .contact-info p {
+    font-size: 13px;
+  }
+  
+  .footer-bottom-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  .footer-legal {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .footer-legal a {
+    font-size: 13px;
+  }
+  
+  .copyright {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 576px) {
+  .footer-content {
+    padding: 24px 12px 12px;
+    gap: 20px;
+  }
+  
+  .footer-title {
+    font-size: 18px;
+  }
+  
+  .footer-subtitle {
+    font-size: 13px;
+  }
+  
+  .footer-description {
+    font-size: 12px;
+  }
+  
+  .social-links {
+    gap: 8px;
+  }
+  
+  .social-link {
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    font-size: 13px;
+  }
+  
+  .footer-links a {
+    font-size: 12px;
+  }
+  
+  .contact-info p {
+    font-size: 12px;
+  }
+  
+  .footer-bottom {
+    padding: 16px;
+  }
+  
+  .footer-legal a {
+    font-size: 12px;
+  }
+  
+  .copyright {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-content {
+    padding: 20px 10px 10px;
+    gap: 18px;
+  }
+  
+  .footer-title {
+    font-size: 16px;
+  }
+  
+  .footer-subtitle {
+    font-size: 12px;
+  }
+  
+  .footer-description {
+    font-size: 11px;
+  }
+  
+  .social-links {
+    gap: 6px;
+  }
+  
+  .social-link {
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    font-size: 12px;
+  }
+  
+  .footer-links a {
+    font-size: 11px;
+  }
+  
+  .contact-info p {
+    font-size: 11px;
+  }
+  
+  .footer-bottom {
+    padding: 12px;
+  }
+  
+  .footer-legal a {
+    font-size: 11px;
+  }
+  
+  .copyright {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 360px) {
+  .footer-content {
+    padding: 16px 8px 8px;
+    gap: 16px;
+  }
+  
+  .footer-title {
+    font-size: 15px;
+  }
+  
+  .footer-subtitle {
+    font-size: 11px;
+  }
+  
+  .footer-description {
+    font-size: 10px;
+  }
+  
+  .social-links {
+    gap: 4px;
+  }
+  
+  .social-link {
+    width: 26px;
+    height: 26px;
+    line-height: 26px;
+    font-size: 11px;
+  }
+  
+  .footer-links a {
+    font-size: 10px;
+  }
+  
+  .contact-info p {
+    font-size: 10px;
+  }
+  
+  .footer-bottom {
+    padding: 10px;
+  }
+  
+  .footer-legal a {
+    font-size: 10px;
+  }
+  
+  .copyright {
+    font-size: 10px;
+  }
+}
+
+@media (min-width: 1400px) {
+  .footer-content {
+    max-width: 1400px;
+    padding: 48px 24px 24px;
+    gap: 36px;
+  }
+  
+  .footer-title {
+    font-size: 28px;
+  }
+  
+  .footer-subtitle {
+    font-size: 18px;
+  }
+  
+  .footer-description {
+    font-size: 16px;
+  }
+  
+  .social-links {
+    gap: 16px;
+  }
+  
+  .social-link {
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    font-size: 18px;
+  }
+  
+  .footer-links a {
+    font-size: 16px;
+  }
+  
+  .contact-info p {
+    font-size: 16px;
+  }
+  
+  .footer-bottom {
+    padding: 24px;
+  }
+  
+  .footer-legal a {
+    font-size: 16px;
+  }
+  
+  .copyright {
+    font-size: 16px;
+  }
+}

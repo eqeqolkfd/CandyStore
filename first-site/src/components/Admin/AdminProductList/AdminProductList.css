@@ -1,8 +1,9 @@
-/* AdminProductList.css
+/* ========================================
+   AdminProductList.css
    Адаптированный стиль каталога для админской панели
    (поиск на всю ширину + фильтры под поиском)
    Модальное окно и связанные стили удалены.
-*/
+   ======================================== */
 
 .admin-product-list {
   max-width: 1200px;
@@ -15,7 +16,9 @@
   color: #333;
 }
 
-/* --- Поиск (на всю ширину, как в каталоге) --- */
+/* ========================================
+   Поиск (на всю ширину, как в каталоге)
+   ======================================== */
 .admin-search {
   margin-bottom: 16px;
   display: flex;
@@ -23,7 +26,7 @@
   width: 100%;
 }
 
-.search-input {
+.admin-search-input {
   width: 100%;
   max-width: 1200px;
   padding: 12px 16px;
@@ -34,15 +37,17 @@
   transition: border-color 0.2s;
 }
 
-.search-input:focus {
+.admin-search-input:focus {
   border-color: #9E8279;
 }
 
-.search-input::placeholder {
+.admin-search-input::placeholder {
   color: #999;
 }
 
-/* --- Фильтры (под поиском) --- */
+/* ========================================
+   Фильтры (под поиском)
+   ======================================== */
 .admin-filters {
   display: flex;
   gap: 12px;
@@ -51,7 +56,7 @@
   align-items: center;
 }
 
-.filter-select {
+.admin-filter-select {
   padding: 8px 12px;
   border: 2px solid #e0e0e0;
   border-radius: 6px;
@@ -63,10 +68,12 @@
   min-width: 140px;
 }
 
-.filter-select:focus { outline: none; border-color: #9E8279; }
-.filter-select:hover { border-color: #9E8279; }
+.admin-filter-select:focus { outline: none; border-color: #9E8279; }
+.admin-filter-select:hover { border-color: #9E8279; }
 
-/* --- Контейнер для фильтров на мобильных (чтобы занимал всю ширину) --- */
+/* ========================================
+   Контейнер для фильтров на мобильных
+   ======================================== */
 .admin-filter-full {
   flex: 1 1 100%;
   display: flex;
@@ -74,14 +81,18 @@
   flex-wrap: wrap;
 }
 
-/* Сетка карточек */
+/* ========================================
+   Сетка карточек
+   ======================================== */
 .admin-catalog-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 16px;
 }
 
-/* Карточка товара (админ) */
+/* ========================================
+   Карточка товара (админ)
+   ======================================== */
 .admin-product-card {
   background: #ffffff;
   border: 1px solid #ececec;
@@ -98,7 +109,9 @@
   box-shadow: 0 10px 18px rgba(0,0,0,0.08);
 }
 
-/* Превью изображения */
+/* ========================================
+   Превью изображения
+   ======================================== */
 .admin-product-thumb {
   width: 100%;
   aspect-ratio: 1 / 1;
@@ -131,7 +144,9 @@
   justify-content: center;
 }
 
-/* Тело карточки */
+/* ========================================
+   Тело карточки
+   ======================================== */
 .admin-product-body {
   padding: 12px;
   display: flex;
@@ -153,12 +168,15 @@
   line-height: 1.35;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   min-height: calc(1.35em * 2);
 }
 
-/* Мета-инфо */
+/* ========================================
+   Мета-инфо
+   ======================================== */
 .admin-meta-grid {
   display: flex;
   flex-wrap: wrap;
@@ -199,7 +217,9 @@
   font-size: 16px;
 }
 
-/* Кнопки действий: менее "тяжёлые", помещаются в узкие карточки */
+/* ========================================
+   Кнопки действий
+   ======================================== */
 .admin-product-actions {
   display: flex;
   gap: 6px;               /* уменьшен gap между кнопками */
@@ -207,7 +227,9 @@
   align-items: center;
 }
 
-/* Общий стиль кнопок (уменьшено padding и шрифт, запрет переноса) */
+/* ========================================
+   Общий стиль кнопок
+   ======================================== */
 .admin-action-btn {
   padding: 6px 8px;       /* уменьшенный padding */
   background: #9E8279;
@@ -222,7 +244,9 @@
   transition: background-color 0.18s, transform 0.12s;
 }
 
-/* Delete — вариант кнопки */
+/* ========================================
+   Delete — вариант кнопки
+   ======================================== */
 .admin-action-delete {
   background: #c84e44;
 }
@@ -230,7 +254,9 @@
 .admin-action-btn:hover { background: #A78E85; transform: translateY(-1px); }
 .admin-action-delete:hover { background: #b5352f; transform: translateY(-1px); }
 
-/* Пустое состояние и загрузка */
+/* ========================================
+   Пустое состояние и загрузка
+   ======================================== */
 .admin-list-empty {
   color: #888;
   font-size: 16px;
@@ -246,7 +272,9 @@
   text-align: center;
 }
 
-/* --- Responsive rules --- */
+/* ========================================
+   Responsive rules
+   ======================================== */
 
 @media (min-width: 768px) and (max-width: 1023px) {
   .admin-catalog-grid {
@@ -302,7 +330,9 @@
   .admin-product-card .admin-product-thumb img { transform: none; }
 }
 
-/* === СТИЛИ ДЛЯ МОДАЛЬНЫХ ОКОН === */
+/* ========================================
+   СТИЛИ ДЛЯ МОДАЛЬНЫХ ОКОН
+   ======================================== */
 
 .admin-header {
   color: white;
@@ -344,7 +374,9 @@
   transform: translateY(0);
 }
 
-/* Модальное окно */
+/* ========================================
+   Модальное окно
+   ======================================== */
 .admin-modal-backdrop {
   position: fixed;
   top: 0;
@@ -423,7 +455,9 @@
   padding: 24px;
 }
 
-/* Форма */
+/* ========================================
+   Форма
+   ======================================== */
 .admin-form-group {
   margin-bottom: 20px;
 }
@@ -516,7 +550,9 @@
   cursor: not-allowed;
 }
 
-/* Модальное окно удаления */
+/* ========================================
+   Модальное окно удаления
+   ======================================== */
 .admin-delete-modal {
   max-width: 400px;
 }
@@ -547,7 +583,9 @@
   background-color: #c82333 !important;
 }
 
-/* Адаптивность */
+/* ========================================
+   Адаптивность
+   ======================================== */
 @media (max-width: 768px) {
   .admin-form-row {
     grid-template-columns: 1fr;
@@ -565,9 +603,145 @@
   .admin-modal-actions button {
     width: 100%;
   }
+  
+  .admin-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  
+  .admin-add-btn {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .admin-modal-backdrop {
+    padding: 10px;
+  }
+  
+  .admin-modal-header {
+    padding: 16px 20px;
+  }
+  
+  .admin-modal-body {
+    padding: 20px;
+  }
 }
 
-/* Стили для загрузки файлов */
+@media (max-width: 480px) {
+  .admin-product-list {
+    padding: 0 8px;
+    margin: 16px auto;
+  }
+  
+  .admin-list-title {
+    font-size: 20px;
+  }
+  
+  .admin-search-input {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+  
+  .admin-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .admin-filter-full {
+    flex-direction: column;
+  }
+  
+  .admin-filter-select {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .admin-catalog-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .admin-product-card {
+    max-width: none;
+  }
+  
+  .admin-product-thumb {
+    height: 200px;
+  }
+  
+  .admin-product-title {
+    font-size: 15px;
+  }
+  
+  .admin-product-desc {
+    font-size: 13px;
+    -webkit-line-clamp: 2;
+  line-clamp: 2;
+  }
+  
+  .admin-product-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .admin-product-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .admin-action-btn {
+    flex: 1;
+    text-align: center;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  
+  .admin-modal-card {
+    margin: 5px;
+    max-height: calc(100vh - 10px);
+  }
+  
+  .admin-modal-header h3 {
+    font-size: 18px;
+  }
+  
+  .admin-form-group input,
+  .admin-form-group textarea,
+  .admin-form-group select {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+  
+  .admin-modal-actions button {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .admin-product-list {
+    max-width: 1400px;
+  }
+  
+  .admin-catalog-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+  }
+  
+  .admin-product-card {
+    min-height: 400px;
+  }
+  
+  .admin-product-thumb {
+    height: 220px;
+  }
+}
+
+/* ========================================
+   Стили для загрузки файлов
+   ======================================== */
 .admin-file-input {
   width: 100%;
   padding: 8px 12px;

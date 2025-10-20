@@ -27,11 +27,166 @@
 .orders-admin .error { color: #c00; background: #ffe6e6; border: 1px solid #ffb3b3; padding: 10px 12px; border-radius: 8px; }
 
 /* Responsive */
+@media (max-width: 1024px) {
+  .orders-admin {
+    padding: 12px;
+  }
+  
+  .orders-admin h2 {
+    font-size: 22px;
+  }
+  
+  .orders-admin-table {
+    font-size: 13px;
+  }
+  
+  .orders-admin-table thead th,
+  .orders-admin-table tbody td {
+    padding: 10px 12px;
+  }
+}
+
 @media (max-width: 900px) {
-  .orders-admin-table thead { display: none; }
-  .orders-admin-table, .orders-admin-table tbody, .orders-admin-table tr, .orders-admin-table td { display: block; width: 100%; }
-  .orders-admin-table tr { border-bottom: 1px solid #eee; padding: 12px 10px; }
-  .orders-admin-table td { border: 0; padding: 8px 0; }
-  .orders-admin-table td::before { content: attr(data-label); display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px; }
+  .orders-admin {
+    padding: 10px;
+  }
+  
+  .orders-admin h2 {
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+  
+  .orders-admin-table {
+    border-radius: 8px;
+  }
+  
+  .orders-admin-table thead { 
+    display: none; 
+  }
+  
+  .orders-admin-table, 
+  .orders-admin-table tbody, 
+  .orders-admin-table tr, 
+  .orders-admin-table td { 
+    display: block; 
+    width: 100%; 
+  }
+  
+  .orders-admin-table tr { 
+    border-bottom: 1px solid #eee; 
+    padding: 16px 12px; 
+    margin-bottom: 8px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  
+  .orders-admin-table td { 
+    border: 0; 
+    padding: 6px 0; 
+    font-size: 14px;
+  }
+  
+  .orders-admin-table td::before { 
+    content: attr(data-label); 
+    display: block; 
+    font-size: 12px; 
+    color: #6b7280; 
+    margin-bottom: 4px; 
+    font-weight: 600;
+  }
+  
+  .orders-admin-table select {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    margin-top: 4px;
+  }
+}
+
+@media (max-width: 768px) {
+  .orders-admin {
+    padding: 8px;
+  }
+  
+  .orders-admin h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  
+  .orders-admin-table tr {
+    padding: 12px 8px;
+    margin-bottom: 6px;
+  }
+  
+  .orders-admin-table td {
+    padding: 4px 0;
+    font-size: 13px;
+  }
+  
+  .orders-admin-table td::before {
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  
+  .orders-admin-table select {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .orders-admin {
+    padding: 6px;
+  }
+  
+  .orders-admin h2 {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+  
+  .orders-admin-table tr {
+    padding: 10px 6px;
+    margin-bottom: 4px;
+  }
+  
+  .orders-admin-table td {
+    padding: 3px 0;
+    font-size: 12px;
+  }
+  
+  .orders-admin-table td::before {
+    font-size: 10px;
+    margin-bottom: 1px;
+  }
+  
+  .orders-admin-table select {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+  
+  .orders-admin .error {
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+}
+
+@media (min-width: 1400px) {
+  .orders-admin {
+    padding: 20px;
+  }
+  
+  .orders-admin h2 {
+    font-size: 28px;
+  }
+  
+  .orders-admin-table {
+    font-size: 15px;
+  }
+  
+  .orders-admin-table thead th,
+  .orders-admin-table tbody td {
+    padding: 16px 18px;
+  }
 }
 

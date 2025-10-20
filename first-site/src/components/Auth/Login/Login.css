@@ -132,20 +132,170 @@
   outline: 2px solid #9E8279;
 }
 
-@media (max-width: 480px) {
-  .form-actions {
-    flex-direction: column;
-    gap: 12px;
-    align-items: stretch;
+/* Адаптивность */
+@media (max-width: 1024px) {
+  .auth-wrapper {
+    padding: 30px 12px;
   }
-  .auth-button {
-    width: 100%;
+  
+  .auth-card {
+    max-width: 400px;
+    padding: 20px;
   }
+  
   .auth-title {
     font-size: 22px;
   }
+}
+
+@media (max-width: 768px) {
+  .auth-wrapper {
+    padding: 20px 10px;
+  }
+  
+  .auth-card {
+    max-width: 380px;
+    padding: 18px;
+  }
+  
+  .auth-title {
+    font-size: 20px;
+    margin-bottom: 14px;
+  }
+  
+  .auth-form {
+    gap: 12px;
+  }
+  
+  .form-field input {
+    height: 42px;
+    font-size: 15px;
+  }
+  
+  .auth-button {
+    height: 42px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-wrapper {
+    padding: 15px 8px;
+  }
+  
+  .auth-card {
+    max-width: 100%;
+    padding: 16px;
+    border-radius: 10px;
+  }
+  
+  .auth-title {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+  
+  .auth-form {
+    gap: 10px;
+  }
+  
+  .form-field {
+    gap: 4px;
+  }
+  
+  .form-field label {
+    font-size: 13px;
+  }
+  
+  .form-field input {
+    height: 40px;
+    font-size: 14px;
+    padding: 8px 10px;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+    margin-top: 4px;
+  }
+  
+  .auth-button {
+    width: 100%;
+    height: 40px;
+    font-size: 14px;
+  }
+  
   .auth-links {
     align-items: center;
+    gap: 6px;
+  }
+  
+  .link-secondary {
+    font-size: 13px;
+  }
+  
+  .field-error {
+    font-size: 12px;
+  }
+  
+  .icon-eye-btn {
+    height: 24px;
+    width: 24px;
+    right: 8px;
+  }
+  
+  .input-password-wrapper input[type="password"],
+  .input-password-wrapper input[type="text"] {
+    padding-right: 35px;
+  }
+}
+
+@media (max-width: 360px) {
+  .auth-wrapper {
+    padding: 10px 5px;
+  }
+  
+  .auth-card {
+    padding: 12px;
+  }
+  
+  .auth-title {
+    font-size: 16px;
+  }
+  
+  .form-field input {
+    height: 38px;
+    font-size: 13px;
+  }
+  
+  .auth-button {
+    height: 38px;
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 1400px) {
+  .auth-wrapper {
+    padding: 50px 20px;
+  }
+  
+  .auth-card {
+    max-width: 450px;
+    padding: 28px;
+  }
+  
+  .auth-title {
+    font-size: 26px;
+  }
+  
+  .form-field input {
+    height: 46px;
+    font-size: 15px;
+  }
+  
+  .auth-button {
+    height: 46px;
+    font-size: 15px;
   }
 }
 

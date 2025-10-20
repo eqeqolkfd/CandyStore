@@ -28,4 +28,459 @@
   .mgr-grid { grid-template-columns: 1fr; }
 }
 
+/* Дополнительная адаптивность для ManagerDashboard */
+@media (max-width: 1024px) {
+  .mgr {
+    padding: 14px;
+  }
+  
+  .mgr h2 {
+    font-size: 22px;
+    margin-bottom: 14px;
+  }
+  
+  .mgr-actions {
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  
+  .mgr-btn {
+    padding: 7px 12px;
+    font-size: 13px;
+  }
+  
+  .mgr-report {
+    padding: 14px;
+  }
+  
+  .mgr-grid {
+    gap: 14px;
+  }
+  
+  .mgr-card {
+    padding: 14px;
+  }
+  
+  .mgr-pie-chart {
+    width: 260px;
+    height: 260px;
+  }
+}
+
+@media (max-width: 768px) {
+  .mgr {
+    padding: 12px;
+  }
+  
+  .mgr h2 {
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+  
+  .mgr-actions {
+    gap: 6px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  
+  .mgr-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  
+  .mgr-report {
+    padding: 12px;
+  }
+  
+  .mgr-grid {
+    gap: 12px;
+  }
+  
+  .mgr-card {
+    padding: 12px;
+  }
+  
+  .mgr-bar-chart {
+    gap: 8px;
+  }
+  
+  .mgr-bar-chart--big {
+    gap: 10px;
+  }
+  
+  .mgr-bar {
+    height: 10px;
+  }
+  
+  .mgr-bar--big {
+    height: 16px;
+  }
+  
+  .mgr-bar-label {
+    font-size: 11px;
+  }
+  
+  .mgr-pie {
+    gap: 6px;
+  }
+  
+  .mgr-pie-chart {
+    width: 240px;
+    height: 240px;
+  }
+  
+  .mgr-pie-legend {
+    gap: 4px;
+  }
+  
+  .mgr-pie-row {
+    gap: 6px;
+  }
+  
+  .mgr-pie-dot {
+    width: 10px;
+    height: 10px;
+  }
+  
+  .mgr-pie-name {
+    font-size: 12px;
+  }
+  
+  .mgr-pie-perc {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 576px) {
+  .mgr {
+    padding: 10px;
+  }
+  
+  .mgr h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  
+  .mgr-actions {
+    gap: 4px;
+    margin-bottom: 10px;
+  }
+  
+  .mgr-btn {
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+  
+  .mgr-report {
+    padding: 10px;
+  }
+  
+  .mgr-grid {
+    gap: 10px;
+  }
+  
+  .mgr-card {
+    padding: 10px;
+  }
+  
+  .mgr-bar-chart {
+    gap: 6px;
+  }
+  
+  .mgr-bar-chart--big {
+    gap: 8px;
+  }
+  
+  .mgr-bar {
+    height: 8px;
+  }
+  
+  .mgr-bar--big {
+    height: 14px;
+  }
+  
+  .mgr-bar-label {
+    font-size: 10px;
+  }
+  
+  .mgr-pie {
+    gap: 4px;
+  }
+  
+  .mgr-pie-chart {
+    width: 200px;
+    height: 200px;
+  }
+  
+  .mgr-pie-legend {
+    gap: 3px;
+  }
+  
+  .mgr-pie-row {
+    gap: 4px;
+  }
+  
+  .mgr-pie-dot {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .mgr-pie-name {
+    font-size: 11px;
+  }
+  
+  .mgr-pie-perc {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .mgr {
+    padding: 8px;
+  }
+  
+  .mgr h2 {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+  
+  .mgr-actions {
+    gap: 3px;
+    margin-bottom: 8px;
+  }
+  
+  .mgr-btn {
+    padding: 4px 6px;
+    font-size: 10px;
+  }
+  
+  .mgr-report {
+    padding: 8px;
+  }
+  
+  .mgr-grid {
+    gap: 8px;
+  }
+  
+  .mgr-card {
+    padding: 8px;
+  }
+  
+  .mgr-bar-chart {
+    gap: 4px;
+  }
+  
+  .mgr-bar-chart--big {
+    gap: 6px;
+  }
+  
+  .mgr-bar {
+    height: 6px;
+  }
+  
+  .mgr-bar--big {
+    height: 12px;
+  }
+  
+  .mgr-bar-label {
+    font-size: 9px;
+  }
+  
+  .mgr-pie {
+    gap: 3px;
+  }
+  
+  .mgr-pie-chart {
+    width: 180px;
+    height: 180px;
+  }
+  
+  .mgr-pie-legend {
+    gap: 2px;
+  }
+  
+  .mgr-pie-row {
+    gap: 3px;
+  }
+  
+  .mgr-pie-dot {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .mgr-pie-name {
+    font-size: 10px;
+  }
+  
+  .mgr-pie-perc {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 360px) {
+  .mgr {
+    padding: 6px;
+  }
+  
+  .mgr h2 {
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+  
+  .mgr-actions {
+    gap: 2px;
+    margin-bottom: 6px;
+  }
+  
+  .mgr-btn {
+    padding: 3px 5px;
+    font-size: 9px;
+  }
+  
+  .mgr-report {
+    padding: 6px;
+  }
+  
+  .mgr-grid {
+    gap: 6px;
+  }
+  
+  .mgr-card {
+    padding: 6px;
+  }
+  
+  .mgr-bar-chart {
+    gap: 3px;
+  }
+  
+  .mgr-bar-chart--big {
+    gap: 4px;
+  }
+  
+  .mgr-bar {
+    height: 5px;
+  }
+  
+  .mgr-bar--big {
+    height: 10px;
+  }
+  
+  .mgr-bar-label {
+    font-size: 8px;
+  }
+  
+  .mgr-pie {
+    gap: 2px;
+  }
+  
+  .mgr-pie-chart {
+    width: 160px;
+    height: 160px;
+  }
+  
+  .mgr-pie-legend {
+    gap: 1px;
+  }
+  
+  .mgr-pie-row {
+    gap: 2px;
+  }
+  
+  .mgr-pie-dot {
+    width: 5px;
+    height: 5px;
+  }
+  
+  .mgr-pie-name {
+    font-size: 9px;
+  }
+  
+  .mgr-pie-perc {
+    font-size: 9px;
+  }
+}
+
+@media (min-width: 1400px) {
+  .mgr {
+    padding: 20px;
+  }
+  
+  .mgr h2 {
+    font-size: 28px;
+    margin-bottom: 20px;
+  }
+  
+  .mgr-actions {
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  
+  .mgr-btn {
+    padding: 10px 18px;
+    font-size: 16px;
+  }
+  
+  .mgr-report {
+    padding: 20px;
+  }
+  
+  .mgr-grid {
+    gap: 20px;
+  }
+  
+  .mgr-card {
+    padding: 20px;
+  }
+  
+  .mgr-bar-chart {
+    gap: 12px;
+  }
+  
+  .mgr-bar-chart--big {
+    gap: 16px;
+  }
+  
+  .mgr-bar {
+    height: 14px;
+  }
+  
+  .mgr-bar--big {
+    height: 22px;
+  }
+  
+  .mgr-bar-label {
+    font-size: 14px;
+  }
+  
+  .mgr-pie {
+    gap: 10px;
+  }
+  
+  .mgr-pie-chart {
+    width: 320px;
+    height: 320px;
+  }
+  
+  .mgr-pie-legend {
+    gap: 8px;
+  }
+  
+  .mgr-pie-row {
+    gap: 10px;
+  }
+  
+  .mgr-pie-dot {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .mgr-pie-name {
+    font-size: 15px;
+  }
+  
+  .mgr-pie-perc {
+    font-size: 15px;
+  }
+}
+
 

@@ -575,12 +575,249 @@
   .users-modal-password-wrapper input { padding-right: 40px; }
 }
 
-/* small screens: convert to cards */
+/* Адаптивность */
+@media (max-width: 1024px) {
+  .admin-users-page {
+    padding: 16px;
+    margin: 20px auto;
+  }
+  
+  .users-header h2 {
+    font-size: 1.3rem;
+  }
+  
+  .users-search {
+    min-width: 200px;
+  }
+  
+  .users-table th,
+  .users-table td {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+  
+  .users-email {
+    max-width: 200px;
+  }
+}
+
+@media (max-width: 900px) {
+  .admin-users-page {
+    padding: 12px;
+    margin: 15px auto;
+  }
+  
+  .users-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .users-actions {
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .users-search {
+    min-width: 180px;
+    flex: 1;
+  }
+  
+  .users-controls {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .users-table {
+    font-size: 12px;
+  }
+  
+  .users-table th,
+  .users-table td {
+    padding: 6px 8px;
+  }
+  
+  .users-email {
+    max-width: 150px;
+  }
+  
+  .btn-add, .btn-edit, .btn-delete {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}
+
 @media (max-width: 720px) {
-  .users-table { display: none; }
-  .users-cards { display: grid; grid-template-columns: 1fr; }
-  .users-header { flex-direction: column; align-items: stretch; gap: 10px; }
-  .users-actions { justify-content: space-between; }
+  .users-table { 
+    display: none; 
+  }
+  
+  .users-cards { 
+    display: grid; 
+    grid-template-columns: 1fr; 
+    gap: 10px;
+  }
+  
+  .users-header { 
+    flex-direction: column; 
+    align-items: stretch; 
+    gap: 10px; 
+  }
+  
+  .users-actions { 
+    justify-content: space-between; 
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .users-search {
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .users-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+  
+  .users-controls label {
+    font-size: 12px;
+  }
+  
+  .users-controls select {
+    margin-left: 0;
+    margin-top: 4px;
+    width: 100%;
+  }
+  
+  .user-card {
+    padding: 10px;
+  }
+  
+  .user-card-row {
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+  
+  .user-card-actions {
+    margin-top: 8px;
+  }
+  
+  .btn-add, .btn-edit, .btn-delete {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-users-page {
+    padding: 8px;
+    margin: 10px auto;
+  }
+  
+  .users-header h2 {
+    font-size: 1.2rem;
+  }
+  
+  .users-search {
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+  
+  .users-controls label {
+    font-size: 11px;
+  }
+  
+  .users-controls select {
+    padding: 4px 6px;
+    font-size: 12px;
+  }
+  
+  .user-card {
+    padding: 8px;
+  }
+  
+  .user-card-row {
+    font-size: 12px;
+    margin-bottom: 3px;
+  }
+  
+  .btn-add, .btn-edit, .btn-delete {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+  
+  .users-role-modal-card,
+  .users-add-modal-card,
+  .users-modal-card {
+    margin: 5px;
+    max-height: calc(100vh - 10px);
+  }
+  
+  .users-role-modal-header,
+  .users-add-modal-header,
+  .users-modal-header {
+    padding: 10px 12px;
+  }
+  
+  .users-role-modal-header h3,
+  .users-add-modal-header h3,
+  .users-modal-header h3 {
+    font-size: 14px;
+  }
+  
+  .users-role-modal-body,
+  .users-add-modal-body,
+  .users-modal-body {
+    padding: 10px 12px;
+  }
+  
+  .users-role-modal-actions,
+  .users-add-modal-actions,
+  .users-modal-actions {
+    padding: 10px 12px;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 1400px) {
+  .admin-users-page {
+    max-width: 1300px;
+    padding: 24px;
+  }
+  
+  .users-header h2 {
+    font-size: 1.6rem;
+  }
+  
+  .users-search {
+    min-width: 300px;
+  }
+  
+  .users-table th,
+  .users-table td {
+    padding: 12px 16px;
+    font-size: 15px;
+  }
+  
+  .users-email {
+    max-width: 300px;
+  }
+  
+  .btn-add, .btn-edit, .btn-delete {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
 }
 
 /* === СТИЛИ ДЛЯ МОДАЛЬНОГО ОКНА УДАЛЕНИЯ ПОЛЬЗОВАТЕЛЯ === */

@@ -213,3 +213,472 @@
     max-width: 100%;
   }
 }
+
+/* Дополнительная адаптивность для Orders */
+@media (max-width: 1024px) {
+  .orders {
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 0 14px;
+  }
+  
+  .orders-title {
+    font-size: 22px;
+  }
+  
+  .order-card {
+    padding: 14px;
+  }
+  
+  .order-id {
+    font-size: 15px;
+  }
+  
+  .order-meta {
+    font-size: 13px;
+  }
+  
+  .order-item {
+    gap: 10px;
+  }
+  
+  .order-item-name {
+    font-size: 14px;
+  }
+  
+  .order-item-qty {
+    font-size: 13px;
+  }
+  
+  .order-item-price {
+    font-size: 14px;
+  }
+  
+  .order-total {
+    font-size: 15px;
+  }
+  
+  .order-address,
+  .order-delivery,
+  .order-payment {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 768px) {
+  .orders {
+    margin: 16px auto;
+    padding: 0 12px;
+  }
+  
+  .orders-title {
+    font-size: 20px;
+    margin-bottom: 14px;
+  }
+  
+  .order-card {
+    padding: 12px;
+  }
+  
+  .order-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  
+  .order-id {
+    font-size: 14px;
+  }
+  
+  .order-meta {
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12px;
+  }
+  
+  .order-status {
+    font-size: 11px;
+    padding: 1px 6px;
+  }
+  
+  .order-items {
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  
+  .order-item {
+    grid-template-columns: 1fr;
+    gap: 4px;
+    text-align: left;
+    padding: 6px 0;
+  }
+  
+  .order-item-name {
+    font-size: 13px;
+  }
+  
+  .order-item-qty,
+  .order-item-price {
+    text-align: left;
+    font-size: 12px;
+  }
+  
+  .order-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding-top: 6px;
+  }
+  
+  .order-total {
+    font-size: 14px;
+  }
+  
+  .order-details {
+    margin-top: 10px;
+    gap: 4px;
+  }
+  
+  .order-address,
+  .order-delivery,
+  .order-payment {
+    font-size: 12px;
+  }
+  
+  .order-address {
+    text-align: left;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .orders {
+    margin: 12px auto;
+    padding: 0 8px;
+  }
+  
+  .orders-title {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+  
+  .order-card {
+    padding: 10px;
+  }
+  
+  .order-header {
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  
+  .order-id {
+    font-size: 13px;
+  }
+  
+  .order-meta {
+    gap: 3px;
+    font-size: 11px;
+  }
+  
+  .order-status {
+    font-size: 10px;
+    padding: 1px 4px;
+  }
+  
+  .order-items {
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+  
+  .order-item {
+    gap: 3px;
+    padding: 4px 0;
+  }
+  
+  .order-item-name {
+    font-size: 12px;
+  }
+  
+  .order-item-qty,
+  .order-item-price {
+    font-size: 11px;
+  }
+  
+  .order-footer {
+    gap: 6px;
+    padding-top: 4px;
+  }
+  
+  .order-total {
+    font-size: 13px;
+  }
+  
+  .order-details {
+    margin-top: 8px;
+    gap: 3px;
+  }
+  
+  .order-address,
+  .order-delivery,
+  .order-payment {
+    font-size: 11px;
+  }
+  
+  .orders-empty h2 {
+    font-size: 18px;
+  }
+  
+  .orders-empty p {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .orders {
+    margin: 8px auto;
+    padding: 0 6px;
+  }
+  
+  .orders-title {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+  
+  .order-card {
+    padding: 8px;
+  }
+  
+  .order-header {
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+  
+  .order-id {
+    font-size: 12px;
+  }
+  
+  .order-meta {
+    gap: 2px;
+    font-size: 10px;
+  }
+  
+  .order-status {
+    font-size: 9px;
+    padding: 1px 3px;
+  }
+  
+  .order-items {
+    gap: 3px;
+    margin-bottom: 6px;
+  }
+  
+  .order-item {
+    gap: 2px;
+    padding: 3px 0;
+  }
+  
+  .order-item-name {
+    font-size: 11px;
+  }
+  
+  .order-item-qty,
+  .order-item-price {
+    font-size: 10px;
+  }
+  
+  .order-footer {
+    gap: 4px;
+    padding-top: 3px;
+  }
+  
+  .order-total {
+    font-size: 12px;
+  }
+  
+  .order-details {
+    margin-top: 6px;
+    gap: 2px;
+  }
+  
+  .order-address,
+  .order-delivery,
+  .order-payment {
+    font-size: 10px;
+  }
+  
+  .orders-empty h2 {
+    font-size: 16px;
+  }
+  
+  .orders-empty p {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 360px) {
+  .orders {
+    margin: 6px auto;
+    padding: 0 4px;
+  }
+  
+  .orders-title {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  
+  .order-card {
+    padding: 6px;
+  }
+  
+  .order-header {
+    gap: 3px;
+    margin-bottom: 4px;
+  }
+  
+  .order-id {
+    font-size: 11px;
+  }
+  
+  .order-meta {
+    gap: 1px;
+    font-size: 9px;
+  }
+  
+  .order-status {
+    font-size: 8px;
+    padding: 1px 2px;
+  }
+  
+  .order-items {
+    gap: 2px;
+    margin-bottom: 4px;
+  }
+  
+  .order-item {
+    gap: 1px;
+    padding: 2px 0;
+  }
+  
+  .order-item-name {
+    font-size: 10px;
+  }
+  
+  .order-item-qty,
+  .order-item-price {
+    font-size: 9px;
+  }
+  
+  .order-footer {
+    gap: 3px;
+    padding-top: 2px;
+  }
+  
+  .order-total {
+    font-size: 11px;
+  }
+  
+  .order-details {
+    margin-top: 4px;
+    gap: 1px;
+  }
+  
+  .order-address,
+  .order-delivery,
+  .order-payment {
+    font-size: 9px;
+  }
+  
+  .orders-empty h2 {
+    font-size: 14px;
+  }
+  
+  .orders-empty p {
+    font-size: 11px;
+  }
+}
+
+@media (min-width: 1400px) {
+  .orders {
+    max-width: 1400px;
+    margin: 32px auto;
+    padding: 0 24px;
+  }
+  
+  .orders-title {
+    font-size: 28px;
+    margin-bottom: 20px;
+  }
+  
+  .order-card {
+    padding: 20px;
+  }
+  
+  .order-header {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+  }
+  
+  .order-id {
+    font-size: 18px;
+  }
+  
+  .order-meta {
+    gap: 16px;
+    font-size: 16px;
+  }
+  
+  .order-status {
+    font-size: 14px;
+    padding: 4px 12px;
+  }
+  
+  .order-items {
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  
+  .order-item {
+    gap: 16px;
+    padding: 12px 0;
+  }
+  
+  .order-item-name {
+    font-size: 16px;
+  }
+  
+  .order-item-qty {
+    font-size: 16px;
+  }
+  
+  .order-item-price {
+    font-size: 16px;
+  }
+  
+  .order-footer {
+    padding-top: 12px;
+  }
+  
+  .order-total {
+    font-size: 18px;
+  }
+  
+  .order-details {
+    margin-top: 16px;
+    gap: 8px;
+  }
+  
+  .order-address,
+  .order-delivery,
+  .order-payment {
+    font-size: 16px;
+  }
+  
+  .orders-empty h2 {
+    font-size: 24px;
+  }
+  
+  .orders-empty p {
+    font-size: 16px;
+  }
+}

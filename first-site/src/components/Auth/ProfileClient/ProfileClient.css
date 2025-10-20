@@ -647,3 +647,225 @@
 .profile-delete-modal-cancel:hover {
   background: #efe5e5;
 }
+
+/* Дополнительная адаптивность для ProfileClient */
+@media (max-width: 1024px) {
+  .profile-client {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 0 14px;
+  }
+  
+  .profile-card {
+    padding: 14px;
+    margin-bottom: 20px;
+  }
+  
+  .profile-title {
+    font-size: 22px;
+  }
+  
+  .profile-edit-input {
+    width: 180px;
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-client {
+    margin: 16px auto;
+    padding: 0 12px;
+  }
+  
+  .profile-card {
+    padding: 12px;
+    margin-bottom: 20px;
+  }
+  
+  .profile-row {
+    flex-direction: column;
+    gap: 4px;
+    padding: 6px 0;
+  }
+  
+  .profile-label {
+    width: auto;
+    font-weight: 600;
+  }
+  
+  .profile-value {
+    font-weight: 500;
+  }
+  
+  .profile-edit-input {
+    width: 100%;
+    max-width: 250px;
+  }
+  
+  .profile-password-section {
+    gap: 8px;
+  }
+  
+  .profile-edit-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .profile-save-btn,
+  .profile-cancel-btn {
+    width: 100%;
+  }
+  
+  .profile-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  
+  .profile-header-btns {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 576px) {
+  .profile-client {
+    margin: 12px auto;
+    padding: 0 8px;
+  }
+  
+  .profile-title {
+    font-size: 20px;
+  }
+  
+  .profile-card {
+    padding: 10px;
+    border-radius: 8px;
+  }
+  
+  .profile-edit-input {
+    height: 40px;
+    font-size: 14px;
+  }
+  
+  .profile-save-btn,
+  .profile-cancel-btn {
+    height: 40px;
+    font-size: 14px;
+  }
+  
+  .profile-edit-btn {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+  
+  .profile-delete-btn {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-client {
+    margin: 8px auto;
+    padding: 0 6px;
+  }
+  
+  .profile-card {
+    padding: 8px;
+    border-radius: 6px;
+  }
+  
+  .profile-title {
+    font-size: 18px;
+  }
+  
+  .profile-edit-input {
+    height: 38px;
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+  
+  .profile-save-btn,
+  .profile-cancel-btn {
+    height: 38px;
+    font-size: 13px;
+    padding: 8px 16px;
+  }
+  
+  .profile-edit-btn {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+  
+  .profile-delete-btn {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+  
+  .profile-field-error,
+  .profile-field-loading {
+    font-size: 12px;
+  }
+  
+  .profile-edit-error {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+}
+
+@media (max-width: 360px) {
+  .profile-client {
+    margin: 6px auto;
+    padding: 0 4px;
+  }
+  
+  .profile-card {
+    padding: 6px;
+  }
+  
+  .profile-title {
+    font-size: 16px;
+  }
+  
+  .profile-edit-input {
+    height: 36px;
+    font-size: 12px;
+  }
+  
+  .profile-save-btn,
+  .profile-cancel-btn {
+    height: 36px;
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+}
+
+@media (min-width: 1400px) {
+  .profile-client {
+    max-width: 1000px;
+    margin: 32px auto;
+    padding: 0 20px;
+  }
+  
+  .profile-card {
+    padding: 20px;
+    margin-bottom: 28px;
+  }
+  
+  .profile-title {
+    font-size: 26px;
+  }
+  
+  .profile-edit-input {
+    height: 46px;
+    font-size: 15px;
+    width: 220px;
+  }
+  
+  .profile-save-btn,
+  .profile-cancel-btn {
+    height: 46px;
+    font-size: 15px;
+    padding: 12px 24px;
+  }
+}

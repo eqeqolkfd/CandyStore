@@ -355,7 +355,7 @@ const AdminProductList = () => {
             placeholder="Поиск товаров..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input"
+            className="admin-search-input"
           />
         </div>
 
@@ -363,7 +363,7 @@ const AdminProductList = () => {
           <select
             value={filters.category}
             onChange={(e) => updateFilters('category', e.target.value)}
-            className="filter-select"
+            className="admin-filter-select"
           >
             <option value="">Все категории</option>
             <option value="Шоколад">Шоколад</option>
@@ -376,7 +376,7 @@ const AdminProductList = () => {
           <select
             value={filters.manufacturer}
             onChange={(e) => updateFilters('manufacturer', e.target.value)}
-            className="filter-select"
+            className="admin-filter-select"
           >
             <option value="">Все производители</option>
             <option value="Сладкая Фабрика">Сладкая Фабрика</option>
@@ -386,7 +386,7 @@ const AdminProductList = () => {
           <select
             value={filters.priceSort}
             onChange={(e) => updateFilters('priceSort', e.target.value)}
-            className="filter-select"
+            className="admin-filter-select"
           >
             <option value="">Цена</option>
             <option value="ASC">По возрастанию</option>
@@ -396,7 +396,7 @@ const AdminProductList = () => {
           <select
             value={filters.weightSort}
             onChange={(e) => updateFilters('weightSort', e.target.value)}
-            className="filter-select"
+            className="admin-filter-select"
           >
             <option value="">Вес</option>
             <option value="ASC">По возрастанию</option>

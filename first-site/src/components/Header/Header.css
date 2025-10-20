@@ -158,3 +158,228 @@ header {
     margin-right: 0;
   }
 }
+
+/* Дополнительная адаптивность для Header */
+@media (max-width: 1024px) {
+  header {
+    padding: 14px 22px;
+    gap: 10px;
+  }
+  
+  .header-nav {
+    gap: 14px;
+  }
+  
+  .block-header-left {
+    gap: 24px;
+  }
+  
+  .list-header-left {
+    gap: 24px;
+  }
+  
+  .list-header-right {
+    gap: 16px;
+  }
+  
+  .block-header-left h1 {
+    font-size: 24px;
+  }
+  
+  .menu-button {
+    font-size: 16px;
+  }
+  
+  .logout-button {
+    padding: 7px 14px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 768px) {
+  header {
+    padding: 10px 16px;
+    gap: 8px;
+  }
+  
+  .header-nav {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+  
+  .block-header-left {
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .list-header-left {
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .list-header-right {
+    padding-left: 0;
+    gap: 15px;
+    justify-content: center;
+  }
+  
+  .block-header-left h1 {
+    font-size: 20px;
+  }
+  
+  .menu-button {
+    font-size: 14px;
+  }
+  
+  .logout-button {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 576px) {
+  header {
+    padding: 8px 12px;
+    gap: 6px;
+  }
+  
+  .header-nav {
+    gap: 12px;
+  }
+  
+  .block-header-left {
+    gap: 12px;
+  }
+  
+  .list-header-left {
+    gap: 12px;
+  }
+  
+  .list-header-right {
+    gap: 12px;
+  }
+  
+  .block-header-left h1 {
+    font-size: 18px;
+  }
+  
+  .menu-button {
+    font-size: 13px;
+  }
+  
+  .logout-button {
+    padding: 5px 10px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  header {
+    padding: 6px 8px;
+    gap: 4px;
+  }
+  
+  .header-nav {
+    gap: 10px;
+  }
+  
+  .block-header-left {
+    gap: 8px;
+  }
+  
+  .list-header-left {
+    gap: 8px;
+  }
+  
+  .list-header-right {
+    gap: 8px;
+  }
+  
+  .block-header-left h1 {
+    font-size: 16px;
+  }
+  
+  .menu-button {
+    font-size: 12px;
+  }
+  
+  .logout-button {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 360px) {
+  header {
+    padding: 4px 6px;
+    gap: 3px;
+  }
+  
+  .header-nav {
+    gap: 8px;
+  }
+  
+  .block-header-left {
+    gap: 6px;
+  }
+  
+  .list-header-left {
+    gap: 6px;
+  }
+  
+  .list-header-right {
+    gap: 6px;
+  }
+  
+  .block-header-left h1 {
+    font-size: 14px;
+  }
+  
+  .menu-button {
+    font-size: 11px;
+  }
+  
+  .logout-button {
+    padding: 3px 6px;
+    font-size: 11px;
+  }
+}
+
+@media (min-width: 1400px) {
+  header {
+    padding: 18px 30px;
+    gap: 16px;
+  }
+  
+  .header-nav {
+    gap: 20px;
+  }
+  
+  .block-header-left {
+    gap: 36px;
+  }
+  
+  .list-header-left {
+    gap: 36px;
+  }
+  
+  .list-header-right {
+    gap: 24px;
+  }
+  
+  .block-header-left h1 {
+    font-size: 28px;
+  }
+  
+  .menu-button {
+    font-size: 18px;
+  }
+  
+  .logout-button {
+    padding: 10px 20px;
+    font-size: 16px;
+  }
+}

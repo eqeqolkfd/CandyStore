@@ -140,7 +140,7 @@ function Favorites() {
                   
                   <div className="favorite-actions">
                     <button
-                      className="favorite-btn"
+                      className="favorite-action-btn"
                       onClick={(e) => {
                         e.stopPropagation();
                         addToCart(product);
@@ -171,13 +171,13 @@ function Favorites() {
               </p>
               <div className="favorites-modal-footer">
                 <button
-                  className="favorite-btn cancel-btn"
+                  className="favorite-action-btn cancel-btn"
                   onClick={cancelAddToCart}
                 >
                   Отмена
                 </button>
                 <button
-                  className="favorite-btn"
+                  className="favorite-action-btn"
                   onClick={confirmAddToCart}
                 >
                   Добавить в корзину
@@ -203,13 +203,13 @@ function Favorites() {
               </p>
               <div className="favorites-modal-footer">
                 <button
-                  className="favorite-btn cancel-btn"
+                  className="favorite-action-btn cancel-btn"
                   onClick={cancelRemoveFromFavorites}
                 >
                   Отмена
                 </button>
                 <button
-                  className="favorite-btn"
+                  className="favorite-action-btn"
                   onClick={confirmRemoveFromFavorites}
                   style={{ backgroundColor: '#dc3545' }}
                 >
