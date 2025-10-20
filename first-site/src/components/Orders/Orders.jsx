@@ -112,7 +112,7 @@ function Orders() {
 
             <div className="order-items">
               {order.items.map(item => (
-                <div className="order-item" key={item.order_item_id}>
+                <div className={`order-item ${item.name_product === 'Товар удален' ? 'order-item-deleted' : ''}`} key={item.order_item_id}>
                   <div className="order-item-name">{item.name_product}</div>
                   <div className="order-item-qty">x{item.quantity}</div>
                   <div className="order-item-price">

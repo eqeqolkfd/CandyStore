@@ -14,7 +14,6 @@ router.post('/', async (req, res) => {
 
     const paymentId = await createPaymentForOrder({ orderId, amount, method, status });
 
-    // If payment status is 'paid', set order status to 'paid' (Оплачен)
     if (String(status).toLowerCase() === 'paid') {
       await pool.query(
         `WITH ensured AS (
@@ -36,7 +35,6 @@ router.post('/', async (req, res) => {
   }
 });
 
-// GET payments by userId or orderId
 router.get('/', async (req, res) => {
   try {
     const userId = req.query.userId ? Number(req.query.userId) : null;

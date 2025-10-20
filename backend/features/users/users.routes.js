@@ -1,11 +1,10 @@
-// routes/users.js
 const express = require('express');
 const router = express.Router();
 const {
   getUserRole,
   loginUser,
   registerUser,
-  registerUserWithoutEmail,  // <-- новая функция
+  registerUserWithoutEmail,
   getProfile,
   getUserPayments,
   updateProfile,
@@ -13,11 +12,10 @@ const {
   deleteUserAccount,
   sendPasswordResetEmail,
   listUsers,
-  updateUserRole, // <-- добавлено
+  updateUserRole,
 } = require('./users.service');
 const { logAuditEvent } = require('../../utils/auditLogger');
 
-// Получить роль пользователя по email или userId
 router.get('/roles', async (req, res) => {
   const { email, userId } = req.query;
   try {
@@ -29,21 +27,21 @@ router.get('/roles', async (req, res) => {
   }
 });
 
-// Логин
 router.post('/login', async (req, res) => {
   const { email, password } = req.body || {};
   if (!email || !password) return res.status(400).json({ error: 'email and password are required' });
   try {
     const user = await loginUser({ email, password });
     if (!user) return res.status(401).json({ error: 'Invalid credentials' });
-    
-    // Записываем в журнал аудита
+
+    const userProfile = await getProfile(user.userId).catch(() => null);
+
     await logAuditEvent({
       action: 'LOGIN',
       userId: user.userId,
       targetType: 'USER',
       targetId: user.userId,
-      targetName: `${user.firstName} ${user.lastName}`,
+      targetName: userProfile ? `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim() || `User ${user.userId}` : `User ${user.userId}`,
       details: { email: user.email },
       severity: 'LOW',
       ipAddress: req.ip || req.connection.remoteAddress,
@@ -56,7 +54,6 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Регистрация
 router.post('/register', async (req, res) => {
   const { firstName, lastName, email, password } = req.body || {};
   if (!firstName || !lastName || !email || !password) {
@@ -65,8 +62,7 @@ router.post('/register', async (req, res) => {
   try {
     const result = await registerUser({ firstName, lastName, email, password });
     if (result?.conflict) return res.status(409).json({ error: 'Email already exists' });
-    
-    // Записываем в журнал аудита
+
     await logAuditEvent({
       action: 'CREATE_USER',
       userId: result.userId,
@@ -89,7 +85,6 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Регистрация без отправки писем (для админов)
 router.post('/admin-create', async (req, res) => {
   const { firstName, lastName, email, password, role = 'client' } = req.body || {};
   if (!firstName || !lastName || !email || !password) {
@@ -98,11 +93,9 @@ router.post('/admin-create', async (req, res) => {
   try {
     const result = await registerUserWithoutEmail({ firstName, lastName, email, password, role });
     if (result?.conflict) return res.status(409).json({ error: 'Email already exists' });
+
+    const adminUserId = req.user?.userId || 1;
     
-    // Получаем ID администратора из токена (если есть)
-    const adminUserId = req.user?.userId || 1; // Fallback на admin user
-    
-    // Записываем в журнал аудита
     await logAuditEvent({
       action: 'CREATE_USER',
       userId: adminUserId,
@@ -126,7 +119,6 @@ router.post('/admin-create', async (req, res) => {
   }
 });
 
-// Профиль
 router.get('/me', async (req, res) => {
   const userId = Number(req.query.userId);
   if (!userId) return res.status(400).json({ error: 'userId is required' });
@@ -139,7 +131,6 @@ router.get('/me', async (req, res) => {
   }
 });
 
-// Платежи пользователя
 router.get('/payments', async (req, res) => {
   const userId = Number(req.query.userId);
   if (!userId) return res.status(400).json({ error: 'userId is required' });
@@ -151,8 +142,6 @@ router.get('/payments', async (req, res) => {
   }
 });
 
-// Список пользователей (GET /api/users)
-// В продакшене: сюда добавьте проверку авторизации и роли (middleware)
 router.get('/', async (req, res) => {
   try {
     const users = await listUsers();
@@ -162,7 +151,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Обновление профиля пользователя
 router.put('/update', async (req, res) => {
   const { userId, first_name, last_name, oldPassword, newPassword, actorId: bodyActorId, actorRole: bodyActorRole } = req.body || {};
   if (!userId) return res.status(400).json({ error: 'userId is required' });
@@ -170,20 +158,17 @@ router.put('/update', async (req, res) => {
     return res.status(400).json({ error: 'At least one field (first_name, last_name, oldPassword, newPassword) is required' });
   }
   try {
-    // Получаем профиль ДО обновления (для before_data)
     const beforeProfile = await getProfile(userId).catch(() => null);
 
     const updatedProfile = await updateProfile({ userId, first_name, last_name, oldPassword, newPassword });
     if (!updatedProfile) return res.status(404).json({ error: 'User not found' });
 
-    // Определяем тип события: если админ обновляет НЕ свой профиль -> UPDATE_USER, иначе UPDATE_PROFILE
     const actorId = req.user?.userId || bodyActorId || userId;
     const actorRole = (req.user?.role || bodyActorRole || '').toLowerCase();
     const isAdminActor = actorRole === 'admin';
     const isSelfUpdate = String(actorId) === String(userId);
     const actionName = (isAdminActor && !isSelfUpdate) ? 'UPDATE_USER' : 'UPDATE_PROFILE';
 
-    // Запись аудита: обновление профиля
     await logAuditEvent({
       action: actionName,
       userId: actorId,
@@ -213,7 +198,6 @@ router.put('/update', async (req, res) => {
       }
     });
 
-    // Запись аудита: смена пароля (если была)
     if (newPassword) {
       await logAuditEvent({
         action: 'CHANGE_PASSWORD',
@@ -235,7 +219,6 @@ router.put('/update', async (req, res) => {
   }
 });
 
-// Логаут
 router.post('/logout', async (req, res) => {
   try {
     const { userId } = req.body || {};
@@ -260,8 +243,6 @@ router.post('/logout', async (req, res) => {
   }
 });
 
-// Обновление роли пользователя (PUT /api/users/role)
-// В продакшене: проверка, что текущий пользователь — admin
 router.put('/role', async (req, res) => {
   const { userId, role } = req.body || {};
   if (!userId || !role) return res.status(400).json({ error: 'userId and role required' });
@@ -269,12 +250,10 @@ router.put('/role', async (req, res) => {
   try {
     const beforeProfile = await getProfile(userId).catch(() => null);
     const updated = await updateUserRole({ userId, role });
-    
-    // Получаем информацию о пользователе для аудита
+
     const userInfo = await getProfile(userId).catch(()=>null);
-    const adminUserId = req.user?.userId || 1; // Fallback на admin user
-    
-    // Записываем в журнал аудита
+    const adminUserId = req.user?.userId || 1;
+
     await logAuditEvent({
       action: 'CHANGE_ROLE',
       userId: adminUserId,
@@ -308,7 +287,6 @@ router.put('/role', async (req, res) => {
   }
 });
 
-// Проверка правильности пароля пользователя
 router.post('/check-password', async (req, res) => {
   const { userId, password } = req.body || {};
   if (!userId || !password) {
@@ -322,19 +300,15 @@ router.post('/check-password', async (req, res) => {
   }
 });
 
-// Удаление пользователя (и всего связанного)
-// В продакшене: проверка прав (admin)
 router.delete('/delete', async (req, res) => {
   const { userId } = req.body || {};
   if (!userId) return res.status(400).json({ error: 'userId is required' });
   try {
-    // Получаем информацию о пользователе перед удалением
     const userInfo = await getUserRole({ userId });
-    const adminUserId = req.user?.userId || 1; // Fallback на admin user
+    const adminUserId = req.user?.userId || 1;
     
     await deleteUserAccount(userId);
-    
-    // Записываем в журнал аудита
+
     await logAuditEvent({
       action: 'DELETE_USER',
       userId: adminUserId,
@@ -357,7 +331,6 @@ router.delete('/delete', async (req, res) => {
   }
 });
 
-// Отправка письма для восстановления пароля
 router.post('/forgot-password', async (req, res) => {
   const { email } = req.body || {};
   if (!email) return res.status(400).json({ error: 'email is required' });

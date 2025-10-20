@@ -231,7 +231,6 @@
   }
 }
 
-/* Очень узкие устройства */
 @media (max-width: 400px) {
   .social-link {
     width: 26px;
@@ -247,7 +246,6 @@
   }
 }
 
-/* Дополнительная адаптивность для Footer */
 @media (max-width: 1024px) {
   .footer-content {
     max-width: 1000px;

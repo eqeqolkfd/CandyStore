@@ -267,7 +267,9 @@ const Audit = () => {
                 </td>
                 <td className="audit-user">
                   <div className="audit-user-info">
-                    <span className="audit-user-name">{log.userName || `User ${log.userId}`}</span>
+                    <span className="audit-user-name">
+                      {log.userName && log.userName !== 'undefined undefined' ? log.userName : `User ${log.userId}`}
+                    </span>
                     <span className="audit-user-id">ID: {log.userId}</span>
                   </div>
                 </td>

@@ -634,11 +634,13 @@ function ProfileClient() {
                 ) : (
                   <div className="profile-modal-products-grid">
                     {modalProducts.map((prod, idx) => (
-                      <div key={idx} className="profile-modal-product-card">
+                      <div key={idx} className={`profile-modal-product-card ${prod.name_product === 'Товар удален' ? 'profile-modal-product-deleted' : ''}`}>
                         {prod.photo_url ? (
                           <img src={normalizeImg(prod.photo_url)} alt={prod.name_product || prod.name || 'Товар'} className="profile-modal-product-img" />
                         ) : (
-                          <div className="profile-modal-product-img profile-modal-product-img--placeholder">Нет фото</div>
+                          <div className="profile-modal-product-img profile-modal-product-img--placeholder">
+                            {prod.name_product === 'Товар удален' ? 'Товар удален' : 'Нет фото'}
+                          </div>
                         )}
                         <div className="profile-modal-product-info">
                           <div className="profile-modal-product-name">{prod.name_product || prod.name || 'Товар'}</div>

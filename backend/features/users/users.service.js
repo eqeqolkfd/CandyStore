@@ -1,4 +1,3 @@
-// users.service.js
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
@@ -13,7 +12,7 @@ const {
   getUserProfileById,
   getPaymentsByUserId,
   getAllUsers,
-  setUserRole,        // <-- новый репозиторный метод
+  setUserRole,
   deleteUserById,
   pool,
 } = require('./users.repository');
@@ -32,12 +31,10 @@ async function loginUser({ email, password }) {
   const user = await getUserByEmail(email);
   if (!user) return null;
   
-  // Проверяем пароль (может быть хешированный или новый сгенерированный)
   if (await bcrypt.compare(password, user.password_hash)) {
     return { userId: user.user_id, email: user.email, role: user.role || null };
   }
-  
-  // Если bcrypt не сработал, проверяем как обычную строку (для новых сгенерированных паролей)
+
   if (password === user.password_hash) {
     return { userId: user.user_id, email: user.email, role: user.role || null };
   }
@@ -99,7 +96,6 @@ async function registerUser({ firstName, lastName, email, password }) {
   }
 }
 
-// Новая функция для регистрации без отправки писем (для админов)
 async function registerUserWithoutEmail({ firstName, lastName, email, password, role = 'client' }) {
   const client = await pool.connect();
   try {
@@ -281,14 +277,11 @@ async function deleteUserAccount(userId) {
   return deleteUserById(userId);
 }
 
-// Возвращает список пользователей (без password_hash), с ролью
 async function listUsers() {
   const rows = await getAllUsers();
   return rows;
 }
 
-// Обновление роли пользователя (admin action)
-// Валидация роли и делегирование репозиторию
 async function updateUserRole({ userId, role }) {
   if (!userId) throw new Error('userId required');
   if (!role) throw new Error('role required');
@@ -298,13 +291,10 @@ async function updateUserRole({ userId, role }) {
     throw new Error('Invalid role');
   }
 
-  // Репозиторий выполнит транзакцию: удалит старые роли и добавит новую
   const updated = await setUserRole(userId, String(role).toLowerCase());
-  return updated; // { userId, role }
+  return updated;
 }
 
-
-// Функции для восстановления пароля и генерации
 function generateRandomPassword() {
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
   const numbers = '0123456789';
@@ -388,13 +378,13 @@ module.exports = {
   getUserRole,
   loginUser,
   registerUser,
-  registerUserWithoutEmail,  // <-- новая функция
+  registerUserWithoutEmail,
   getProfile,
   getUserPayments,
   updateProfile,
   checkPassword,
   deleteUserAccount,
   listUsers,
-  updateUserRole,      // <-- экспортируем
+  updateUserRole,
   sendPasswordResetEmail
 };

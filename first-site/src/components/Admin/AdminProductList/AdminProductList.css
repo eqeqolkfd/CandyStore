@@ -101,7 +101,7 @@
   display: flex;
   flex-direction: column;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  cursor: default; /* карточка не кликабельна для открытия модалки */
+  cursor: default;
 }
 
 .admin-product-card:hover {
@@ -204,8 +204,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;               /* уменьшен gap */
-  flex-wrap: wrap;        /* разрешаем перенос элементов */
+  gap: 8px;
+  flex-wrap: wrap;
   font-weight: 700;
   color: #222;
   font-size: 16px;
@@ -222,7 +222,7 @@
    ======================================== */
 .admin-product-actions {
   display: flex;
-  gap: 6px;               /* уменьшен gap между кнопками */
+  gap: 6px;
   flex-shrink: 0;
   align-items: center;
 }
@@ -231,16 +231,16 @@
    Общий стиль кнопок
    ======================================== */
 .admin-action-btn {
-  padding: 6px 8px;       /* уменьшенный padding */
+  padding: 6px 8px;
   background: #9E8279;
   color: #fff;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 12px;        /* уменьшенный размер шрифта */
+  font-size: 12px;
   line-height: 1;
-  white-space: nowrap;    /* не ломаем текст на строки */
-  min-width: 0;           /* важно для flex-basis */
+  white-space: nowrap;
+  min-width: 0;
   transition: background-color 0.18s, transform 0.12s;
 }
 
@@ -324,7 +324,6 @@
   }
 }
 
-/* Touch fallback */
 @media (hover: none) {
   .admin-product-card:hover { transform: none; box-shadow: none; }
   .admin-product-card .admin-product-thumb img { transform: none; }

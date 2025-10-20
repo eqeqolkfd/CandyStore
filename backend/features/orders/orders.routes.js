@@ -8,7 +8,6 @@ router.get('/', async (req, res) => {
   try {
     const orderId = req.query.orderId ? Number(req.query.orderId) : null;
     if (orderId) {
-      // Find order by ID, with its items
       const all = await fetchOrdersByUser(null, orderId);
       if (!all || !all.length) return res.status(404).json({ error: 'Order not found' });
       res.json(all[0]);
@@ -42,7 +41,6 @@ router.post('/', async (req, res) => {
 
 module.exports = router;
 
-// Admin: list all orders with status and items count
 router.get('/admin/all', async (req, res) => {
   try {
     const r = await pool.query(`
@@ -61,7 +59,6 @@ router.get('/admin/all', async (req, res) => {
   }
 });
 
-// Admin: list statuses
 router.get('/admin/statuses', async (_req, res) => {
   try {
     const r = await pool.query('SELECT status_id, code, name_orderstatuses FROM order_statuses ORDER BY status_id');
@@ -71,7 +68,6 @@ router.get('/admin/statuses', async (_req, res) => {
   }
 });
 
-// Admin: update order status by code
 router.put('/admin/orders/:id/status', async (req, res) => {
   try {
     const orderId = Number(req.params.id);

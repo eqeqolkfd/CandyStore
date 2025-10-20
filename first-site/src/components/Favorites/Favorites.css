@@ -331,7 +331,6 @@
   }
 }
 
-/* Дополнительная адаптивность для Favorites */
 @media (max-width: 1024px) {
   .favorites {
     max-width: 1000px;

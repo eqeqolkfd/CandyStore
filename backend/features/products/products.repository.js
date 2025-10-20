@@ -78,7 +78,6 @@ async function createProduct(productData) {
   try {
     await client.query('BEGIN');
     
-    // Получаем или создаем категорию
     let categoryId = null;
     if (productData.category) {
       const categoryResult = await client.query(
@@ -97,7 +96,6 @@ async function createProduct(productData) {
       }
     }
     
-    // Получаем или создаем производителя
     let manufacturerId = null;
     if (productData.manufacturer) {
       const manufacturerResult = await client.query(
@@ -116,7 +114,6 @@ async function createProduct(productData) {
       }
     }
     
-    // Создаем товар
     const productResult = await client.query(`
       INSERT INTO products (
         name_product, 
@@ -154,8 +151,7 @@ async function updateProduct(id, productData) {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-    
-    // Получаем или создаем категорию
+
     let categoryId = null;
     if (productData.category) {
       const categoryResult = await client.query(
@@ -173,8 +169,7 @@ async function updateProduct(id, productData) {
         categoryId = newCategoryResult.rows[0].category_id;
       }
     }
-    
-    // Получаем или создаем производителя
+
     let manufacturerId = null;
     if (productData.manufacturer) {
       const manufacturerResult = await client.query(
@@ -192,8 +187,7 @@ async function updateProduct(id, productData) {
         manufacturerId = newManufacturerResult.rows[0].manufacturer_id;
       }
     }
-    
-    // Обновляем товар
+
     const productResult = await client.query(`
       UPDATE products SET
         name_product = $1,

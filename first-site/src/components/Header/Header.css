@@ -75,16 +75,13 @@ header {
   color: #FDBF6E;
 }
 
-/* 1200+ — базовые стили */
 
-/* 992–1199 */
 @media (max-width: 1199.98px) {
   .header-nav {
     gap: 16px;
   }
 }
 
-/* 768–991 */
 @media (max-width: 991.98px) {
   header {
     padding: 12px 18px;
@@ -101,7 +98,6 @@ header {
   }
 }
 
-/* 576–767 */
 @media (max-width: 767.98px) {
   header {
     padding: 10px 16px;
@@ -139,7 +135,6 @@ header {
   }
 }
 
-/* ≤575 */
 @media (max-width: 575.98px) {
   .list-header-left,
   .list-header-right {
@@ -148,7 +143,6 @@ header {
   }
 }
 
-/* Очень узкие устройства */
 @media (max-width: 400px) {
   .block-header-left h1 {
     font-size: 18px;
@@ -159,7 +153,6 @@ header {
   }
 }
 
-/* Дополнительная адаптивность для Header */
 @media (max-width: 1024px) {
   header {
     padding: 14px 22px;

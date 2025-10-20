@@ -214,7 +214,17 @@
   }
 }
 
-/* Дополнительная адаптивность для Orders */
+.order-item-deleted {
+  opacity: 0.6;
+  background: #f8f8f8;
+  border-left: 3px solid #ccc;
+}
+
+.order-item-deleted .order-item-name {
+  color: #999;
+  font-style: italic;
+}
+
 @media (max-width: 1024px) {
   .orders {
     max-width: 1000px;

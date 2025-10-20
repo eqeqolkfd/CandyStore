@@ -9,7 +9,6 @@ const {
 } = require('./products.service');
 const { logAuditEvent } = require('../../utils/auditLogger');
 
-// Получить все товары (каталог)
 router.get('/', async (req, res) => {
   try {
     const filters = {
@@ -26,7 +25,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Получить товар по ID
 router.get('/:id', async (req, res) => {
   try {
     const product = await getProductById(req.params.id);
@@ -40,16 +38,14 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Создать товар
 router.post('/', async (req, res) => {
   try {
     const productData = req.body;
     const newProduct = await createProductService(productData);
-    
-    // Логируем создание товара
+
     await logAuditEvent({
       action: 'CREATE_PRODUCT',
-      userId: req.user?.userId || 1, // Если нет авторизации, используем admin
+      userId: req.user?.userId || 1,
       targetType: 'PRODUCT',
       targetId: newProduct.product_id,
       targetName: newProduct.name_product,
@@ -71,21 +67,18 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Обновить товар
 router.put('/:id', async (req, res) => {
   try {
     const productId = req.params.id;
     const productData = req.body;
-    
-    // Получаем старые данные для аудита
+
     const oldProduct = await getProductById(productId);
     if (!oldProduct) {
       return res.status(404).json({ error: 'Product not found' });
     }
     
     const updatedProduct = await updateProductService(productId, productData);
-    
-    // Логируем обновление товара
+
     await logAuditEvent({
       action: 'UPDATE_PRODUCT',
       userId: req.user?.userId || 1,
@@ -140,20 +133,17 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Удалить товар
 router.delete('/:id', async (req, res) => {
   try {
     const productId = req.params.id;
-    
-    // Получаем данные товара для аудита
+
     const product = await getProductById(productId);
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }
     
     await deleteProductService(productId);
-    
-    // Логируем удаление товара
+
     await logAuditEvent({
       action: 'DELETE_PRODUCT',
       userId: req.user?.userId || 1,

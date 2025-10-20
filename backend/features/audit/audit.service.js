@@ -1,10 +1,8 @@
-// audit.service.js
 const pool = require('../../db');
 
 async function getAuditLogs({ page, limit, action, user, sortBy, sortOrder }) {
   const client = await pool.connect();
   try {
-    // Проверяем, существует ли таблица audit_logs
     const tableCheck = await client.query(`
       SELECT EXISTS (
         SELECT FROM information_schema.tables 
@@ -22,7 +20,7 @@ async function getAuditLogs({ page, limit, action, user, sortBy, sortOrder }) {
         al."timestamp",
         al."action",
         al.user_id,
-        u.first_name || ' ' || u.last_name as user_name,
+        TRIM(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, '')) as user_name,
         al.target_type,
         al.target_id,
         al.target_name,
@@ -50,27 +48,23 @@ async function getAuditLogs({ page, limit, action, user, sortBy, sortOrder }) {
       params.push(`%${user}%`);
       paramIndex++;
     }
-    
-    // Сортировка
+
     const validSortFields = ['timestamp', 'action', 'user_name', 'severity'];
     const sortField = validSortFields.includes(sortBy) ? sortBy : 'timestamp';
     const sortDirection = sortOrder === 'asc' ? 'ASC' : 'DESC';
-    
-    // Добавляем кавычки для timestamp и action
+
     const sortFieldWithQuotes = (sortField === 'timestamp' || sortField === 'action') 
       ? `"${sortField}"` 
       : sortField;
     
     query += ` ORDER BY ${sortFieldWithQuotes} ${sortDirection}`;
-    
-    // Пагинация
+
     const offset = (page - 1) * limit;
     query += ` LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
     params.push(limit, offset);
     
     const result = await client.query(query, params);
-    
-    // Получаем общее количество записей
+
     let countQuery = `
       SELECT COUNT(*) as total
       FROM audit_logs al
@@ -123,7 +117,6 @@ async function getAuditLogs({ page, limit, action, user, sortBy, sortOrder }) {
 }
 
 async function createAuditLog({ action, userId, targetType, targetId, targetName, details, severity, ipAddress, userAgent, beforeData = null, afterData = null }) {
-  console.log('🔍 createAuditLog вызвана:', { action, userId, targetName });
   const client = await pool.connect();
   try {
     const query = `
@@ -135,19 +128,6 @@ async function createAuditLog({ action, userId, targetType, targetId, targetName
       RETURNING *
     `;
     
-    console.log('🔍 Выполняем SQL запрос с параметрами:', [
-      action,
-      userId,
-      targetType,
-      targetId,
-      targetName,
-      JSON.stringify(details),
-      beforeData ? JSON.stringify(beforeData) : null,
-      afterData ? JSON.stringify(afterData) : null,
-      severity,
-      ipAddress,
-      userAgent
-    ]);
     
     const result = await client.query(query, [
       action,
@@ -163,10 +143,8 @@ async function createAuditLog({ action, userId, targetType, targetId, targetName
       userAgent
     ]);
     
-    console.log('✅ SQL запрос выполнен успешно, результат:', result.rows[0]);
     return result.rows[0];
   } catch (error) {
-    console.error('❌ Ошибка в createAuditLog:', error);
     throw error;
   } finally {
     client.release();
@@ -177,15 +155,10 @@ async function getAuditStats() {
   const client = await pool.connect();
   try {
     const queries = [
-      // Общее количество записей
       'SELECT COUNT(*) as total FROM audit_logs',
-      // Записи по уровням критичности
       'SELECT severity, COUNT(*) as count FROM audit_logs GROUP BY severity',
-      // Записи по действиям
       'SELECT action, COUNT(*) as count FROM audit_logs GROUP BY action ORDER BY count DESC LIMIT 10',
-      // Записи за последние 7 дней
       'SELECT COUNT(*) as last_week FROM audit_logs WHERE timestamp >= NOW() - INTERVAL \'7 days\'',
-      // Записи за последние 24 часа
       'SELECT COUNT(*) as last_day FROM audit_logs WHERE timestamp >= NOW() - INTERVAL \'24 hours\''
     ];
     

@@ -100,9 +100,18 @@ async function fetchOrdersByUser(userId, orderId) {
        oi.product_id,
        oi.quantity,
        oi.price,
-       p.name_product,
-       p.description as product_description,
-       p.photo_url
+       CASE 
+         WHEN p.product_id IS NULL THEN 'Товар удален'
+         ELSE p.name_product 
+       END as name_product,
+       CASE 
+         WHEN p.product_id IS NULL THEN 'Товар больше не доступен'
+         ELSE p.description 
+       END as product_description,
+       CASE 
+         WHEN p.product_id IS NULL THEN NULL
+         ELSE p.photo_url 
+       END as photo_url
      FROM order_items oi
      LEFT JOIN products p ON p.product_id = oi.product_id
      WHERE oi.order_id = ANY($1::int[])`,

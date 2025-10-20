@@ -28,7 +28,6 @@
   .mgr-grid { grid-template-columns: 1fr; }
 }
 
-/* Дополнительная адаптивность для ManagerDashboard */
 @media (max-width: 1024px) {
   .mgr {
     padding: 14px;

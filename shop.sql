@@ -130,7 +130,6 @@ CREATE TABLE feedback (
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_products_name ON products(name_product);
 
--- Таблица журнала аудита
 CREATE TABLE audit_logs (
     audit_id        SERIAL PRIMARY KEY,
     timestamp_logs TIMESTAMP WITH TIME ZONE DEFAULT now(),
@@ -150,7 +149,6 @@ ALTER TABLE audit_logs
     ADD COLUMN IF NOT EXISTS before_data JSONB,
     ADD COLUMN IF NOT EXISTS after_data  JSONB;
 
--- Индексы для оптимизации запросов журнала аудита
 CREATE INDEX idx_audit_logs_timestamp ON audit_logs(timestamp);
 CREATE INDEX idx_audit_logs_action ON audit_logs(action);
 CREATE INDEX idx_audit_logs_user_id ON audit_logs(user_id);
@@ -206,17 +204,12 @@ BEGIN
 END;
 $$;
 
-
--- 3) Универсальная триггер-функция для автоматического логирования изменений строк
---    - извлекает текущего "актора" из session config: current_setting('audit.user_id', true)
---    - извлекает ip и user_agent при наличии (current_setting('audit.ip', true), current_setting('audit.user_agent', true))
---    - убирает чувствительные поля (password, password_hash, token, secret)
 CREATE OR REPLACE FUNCTION fn_audit_row_change()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    v_op            TEXT := TG_OP;                 -- INSERT / UPDATE / DELETE
+    v_op            TEXT := TG_OP;     
     v_table         TEXT := TG_TABLE_NAME;
     v_before        JSONB;
     v_after         JSONB;
@@ -232,7 +225,6 @@ DECLARE
     sensitive_cols  TEXT[] := ARRAY['password','password_hash','secret','token'];
     col TEXT;
 BEGIN
-    -- Build before/after JSONB
     IF TG_OP = 'INSERT' THEN
         v_before := NULL;
         v_after  := to_jsonb(NEW);
@@ -244,13 +236,11 @@ BEGIN
         v_after  := to_jsonb(NEW);
     END IF;
 
-    -- Remove sensitive keys if present
     FOREACH col IN ARRAY sensitive_cols LOOP
         IF v_before IS NOT NULL THEN v_before := v_before - col; END IF;
         IF v_after  IS NOT NULL THEN v_after  := v_after  - col; END IF;
     END LOOP;
 
-    -- Try get actor/user id and other context from session GUCs set by application
     v_actor_txt := current_setting('audit.user_id', true);
     IF v_actor_txt IS NOT NULL THEN
         BEGIN
@@ -263,7 +253,6 @@ BEGIN
     v_ip_txt := current_setting('audit.ip', true);
     v_user_agent_txt := current_setting('audit.user_agent', true);
 
-    -- Determine target_id: try common patterns: <table>_id, id, singular_table + _id
     v_json := COALESCE(v_after, v_before);
     v_singular := regexp_replace(v_table, 's$', ''); -- very simple singularization
 
@@ -278,21 +267,18 @@ BEGIN
             v_target_id := v_target_id_txt::INT;
         END IF;
 
-        -- Try to get a human-friendly name field if exists
         v_target_name := COALESCE(
             v_json ->> 'name',
             (v_json ->> 'first_name') || ' ' || (v_json ->> 'last_name'),
             v_json ->> 'title',
             NULL
         );
-        -- Trim 'NULL' combos
         IF v_target_name IS NOT NULL THEN
             v_target_name := regexp_replace(v_target_name, '(^\s+|\s+$)', '', 'g');
             IF v_target_name ~ '^null' THEN v_target_name := NULL; END IF;
         END IF;
     END IF;
 
-    -- Call common insert function
     PERFORM fn_insert_audit(
         p_action      => v_op,
         p_user_id     => v_actor_id,
@@ -307,14 +293,9 @@ BEGIN
         p_user_agent  => v_user_agent_txt
     );
 
-    -- AFTER trigger: return NULL
     RETURN NULL;
 END;
 $$;
-
-
--- 4) Триггеры для выбранных таблиц — добавьте другие таблицы по аналогии
---    Здесь примеры для users, products, categories, manufacturers, orders, order_items, payments, reviews
 
 CREATE TRIGGER trg_audit_users_all
 AFTER INSERT OR UPDATE OR DELETE ON users
@@ -357,7 +338,6 @@ FOR EACH ROW
 EXECUTE FUNCTION fn_audit_row_change();
 
 
--- 5) Функция для ручной записи аудита (например, при логине/аутентификации, т.к. логин обычно обрабатывает приложение)
 CREATE OR REPLACE FUNCTION fn_log_manual_event(
     p_action TEXT,
     p_user_id INT DEFAULT NULL,
@@ -555,7 +535,6 @@ END$$;
 
 DO $$
 BEGIN
-    -- безопасно удаляем индексы, если они есть
     IF EXISTS (SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE c.relname='idx_audit_logs_timestamp') THEN
         DROP INDEX idx_audit_logs_timestamp;
     END IF;
@@ -620,7 +599,7 @@ RETURNS TRIGGER
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    v_op            TEXT := TG_OP;                 -- INSERT / UPDATE / DELETE
+    v_op            TEXT := TG_OP;                 
     v_table         TEXT := TG_TABLE_NAME;
     v_before        JSONB;
     v_after         JSONB;

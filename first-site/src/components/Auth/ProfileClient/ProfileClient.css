@@ -4,7 +4,6 @@
   padding: 0 16px;
 }
 
-/* Адаптивные стили для основного контейнера ProfileClient */
 @media (max-width: 768px) {
   .profile-client {
     margin: 16px auto;
@@ -65,7 +64,7 @@
 
 .profile-header-btns {
   display: flex;
-  gap: 6px; /* минимальный отступ между кнопками */
+  gap: 6px;
   align-items: center;
 }
 
@@ -159,7 +158,6 @@
   font-style: italic;
 }
 
-/* Стили для полей пароля ProfileClient (аналогично Register.css, но с уникальными названиями) */
 .profile-password-input-wrapper input[type="password"],
 .profile-password-input-wrapper input[type="text"] {
   flex: 1;
@@ -247,7 +245,6 @@
 .payments-list { display: grid; gap: 12px; }
 .payments-list--grid3 { grid-template-columns: repeat(3, 1fr); }
 
-/* Адаптивные стили для списка платежей ProfileClient */
 @media (max-width: 900px) { 
   .payments-list--grid3 { 
     grid-template-columns: repeat(2, 1fr); 
@@ -323,7 +320,6 @@
   padding-right: 8px;
 }
 
-/* Стилизация скроллбара для WebKit браузеров */
 .profile-modal-products-grid::-webkit-scrollbar {
   width: 6px;
 }
@@ -385,8 +381,22 @@
 .profile-modal-close { background: #9E8279; color: #fff; border: none; border-radius: 6px; padding: 6px 18px; cursor:pointer; font-size:16px; }
 .profile-modal-close:hover { background: #7f685f; }
 
-/* Адаптивные стили для ProfileClient модального окна товаров */
-/* Большие экраны - 1200px и больше */
+.profile-modal-product-deleted {
+  opacity: 0.6;
+  background: #f8f8f8;
+  border: 1px solid #ddd;
+}
+
+.profile-modal-product-deleted .profile-modal-product-name {
+  color: #999;
+  font-style: italic;
+}
+
+.profile-modal-product-deleted .profile-modal-product-img--placeholder {
+  background: #f0f0f0;
+  color: #999;
+}
+
 @media (max-width: 1200px) {
   .profile-modal-products-grid {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -399,7 +409,6 @@
   }
 }
 
-/* Очень большие экраны - больше 1200px */
 @media (min-width: 1201px) {
   .profile-modal-card {
     max-width: min(95vw, 800px);
@@ -411,7 +420,6 @@
   }
 }
 
-/* Средние экраны - 992px - 1199px */
 @media (max-width: 992px) {
   .profile-modal-card {
     min-width: 280px;
@@ -441,7 +449,6 @@
   }
 }
 
-/* Планшеты - 768px - 991px */
 @media (max-width: 768px) {
   .profile-modal-card {
     min-width: 260px;
@@ -475,7 +482,6 @@
   }
 }
 
-/* Мобильные устройства - 576px - 767px */
 @media (max-width: 576px) {
   .profile-modal-card {
     min-width: 240px;
@@ -522,7 +528,6 @@
   }
 }
 
-/* Очень маленькие экраны - до 400px */
 @media (max-width: 400px) {
   .profile-modal-card {
     min-width: 200px;
@@ -648,7 +653,6 @@
   background: #efe5e5;
 }
 
-/* Дополнительная адаптивность для ProfileClient */
 @media (max-width: 1024px) {
   .profile-client {
     max-width: 800px;

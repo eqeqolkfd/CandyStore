@@ -1,4 +1,3 @@
-// audit.routes.js
 const express = require('express');
 const router = express.Router();
 const {
@@ -7,7 +6,6 @@ const {
   getAuditStats
 } = require('./audit.service');
 
-// Получить журнал аудита
 router.get('/', async (req, res) => {
   try {
     const { page = 1, limit = 50, action, user, sortBy = 'timestamp', sortOrder = 'desc' } = req.query;
@@ -28,7 +26,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Создать запись аудита
 router.post('/', async (req, res) => {
   try {
     const { action, userId, targetType, targetId, targetName, details, severity = 'LOW' } = req.body;
@@ -53,7 +50,6 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Получить статистику аудита
 router.get('/stats', async (req, res) => {
   try {
     const stats = await getAuditStats();

@@ -408,7 +408,7 @@ body.modal-open {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  overflow-y: auto; /* вертикальный скролл при переполнении */
+  overflow-y: auto;
 }
 
 .cart-checkout-modal .cart-modal-title {
@@ -479,7 +479,6 @@ body.modal-open {
   cursor: not-allowed;
 }
 
-/* cart-specific validation error */
 .cart-field-error {
   color: #d2322d;
   font-size: 13px;
@@ -651,7 +650,6 @@ body.modal-open {
   .cart-empty-icon { font-size: 56px; }
 }
 
-/* Дополнительная адаптивность для Cart */
 @media (max-width: 1024px) {
   .cart {
     max-width: 1000px;

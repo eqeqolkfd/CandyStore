@@ -4,7 +4,6 @@ import './Users.css';
 
 const API_URL = 'http://localhost:5000/api/users';
 
-// --- Перевод ролей на русский для UI
 const roleNames = {
   admin: 'Администратор',
   manager: 'Менеджер',

@@ -132,7 +132,6 @@
   outline: 2px solid #9E8279;
 }
 
-/* Адаптивность */
 @media (max-width: 1024px) {
   .auth-wrapper {
     padding: 30px 12px;
