@@ -42,7 +42,7 @@
 .cart-total-price {
   font-size: 18px;
   font-weight: 700;
-  color: #222;
+  color: #fff;
 }
 
 .cart-empty {
@@ -58,7 +58,7 @@
 .cart-empty h2 {
   margin: 0 0 8px;
   font-size: 24px;
-  color: #333;
+  color: #fff;
 }
 
 .cart-empty p {

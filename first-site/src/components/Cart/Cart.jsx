@@ -139,7 +139,7 @@ function Cart() {
       <div className="cart-header">
         <div className="cart-summary">
           <span className="cart-total-price">
-            Итого: {getTotalPrice().toLocaleString('ru-RU', {
+            Итоговая стоимость: {getTotalPrice().toLocaleString('ru-RU', {
               style: 'currency',
               currency: 'RUB',
               maximumFractionDigits: 0,

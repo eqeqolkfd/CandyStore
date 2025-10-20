@@ -54,7 +54,7 @@ function OrdersAdmin() {
 
   return (
     <div className="orders-admin">
-      <h2>Заказы (админ)</h2>
+      <h2>Список заказов</h2>
       <table className="orders-admin-table">
         <thead>
           <tr>
