@@ -58,13 +58,12 @@ function OrdersAdmin() {
       <table className="orders-admin-table">
         <thead>
           <tr>
-            <th>ID</th>
+            <th>Номер заказа</th>
             <th>Пользователь</th>
             <th>Email</th>
             <th>Создан</th>
             <th>Сумма</th>
             <th>Статус</th>
-            <th>Действия</th>
           </tr>
         </thead>
         <tbody>
@@ -85,9 +84,6 @@ function OrdersAdmin() {
                     <option key={s.status_id} value={s.code}>{s.name_orderstatuses}</option>
                   ))}
                 </select>
-              </td>
-              <td>
-                <button onClick={()=>window.open(`/orders?orderId=${o.order_id}`, '_blank')}>Открыть</button>
               </td>
             </tr>
           ))}

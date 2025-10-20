@@ -331,12 +331,13 @@ function Cart() {
                 onSubmit={async (e) => {
                   e.preventDefault();
                   if (checkoutSubmitting) return;
+                  const isPickup = deliveryMethod === 'pickup';
                   const errs = {
-                    city: validateCity(address.city),
-                    street: validateStreet(address.street),
-                    house: unitType === 'house' ? validateHouse(address.house) : '',
-                    apartment: unitType === 'apartment' ? validateApartment(address.apartment) : '',
-                    postalCode: validatePostalCode(address.postalCode),
+                    city: isPickup ? '' : validateCity(address.city),
+                    street: isPickup ? '' : validateStreet(address.street),
+                    house: isPickup ? '' : (unitType === 'house' ? validateHouse(address.house) : ''),
+                    apartment: isPickup ? '' : (unitType === 'apartment' ? validateApartment(address.apartment) : ''),
+                    postalCode: isPickup ? '' : validatePostalCode(address.postalCode),
                     deliveryMethod: validateDelivery(deliveryMethod),
                     paymentMethod: validatePayment(paymentMethod),
                   };
@@ -392,30 +393,32 @@ function Cart() {
                 }}
               >
                 <div className="form-grid">
-                  <div className="form-field">
-                    <label htmlFor="addressUnitType">Тип адреса</label>
-                    <select
-                      id="addressUnitType"
-                      value={unitType}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setUnitType(val);
-                        if (val === 'house') {
-                          // Очистить квартиру
-                          setAddress({ ...address, apartment: '' });
-                          setFormErrors({ ...formErrors, apartment: '' });
-                        } else {
-                          // Очистить дом
-                          setAddress({ ...address, house: '' });
-                          setFormErrors({ ...formErrors, house: '' });
-                        }
-                      }}
-                      required
-                    >
-                      <option value="house">Дом</option>
-                      <option value="apartment">Квартира</option>
-                    </select>
-                  </div>
+                  {deliveryMethod !== 'pickup' && (
+                    <div className="form-field">
+                      <label htmlFor="addressUnitType">Тип адреса</label>
+                      <select
+                        id="addressUnitType"
+                        value={unitType}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setUnitType(val);
+                          if (val === 'house') {
+                            // Очистить квартиру
+                            setAddress({ ...address, apartment: '' });
+                            setFormErrors({ ...formErrors, apartment: '' });
+                          } else {
+                            // Очистить дом
+                            setAddress({ ...address, house: '' });
+                            setFormErrors({ ...formErrors, house: '' });
+                          }
+                        }}
+                        required
+                      >
+                        <option value="house">Дом</option>
+                        <option value="apartment">Квартира</option>
+                      </select>
+                    </div>
+                  )}
                   <div className="form-field">
                     <label htmlFor="city">Город</label>
                     <input
@@ -430,6 +433,7 @@ function Cart() {
                         setFormErrors({ ...formErrors, city: validateCity(v) });
                       }}
                       required
+                      disabled={deliveryMethod === 'pickup'}
                     />
                     {formErrors.city && <div className="cart-field-error">{formErrors.city}</div>}
                   </div>
@@ -447,6 +451,7 @@ function Cart() {
                         setFormErrors({ ...formErrors, street: validateStreet(v) });
                       }}
                       required
+                      disabled={deliveryMethod === 'pickup'}
                     />
                     {formErrors.street && <div className="cart-field-error">{formErrors.street}</div>}
                   </div>
@@ -465,6 +470,7 @@ function Cart() {
                           setFormErrors({ ...formErrors, house: validateHouse(v), apartment: '' });
                         }}
                         required
+                      disabled={deliveryMethod === 'pickup'}
                       />
                       {formErrors.house && <div className="cart-field-error">{formErrors.house}</div>}
                     </div>
@@ -483,29 +489,32 @@ function Cart() {
                           setFormErrors({ ...formErrors, apartment: validateApartment(v), house: '' });
                         }}
                         required
+                      disabled={deliveryMethod === 'pickup'}
                       />
                       {formErrors.apartment && <div className="cart-field-error">{formErrors.apartment}</div>}
                     </div>
                   )}
-                  <div className="form-field">
-                    <label htmlFor="postalCode">Почтовый индекс</label>
-                    <input
-                      id="postalCode"
-                      type="text"
-                      placeholder="101000"
-                      value={address.postalCode}
-                      onChange={(e) => {
-                        // Разрешаем только цифры и максимум 6
-                        const digits = (e.target.value || '').replace(/\D/g, '').slice(0, 6);
-                        setAddress({ ...address, postalCode: digits });
-                        setFormErrors({ ...formErrors, postalCode: validatePostalCode(digits) });
-                      }}
-                      required
-                      inputMode="numeric"
-                      maxLength={6}
-                    />
-                    {formErrors.postalCode && <div className="cart-field-error">{formErrors.postalCode}</div>}
-                  </div>
+                  {deliveryMethod !== 'pickup' && (
+                    <div className="form-field">
+                      <label htmlFor="postalCode">Почтовый индекс</label>
+                      <input
+                        id="postalCode"
+                        type="text"
+                        placeholder="101000"
+                        value={address.postalCode}
+                        onChange={(e) => {
+                          // Разрешаем только цифры и максимум 6
+                          const digits = (e.target.value || '').replace(/\D/g, '').slice(0, 6);
+                          setAddress({ ...address, postalCode: digits });
+                          setFormErrors({ ...formErrors, postalCode: validatePostalCode(digits) });
+                        }}
+                        required
+                        inputMode="numeric"
+                        maxLength={6}
+                      />
+                      {formErrors.postalCode && <div className="cart-field-error">{formErrors.postalCode}</div>}
+                    </div>
+                  )}
                   
                   <div className="form-field">
                     <label htmlFor="deliveryMethod">Способ доставки</label>
@@ -513,8 +522,32 @@ function Cart() {
                       id="deliveryMethod"
                       value={deliveryMethod}
                       onChange={(e) => {
-                        setDeliveryMethod(e.target.value);
-                        setFormErrors({ ...formErrors, deliveryMethod: validateDelivery(e.target.value) });
+                        const v = e.target.value;
+                        setDeliveryMethod(v);
+                        setFormErrors({ ...formErrors, deliveryMethod: validateDelivery(v) });
+                        if (v === 'pickup') {
+                          // Автозаполнение адреса для самовывоза (из футера магазина)
+                          setUnitType('house');
+                          setAddress({
+                            city: 'Москва',
+                            street: 'Сладкая',
+                            house: '123',
+                            apartment: '',
+                            postalCode: address.postalCode || ''
+                          });
+                          setFormErrors(prev => ({
+                            ...prev,
+                            city: '',
+                            street: '',
+                            house: '',
+                            apartment: ''
+                          }));
+                        } else {
+                          // Очистить адрес и сделать поля редактируемыми
+                          setAddress({ city: '', street: '', house: '', apartment: '', postalCode: '' });
+                          setUnitType('house');
+                          setFormErrors(prev => ({ ...prev, city: '', street: '', house: '', apartment: '' }));
+                        }
                       }}
                       required
                     >
@@ -568,14 +601,6 @@ function Cart() {
           </div>
         </div>
       )}
-
-      {postCheckoutStatus && (
-        <div className="cart-status-banner">
-          Статус заказа: {postCheckoutStatus === 'paid' ? 'Оплачен' : 'В ожидании'}
-        </div>
-      )}
-
-
     </div>
   );
 }
