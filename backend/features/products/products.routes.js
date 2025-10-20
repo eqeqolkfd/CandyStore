@@ -106,6 +106,28 @@ router.put('/:id', async (req, res) => {
           manufacturer: productData.manufacturer
         }
       },
+      beforeData: {
+        product_id: oldProduct.product_id,
+        name_product: oldProduct.name_product,
+        description: oldProduct.description,
+        price: oldProduct.price,
+        weight_grams: oldProduct.weight_grams,
+        photo_url: oldProduct.photo_url,
+        category_name: oldProduct.category_name,
+        manufacturer_name: oldProduct.manufacturer_name,
+        sku: oldProduct.sku
+      },
+      afterData: {
+        product_id: updatedProduct.product_id,
+        name_product: updatedProduct.name_product,
+        description: updatedProduct.description,
+        price: updatedProduct.price,
+        weight_grams: updatedProduct.weight_grams,
+        photo_url: updatedProduct.photo_url,
+        category_name: updatedProduct.category_name,
+        manufacturer_name: updatedProduct.manufacturer_name,
+        sku: updatedProduct.sku
+      },
       severity: 'LOW',
       ipAddress: req.ip || req.connection.remoteAddress,
       userAgent: req.get('User-Agent')

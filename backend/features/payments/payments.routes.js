@@ -13,6 +13,22 @@ router.post('/', async (req, res) => {
     const amount = totalRes.rows[0].total_amount;
 
     const paymentId = await createPaymentForOrder({ orderId, amount, method, status });
+
+    // If payment status is 'paid', set order status to 'paid' (Оплачен)
+    if (String(status).toLowerCase() === 'paid') {
+      await pool.query(
+        `WITH ensured AS (
+           INSERT INTO order_statuses (code, name_orderstatuses, description)
+           VALUES ('paid', 'Оплачен', 'Заказ оплачен')
+           ON CONFLICT (code) DO NOTHING
+           RETURNING status_id
+         )
+         UPDATE orders o
+            SET status_id = COALESCE((SELECT status_id FROM order_statuses WHERE code = 'paid'), (SELECT status_id FROM ensured))
+          WHERE o.order_id = $1`,
+        [orderId]
+      );
+    }
     res.status(201).json({ paymentId });
   } catch (e) {
     console.error('Create payment error:', e.message);

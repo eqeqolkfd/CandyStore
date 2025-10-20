@@ -1,0 +1,6 @@
+.orders-admin { padding: 16px; }
+.orders-admin h2 { margin: 0 0 16px; }
+.orders-admin-table { width: 100%; border-collapse: collapse; }
+.orders-admin-table th, .orders-admin-table td { border: 1px solid #eee; padding: 8px; }
+.orders-admin .error { color: #c00; }
+

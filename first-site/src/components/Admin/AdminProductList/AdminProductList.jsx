@@ -152,13 +152,18 @@ const AdminProductList = () => {
   // Валидация формы
   const validateForm = () => {
     const errors = {};
-    if (!productForm.name.trim()) errors.name = 'Название обязательно';
-    if (!productForm.price.trim()) errors.price = 'Цена обязательна';
-    if (!productForm.weight.trim()) errors.weight = 'Вес обязателен';
-    if (productForm.price && isNaN(Number(productForm.price))) errors.price = 'Цена должна быть числом';
-    if (productForm.weight && isNaN(Number(productForm.weight))) errors.weight = 'Вес должен быть числом';
-    if (productForm.price && Number(productForm.price) < 0) errors.price = 'Цена не может быть отрицательной';
-    if (productForm.weight && Number(productForm.weight) < 0) errors.weight = 'Вес не может быть отрицательным';
+    const nameStr = String(productForm.name ?? '').trim();
+    const priceStr = String(productForm.price ?? '').trim();
+    const weightStr = String(productForm.weight ?? '').trim();
+
+    if (!nameStr) errors.name = 'Название обязательно';
+    if (!priceStr) errors.price = 'Цена обязательна';
+    if (!weightStr) errors.weight = 'Вес обязателен';
+
+    if (priceStr && isNaN(Number(priceStr))) errors.price = 'Цена должна быть числом';
+    if (weightStr && isNaN(Number(weightStr))) errors.weight = 'Вес должен быть числом';
+    if (priceStr && Number(priceStr) < 0) errors.price = 'Цена не может быть отрицательной';
+    if (weightStr && Number(weightStr) < 0) errors.weight = 'Вес не может быть отрицательным';
     
     // Для создания товара изображение обязательно
     if (showAddModal && !selectedFile && !productForm.imageUrl) {

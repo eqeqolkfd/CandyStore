@@ -21,6 +21,7 @@ app.get('/', (_req, res) => res.send('API сервер работает!'));
 app.use('/api/users', usersRoutes);
 app.use('/api/products', productsRoutes);
 app.use('/api/orders', ordersRoutes);
+// Admin helpers for orders are nested under /api/orders (see routes file)
 app.use('/api/payments', paymentsRoutes);
 app.use('/api/audit', auditRoutes);
 app.use('/api/upload', uploadRoutes);

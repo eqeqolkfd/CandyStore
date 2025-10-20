@@ -836,16 +836,6 @@ SELECT setval('products_product_id_seq', (SELECT MAX(product_id) FROM products),
 INSERT INTO user_roles (user_id, role_id)
 SELECT 1, role_id FROM roles WHERE name_role = 'admin';
 
-
-
-INSERT INTO order_statuses (status_id, code, name_orderstatuses, description) VALUES
-(1, 'new', 'Новый', 'Новый заказ'),
-(2, 'processing', 'В обработке', 'Заказ обрабатывается'),
-(3, 'shipped', 'Отправлен', 'Заказ отправлен'),
-(4, 'delivered', 'Доставлен', 'Заказ доставлен'),
-(5, 'canceled', 'Отменён', 'Заказ отменён');
-
-
 select * from order_statuses;
 
 select * from products;

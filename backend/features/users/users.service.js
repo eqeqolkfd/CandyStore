@@ -144,19 +144,25 @@ async function updateProfile({ userId, first_name, last_name, oldPassword, newPa
       return null;
     }
 
-    if (oldPassword && newPassword) {
+  if (oldPassword && newPassword) {
       const userResult = await client.query(
         'SELECT password_hash FROM users WHERE user_id = $1',
         [userId]
       );
-      
       if (userResult.rows.length === 0) {
         throw new Error('Пользователь не найден');
       }
-      
       const currentPasswordHash = userResult.rows[0].password_hash;
-      
-      if (String(currentPasswordHash) !== String(oldPassword)) {
+      let isValid = false;
+      try {
+        isValid = await bcrypt.compare(oldPassword, currentPasswordHash);
+      } catch (_) {
+        isValid = false;
+      }
+      if (!isValid) {
+        isValid = String(currentPasswordHash) === String(oldPassword);
+      }
+      if (!isValid) {
         throw new Error('Неверный старый пароль');
       }
     }
@@ -251,20 +257,20 @@ async function checkPassword(userId, password) {
       'SELECT password_hash FROM users WHERE user_id = $1',
       [userId]
     );
-    
     if (result.rows.length === 0) {
-      console.log('Пользователь не найден:', userId);
       return false;
     }
-    
     const currentPasswordHash = result.rows[0].password_hash;
-    console.log('Проверка пароля для userId:', userId);
-    console.log('Хранимый пароль:', currentPasswordHash);
-    console.log('Введенный пароль:', password);
-    console.log('Сравнение:', String(currentPasswordHash) === String(password));
-    
-    return String(currentPasswordHash) === String(password);
-    
+    let isValid = false;
+    try {
+      isValid = await bcrypt.compare(password, currentPasswordHash);
+    } catch (_) {
+      isValid = false;
+    }
+    if (!isValid) {
+      isValid = String(currentPasswordHash) === String(password);
+    }
+    return isValid;
   } catch (error) {
     console.error('Ошибка проверки пароля:', error);
     return false;

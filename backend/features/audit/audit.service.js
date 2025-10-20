@@ -27,6 +27,8 @@ async function getAuditLogs({ page, limit, action, user, sortBy, sortOrder }) {
         al.target_id,
         al.target_name,
         al.details,
+        al.before_data,
+        al.after_data,
         al.severity,
         al.ip_address,
         al.user_agent
@@ -105,6 +107,8 @@ async function getAuditLogs({ page, limit, action, user, sortBy, sortOrder }) {
         targetId: row.target_id,
         targetName: row.target_name,
         details: row.details,
+        before_data: row.before_data,
+        after_data: row.after_data,
         severity: row.severity,
         ipAddress: row.ip_address,
         userAgent: row.user_agent
@@ -118,13 +122,16 @@ async function getAuditLogs({ page, limit, action, user, sortBy, sortOrder }) {
   }
 }
 
-async function createAuditLog({ action, userId, targetType, targetId, targetName, details, severity, ipAddress, userAgent }) {
+async function createAuditLog({ action, userId, targetType, targetId, targetName, details, severity, ipAddress, userAgent, beforeData = null, afterData = null }) {
   console.log('🔍 createAuditLog вызвана:', { action, userId, targetName });
   const client = await pool.connect();
   try {
     const query = `
-      INSERT INTO audit_logs ("action", user_id, target_type, target_id, target_name, details, severity, ip_address, user_agent)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      INSERT INTO audit_logs (
+        "action", user_id, target_type, target_id, target_name,
+        details, before_data, after_data, severity, ip_address, user_agent
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       RETURNING *
     `;
     
@@ -135,6 +142,8 @@ async function createAuditLog({ action, userId, targetType, targetId, targetName
       targetId,
       targetName,
       JSON.stringify(details),
+      beforeData ? JSON.stringify(beforeData) : null,
+      afterData ? JSON.stringify(afterData) : null,
       severity,
       ipAddress,
       userAgent
@@ -147,6 +156,8 @@ async function createAuditLog({ action, userId, targetType, targetId, targetName
       targetId,
       targetName,
       JSON.stringify(details),
+      beforeData ? JSON.stringify(beforeData) : null,
+      afterData ? JSON.stringify(afterData) : null,
       severity,
       ipAddress,
       userAgent

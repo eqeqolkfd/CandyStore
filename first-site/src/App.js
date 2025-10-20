@@ -12,6 +12,7 @@ import ForgotPassword from './components/Auth/Login/ForgotPassword/ForgotPasswor
 import AdminProductList from './components/Admin/AdminProductList/AdminProductList.jsx';
 import Users from './components/Admin/Users/Users.jsx';
 import Audit from './components/Admin/Audit/Audit.jsx';
+import OrdersAdmin from './components/Admin/OrdersAdmin/OrdersAdmin.jsx';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 
@@ -184,6 +185,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/admin/products" element={<AdminProductList />} />
           <Route path="/admin/users" element={<Users />} />
+          <Route path="/admin/orders" element={<OrdersAdmin />} />
           <Route path="/admin/audit" element={<Audit />} />
         </Routes>
 

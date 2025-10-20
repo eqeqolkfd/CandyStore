@@ -18,6 +18,7 @@ function Header() {
             <li className="menu-button"><Link to="/">Главная</Link></li>
             {isAdmin && <li className="menu-button"><Link to="/admin/products">Товары</Link></li>}
             {isAdmin && <li className="menu-button"><Link to="/admin/users">Пользователи</Link></li>}
+            {isAdmin && <li className="menu-button"><Link to="/admin/orders">Заказы</Link></li>}
             {isAdmin && <li className="menu-button"><Link to="/admin/audit">Журнал аудита</Link></li>}
             {!isAdmin && <li className="menu-button"><Link to="/catalog">Каталог</Link></li>}
             {!isAdmin && isAuthorized && <li className="menu-button"><Link to="/favorites">Избранное</Link></li>}
@@ -32,8 +33,19 @@ function Header() {
           {isAuthorized && (
             <button
               className="logout-button"
-              onClick={() => {
+              onClick={async () => {
                 try {
+                  const storedUser = typeof window !== 'undefined' ? localStorage.getItem('currentUser') : null;
+                  const cu = storedUser ? JSON.parse(storedUser) : null;
+                  if (cu?.userId) {
+                    try {
+                      await fetch('http://localhost:5000/api/users/logout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userId: cu.userId })
+                      });
+                    } catch (_) {}
+                  }
                   localStorage.removeItem('currentUser');
                 } catch (_) {}
                 navigate('/');

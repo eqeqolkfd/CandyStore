@@ -26,6 +26,8 @@ function Users() {
   // модалка редактирования роли
   const [editUser, setEditUser] = useState(null); // { ...user }
   const [editRole, setEditRole] = useState('');
+  const [editFirstName, setEditFirstName] = useState('');
+  const [editLastName, setEditLastName] = useState('');
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError] = useState('');
 
@@ -224,6 +226,8 @@ function Users() {
     }
     setEditUser(user);
     setEditRole(String((user.role || user.name_role || 'client')).toLowerCase());
+    setEditFirstName(user.first_name || '');
+    setEditLastName(user.last_name || '');
     setEditError('');
   };
 
@@ -285,6 +289,94 @@ function Users() {
     } catch (e) {
       console.error('Ошибка сохранения роли:', e);
       setEditError('Не удалось сохранить роль. Подробнее в консоли.');
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
+  const saveProfileNames = async () => {
+    if (!editUser) return;
+    setEditLoading(true);
+    setEditError('');
+    try {
+      const id = editUser.user_id || editUser.id;
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+
+      const res = await fetch(`${API_URL}/update`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({
+          userId: id,
+          first_name: editFirstName,
+          last_name: editLastName
+        })
+      });
+      if (!res.ok) {
+        const errTxt = await res.text();
+        throw new Error(errTxt || `HTTP ${res.status}`);
+      }
+
+      // Закрываем и обновляем список (лог аудита запишется на бэке как UPDATE_PROFILE)
+      closeEditModal();
+      window.location.reload();
+    } catch (e) {
+      console.error('Ошибка сохранения профиля:', e);
+      setEditError('Не удалось сохранить имя/фамилию. Подробнее в консоли.');
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
+  const saveAll = async () => {
+    if (!editUser) return;
+    setEditLoading(true);
+    setEditError('');
+    const id = editUser.user_id || editUser.id;
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+
+    try {
+      // 1) Сохраняем имя/фамилию, если изменились
+      const firstChanged = (editFirstName ?? '') !== (editUser.first_name ?? '');
+      const lastChanged  = (editLastName  ?? '') !== (editUser.last_name  ?? '');
+      if (firstChanged || lastChanged) {
+        const r1 = await fetch(`${API_URL}/update`, {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify({
+            userId: id,
+            first_name: editFirstName,
+            last_name: editLastName,
+            actorId: currentUser?.userId,
+            actorRole: currentUser?.role
+          })
+        });
+        if (!r1.ok) {
+          const t = await r1.text();
+          throw new Error(t || `HTTP ${r1.status}`);
+        }
+      }
+
+      // 2) Сохраняем роль, если изменилась
+      const currentRole = String((editUser.role || editUser.name_role || 'client')).toLowerCase();
+      if (editRole && editRole !== currentRole) {
+        const r2 = await fetch(`${API_URL}/role`, {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify({ userId: id, role: editRole })
+        });
+        if (!r2.ok) {
+          const t = await r2.text();
+          throw new Error(t || `HTTP ${r2.status}`);
+        }
+      }
+
+      closeEditModal();
+      window.location.reload();
+    } catch (e) {
+      console.error('Ошибка сохранения пользователя:', e);
+      setEditError('Не удалось сохранить изменения. Подробнее в консоли.');
     } finally {
       setEditLoading(false);
     }
@@ -485,6 +577,16 @@ function Users() {
 
             <div className="users-role-modal-body">
               <div className="users-role-modal-row"><strong>Пользователь:</strong> {editUser.first_name} {editUser.last_name} (ID {editUser.user_id ?? editUser.id})</div>
+              <div className="users-role-modal-row users-edit-names">
+                <label>
+                  Имя:
+                  <input type="text" value={editFirstName} onChange={(e)=>setEditFirstName(e.target.value)} maxLength={50} />
+                </label>
+                <label>
+                  Фамилия:
+                  <input type="text" value={editLastName} onChange={(e)=>setEditLastName(e.target.value)} maxLength={50} />
+                </label>
+              </div>
 
               <label className="users-role-modal-label">
                 Роль:
@@ -499,7 +601,7 @@ function Users() {
 
             <div className="users-role-modal-actions">
               <button className="btn-secondary" onClick={closeEditModal} disabled={editLoading}>Отмена</button>
-              <button className="btn-primary" onClick={saveRole} disabled={editLoading}>
+              <button className="btn-primary" onClick={saveAll} disabled={editLoading}>
                 {editLoading ? 'Сохранение...' : 'Сохранить'}
               </button>
             </div>

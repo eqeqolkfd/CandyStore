@@ -267,7 +267,7 @@ const Audit = () => {
                 </td>
                 <td className="audit-user">
                   <div className="audit-user-info">
-                    <span className="audit-user-name">{log.userName}</span>
+                    <span className="audit-user-name">{log.userName || `User ${log.userId}`}</span>
                     <span className="audit-user-id">ID: {log.userId}</span>
                   </div>
                 </td>
@@ -302,6 +302,21 @@ const Audit = () => {
                         {log.details.ipAddress && (
                           <div className="audit-detail-item">
                             <strong>IP (детали):</strong> {log.details.ipAddress}
+                          </div>
+                        )}
+                      </>
+                    )}
+                    {/* Было/Стало на базе before_data/after_data для ключевых экшенов */}
+                    {['CHANGE_ROLE','UPDATE_PRODUCT','UPDATE_USER','CHANGE_PASSWORD','UPDATE_PROFILE'].includes(log.action) && (
+                      <>
+                        {log.before_data && (
+                          <div className="audit-detail-item">
+                            <strong>Было:</strong> {log.action === 'CHANGE_ROLE' && log.before_data.role ? log.before_data.role : (typeof log.before_data === 'string' ? log.before_data : JSON.stringify(log.before_data))}
+                          </div>
+                        )}
+                        {log.after_data && (
+                          <div className="audit-detail-item">
+                            <strong>Стало:</strong> {log.action === 'CHANGE_ROLE' && log.after_data.role ? log.after_data.role : (typeof log.after_data === 'string' ? log.after_data : JSON.stringify(log.after_data))}
                           </div>
                         )}
                       </>

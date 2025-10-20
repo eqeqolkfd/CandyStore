@@ -19,6 +19,7 @@ function Cart() {
   const [checkoutSubmitting, setCheckoutSubmitting] = useState(false);
   const [formErrors, setFormErrors] = useState({});
   const [unitType, setUnitType] = useState('house'); // 'house' | 'apartment'
+  const [postCheckoutStatus, setPostCheckoutStatus] = useState(''); // '', 'pending', 'paid'
 
   const normalizeImg = (url) => {
     if (!url) return '';
@@ -369,7 +370,7 @@ function Cart() {
                           body: JSON.stringify({
                             orderId,
                             method: paymentMethod,
-                            status: paymentMethod === 'meet' ? 'pending' : 'pending'
+                            status: paymentMethod === 'meet' ? 'pending' : 'paid'
                           })
                         });
                       } catch (e) {
@@ -378,6 +379,7 @@ function Cart() {
 
                       setCartItems([]);
                       setCheckoutOpen(false);
+                      setPostCheckoutStatus(paymentMethod === 'meet' ? 'pending' : 'paid');
                     } else {
                       const error = await response.json();
                       console.error('Order creation failed:', error.error);
@@ -564,6 +566,12 @@ function Cart() {
               </form>
             </div>
           </div>
+        </div>
+      )}
+
+      {postCheckoutStatus && (
+        <div className="cart-status-banner">
+          Статус заказа: {postCheckoutStatus === 'paid' ? 'Оплачен' : 'В ожидании'}
         </div>
       )}
 

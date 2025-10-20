@@ -233,10 +233,16 @@ async function deleteProduct(id) {
   return result.rowCount > 0;
 }
 
+async function isProductReferencedInOrders(id) {
+  const res = await pool.query('SELECT EXISTS (SELECT 1 FROM order_items WHERE product_id = $1) AS in_orders', [id]);
+  return Boolean(res.rows?.[0]?.in_orders);
+}
+
 module.exports = { 
   findAllProducts, 
   findProductById, 
   createProduct, 
   updateProduct, 
-  deleteProduct 
+  deleteProduct,
+  isProductReferencedInOrders 
 };

@@ -50,8 +50,17 @@ function ProfileClient() {
     const key = String(s || '').toLowerCase();
     if (key === 'pending') return 'В ожидании';
     if (key === 'paid') return 'Оплачен';
-    if (key === 'failed') return 'Неудачно';
     return '—';
+  };
+
+  // Для отображения в платежах: метод влияет на статус
+  const displayedPaymentStatus = (payment) => {
+    const methodKey = String(payment?.method_payments || '').toLowerCase();
+    // При получении (meet/cod) — всегда "В ожидании"
+    if (methodKey === 'meet' || methodKey === 'cod') return 'В ожидании';
+    // Онлайн: карта / СБП — всегда "Оплачен"
+    if (methodKey === 'card' || methodKey === 'sbp') return 'Оплачен';
+    return paymentStatusLabel(payment?.payment_status);
   };
   const roleLabel = (r) => {
     const key = String(r || '').toLowerCase();
@@ -605,7 +614,7 @@ function ProfileClient() {
                 <div>Платёж №{p.payment_id} по заказу №{p.order_id}</div>
                 <div>Сумма: {Number(p.amount).toLocaleString('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 })}</div>
                 <div>Метод: {methodLabel(p.method_payments)}</div>
-                <div>Статус платежа: {paymentStatusLabel(p.payment_status)}</div>
+                <div>Статус платежа: {displayedPaymentStatus(p)}</div>
                 <div>Статус заказа: {p.order_status_name || '—'}</div>
                 <div>Дата: {new Date(p.created_at).toLocaleString('ru-RU')}</div>
                 <button className="profile-details-btn" onClick={() => {setModalOrder(p.order_id); fetchOrderProducts(p.order_id);}}>Подробнее</button>

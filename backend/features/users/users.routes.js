@@ -164,15 +164,97 @@ router.get('/', async (req, res) => {
 
 // Обновление профиля пользователя
 router.put('/update', async (req, res) => {
-  const { userId, first_name, last_name, oldPassword, newPassword } = req.body || {};
+  const { userId, first_name, last_name, oldPassword, newPassword, actorId: bodyActorId, actorRole: bodyActorRole } = req.body || {};
   if (!userId) return res.status(400).json({ error: 'userId is required' });
   if (!first_name && !last_name && !oldPassword && !newPassword) {
     return res.status(400).json({ error: 'At least one field (first_name, last_name, oldPassword, newPassword) is required' });
   }
   try {
+    // Получаем профиль ДО обновления (для before_data)
+    const beforeProfile = await getProfile(userId).catch(() => null);
+
     const updatedProfile = await updateProfile({ userId, first_name, last_name, oldPassword, newPassword });
     if (!updatedProfile) return res.status(404).json({ error: 'User not found' });
+
+    // Определяем тип события: если админ обновляет НЕ свой профиль -> UPDATE_USER, иначе UPDATE_PROFILE
+    const actorId = req.user?.userId || bodyActorId || userId;
+    const actorRole = (req.user?.role || bodyActorRole || '').toLowerCase();
+    const isAdminActor = actorRole === 'admin';
+    const isSelfUpdate = String(actorId) === String(userId);
+    const actionName = (isAdminActor && !isSelfUpdate) ? 'UPDATE_USER' : 'UPDATE_PROFILE';
+
+    // Запись аудита: обновление профиля
+    await logAuditEvent({
+      action: actionName,
+      userId: actorId,
+      targetType: 'USER',
+      targetId: userId,
+      targetName: `${updatedProfile.first_name || ''} ${updatedProfile.last_name || ''}`.trim(),
+      details: {
+        updatedFields: {
+          first_name: first_name !== undefined,
+          last_name: last_name !== undefined
+        }
+      },
+      severity: 'LOW',
+      ipAddress: req.ip || req.connection?.remoteAddress,
+      userAgent: req.get('User-Agent'),
+      beforeData: beforeProfile ? {
+        user_id: beforeProfile.user_id,
+        first_name: beforeProfile.first_name,
+        last_name: beforeProfile.last_name,
+        email: beforeProfile.email
+      } : {},
+      afterData: {
+        user_id: updatedProfile.user_id,
+        first_name: updatedProfile.first_name,
+        last_name: updatedProfile.last_name,
+        email: updatedProfile.email
+      }
+    });
+
+    // Запись аудита: смена пароля (если была)
+    if (newPassword) {
+      await logAuditEvent({
+        action: 'CHANGE_PASSWORD',
+        userId: userId,
+        targetType: 'USER',
+        targetId: userId,
+        targetName: `${updatedProfile.first_name || ''} ${updatedProfile.last_name || ''}`.trim(),
+        details: { byUser: true },
+        severity: 'MEDIUM',
+        ipAddress: req.ip || req.connection?.remoteAddress,
+        userAgent: req.get('User-Agent'),
+        beforeData: {},
+        afterData: {}
+      });
+    }
     res.json(updatedProfile);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Логаут
+router.post('/logout', async (req, res) => {
+  try {
+    const { userId } = req.body || {};
+    if (userId) {
+      await logAuditEvent({
+        action: 'LOGOUT',
+        userId,
+        targetType: 'USER',
+        targetId: userId,
+        targetName: `User ${userId}`,
+        details: {},
+        severity: 'LOW',
+        ipAddress: req.ip || req.connection?.remoteAddress,
+        userAgent: req.get('User-Agent'),
+        beforeData: {},
+        afterData: {}
+      });
+    }
+    res.json({ success: true });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -185,10 +267,11 @@ router.put('/role', async (req, res) => {
   if (!userId || !role) return res.status(400).json({ error: 'userId and role required' });
 
   try {
+    const beforeProfile = await getProfile(userId).catch(() => null);
     const updated = await updateUserRole({ userId, role });
     
     // Получаем информацию о пользователе для аудита
-    const userInfo = await getUserRole({ userId });
+    const userInfo = await getProfile(userId).catch(()=>null);
     const adminUserId = req.user?.userId || 1; // Fallback на admin user
     
     // Записываем в журнал аудита
@@ -197,7 +280,7 @@ router.put('/role', async (req, res) => {
       userId: adminUserId,
       targetType: 'USER',
       targetId: userId,
-      targetName: userInfo ? `${userInfo.firstName} ${userInfo.lastName}` : `User ${userId}`,
+      targetName: userInfo ? `${userInfo.first_name || ''} ${userInfo.last_name || ''}`.trim() || `User ${userId}` : `User ${userId}`,
       details: { 
         oldRole: updated.oldRole,
         newRole: role,
@@ -205,7 +288,18 @@ router.put('/role', async (req, res) => {
       },
       severity: 'HIGH',
       ipAddress: req.ip || req.connection.remoteAddress,
-      userAgent: req.get('User-Agent')
+      userAgent: req.get('User-Agent'),
+      beforeData: beforeProfile ? {
+        user_id: beforeProfile.user_id,
+        first_name: beforeProfile.first_name,
+        last_name: beforeProfile.last_name,
+        email: beforeProfile.email,
+        role: updated.oldRole
+      } : { role: updated.oldRole },
+      afterData: {
+        user_id: userId,
+        role: role
+      }
     });
     
     res.json(updated);

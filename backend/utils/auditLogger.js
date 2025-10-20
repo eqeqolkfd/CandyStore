@@ -23,7 +23,9 @@ async function logAuditEvent({
   details = {},
   severity = 'LOW',
   ipAddress = null,
-  userAgent = null
+  userAgent = null,
+  beforeData = null,
+  afterData = null
 }) {
   console.log('🔍 logAuditEvent вызвана:', { action, userId, targetName });
   try {
@@ -34,6 +36,8 @@ async function logAuditEvent({
       targetId,
       targetName,
       details,
+      beforeData,
+      afterData,
       severity,
       ipAddress,
       userAgent
