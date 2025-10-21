@@ -145,6 +145,17 @@ CREATE TABLE audit_logs (
     created_at      TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
+CREATE TABLE backups (
+    backup_id       SERIAL PRIMARY KEY,
+    filename        VARCHAR(255) NOT NULL UNIQUE,
+    file_path       TEXT NOT NULL,
+    file_size_mb    NUMERIC(10,2) NOT NULL,
+    created_by      INT REFERENCES users(user_id) ON DELETE SET NULL,
+    created_at      TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    description     TEXT,
+    is_automatic    BOOLEAN DEFAULT FALSE
+);
+
 ALTER TABLE audit_logs
     ADD COLUMN IF NOT EXISTS before_data JSONB,
     ADD COLUMN IF NOT EXISTS after_data  JSONB;

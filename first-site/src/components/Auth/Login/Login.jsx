@@ -50,7 +50,7 @@ function Login() {
         setServerError(data?.error || 'Ошибка входа');
         return;
       }
-      localStorage.setItem('currentUser', JSON.stringify({ userId: data.userId, email: data.email, role: data.role }));
+      localStorage.setItem('currentUser', JSON.stringify({ userId: data.userId, email: data.email, role: data.role, token: data.token }));
       navigate('/');
     } catch (err) {
       setServerError('Сервер недоступен, попробуйте позже');

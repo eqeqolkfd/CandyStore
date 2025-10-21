@@ -873,3 +873,438 @@
     padding: 12px 24px;
   }
 }
+
+/* Стили для секции бекапов */
+.profile-backup-section {
+  margin-top: 40px;
+  padding: 24px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+}
+
+.profile-backup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.profile-backup-title {
+  margin: 0;
+  font-size: 24px;
+  color: #495057;
+  font-weight: 700;
+}
+
+.profile-backup-create-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+.profile-backup-create-btn:hover:not(:disabled) {
+  background: #218838;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+}
+
+.profile-backup-create-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.profile-backup-error {
+  background: #dc3545;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border-left: 4px solid #c82333;
+}
+
+.profile-backup-success {
+  background: #28a745;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border-left: 4px solid #218838;
+}
+
+.profile-backup-info {
+  background: #e3f2fd;
+  padding: 15px 20px;
+  border-radius: 8px;
+  margin-bottom: 25px;
+  border-left: 4px solid #2196f3;
+}
+
+.profile-backup-info p {
+  margin: 0;
+  color: #1565c0;
+  font-size: 14px;
+}
+
+.profile-backup-loading,
+.profile-backup-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
+  font-size: 16px;
+  background: #fff;
+  border-radius: 8px;
+  border: 2px dashed #dee2e6;
+}
+
+.profile-backup-table {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.profile-backup-table-header {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1.5fr 1.5fr 1fr;
+  gap: 20px;
+  padding: 16px 20px;
+  background: #495057;
+  font-weight: 600;
+  font-size: 14px;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.profile-backup-table-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1.5fr 1.5fr 1fr;
+  gap: 20px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #dee2e6;
+  align-items: center;
+  transition: background-color 0.2s ease;
+}
+
+.profile-backup-table-row:hover {
+  background: #f8f9fa;
+}
+
+.profile-backup-table-row:last-child {
+  border-bottom: none;
+}
+
+.profile-backup-filename {
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: #495057;
+  word-break: break-all;
+}
+
+.profile-backup-size {
+  font-weight: 600;
+  color: #28a745;
+}
+
+.profile-backup-date {
+  color: #6c757d;
+  font-size: 13px;
+}
+
+.profile-backup-created-by {
+  color: #495057;
+  font-size: 13px;
+}
+
+.profile-backup-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.profile-backup-download-btn,
+.profile-backup-delete-btn {
+  background: none;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-backup-download-btn {
+  background: #007bff;
+  color: white;
+}
+
+.profile-backup-download-btn:hover {
+  background: #0056b3;
+  transform: scale(1.05);
+}
+
+.profile-backup-delete-btn {
+  background: #dc3545;
+  color: white;
+}
+
+.profile-backup-delete-btn:hover {
+  background: #c82333;
+  transform: scale(1.05);
+}
+
+/* Адаптивность для бекапов */
+@media (max-width: 1024px) {
+  .profile-backup-section {
+    margin-top: 30px;
+    padding: 20px;
+  }
+  
+  .profile-backup-title {
+    font-size: 22px;
+  }
+  
+  .profile-backup-table-header,
+  .profile-backup-table-row {
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    gap: 15px;
+    padding: 12px 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-backup-section {
+    margin-top: 25px;
+    padding: 16px;
+  }
+  
+  .profile-backup-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+  
+  .profile-backup-title {
+    font-size: 20px;
+    text-align: center;
+  }
+  
+  .profile-backup-table-header {
+    display: none;
+  }
+  
+  .profile-backup-table-row {
+    display: block;
+    padding: 20px;
+    margin-bottom: 10px;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+  }
+  
+  .profile-backup-filename {
+    font-size: 14px;
+    margin-bottom: 8px;
+    word-break: break-all;
+  }
+  
+  .profile-backup-size,
+  .profile-backup-date,
+  .profile-backup-created-by {
+    font-size: 12px;
+    margin-bottom: 8px;
+    display: block;
+  }
+  
+  .profile-backup-actions {
+    justify-content: center;
+    margin-top: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-backup-section {
+    margin-top: 20px;
+    padding: 12px;
+  }
+  
+  .profile-backup-title {
+    font-size: 18px;
+  }
+  
+  .profile-backup-create-btn {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+  
+  .profile-backup-table-row {
+    padding: 15px;
+  }
+  
+  .profile-backup-filename {
+    font-size: 13px;
+  }
+  
+  .profile-backup-size,
+  .profile-backup-date,
+  .profile-backup-created-by {
+    font-size: 11px;
+  }
+}
+
+/* Стили для модального окна удаления бекапа */
+.profile-backup-delete-modal-overlay {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(40, 39, 41, 0.21);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-backup-delete-modal {
+  min-width: 320px;
+  max-width: min(95vw, 500px);
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px 4px rgba(60, 48, 46, 0.11);
+  padding: 28px 20px 20px 20px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.profile-backup-delete-modal-header {
+  margin: 0 0 12px;
+  font-size: 21px;
+  color: #3a2920;
+  font-weight: bold;
+}
+
+.profile-backup-delete-modal-body {
+  flex: 1;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.profile-backup-delete-modal-body p {
+  margin: 0 0 12px 0;
+  color: #705b49;
+  font-size: 14px;
+}
+
+.profile-backup-delete-modal-filename {
+  font-family: 'Courier New', monospace;
+  background: #f9f8fa;
+  border: 1px solid #e5e0dc;
+  padding: 8px 12px;
+  border-radius: 7px;
+  font-size: 13px;
+  color: #3a2920;
+  word-break: break-all;
+  margin: 12px 0;
+  box-shadow: 0 0 4px 0 rgba(150, 140, 140, 0.07);
+}
+
+.profile-backup-delete-modal-warning {
+  color: #dc3545;
+  font-weight: 600;
+  font-size: 13px;
+  margin-top: 16px;
+}
+
+.profile-backup-delete-modal-footer {
+  text-align: right;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.profile-backup-delete-modal-cancel,
+.profile-backup-delete-modal-confirm {
+  background: #9E8279;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 18px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.2s ease;
+}
+
+.profile-backup-delete-modal-cancel:hover {
+  background: #7f685f;
+}
+
+.profile-backup-delete-modal-confirm {
+  background: #dc3545;
+}
+
+.profile-backup-delete-modal-confirm:hover {
+  background: #c82333;
+}
+
+/* Адаптивность для модального окна */
+@media (max-width: 768px) {
+  .profile-backup-delete-modal {
+    min-width: 280px;
+    max-width: min(90vw, 450px);
+    padding: 24px 16px 16px 16px;
+    max-height: 85vh;
+  }
+  
+  .profile-backup-delete-modal-header {
+    font-size: 19px;
+  }
+  
+  .profile-backup-delete-modal-footer {
+    flex-direction: column;
+  }
+  
+  .profile-backup-delete-modal-cancel,
+  .profile-backup-delete-modal-confirm {
+    width: 100%;
+    padding: 8px 20px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 576px) {
+  .profile-backup-delete-modal {
+    min-width: 260px;
+    max-width: min(85vw, 400px);
+    padding: 20px 14px 14px 14px;
+    max-height: 85vh;
+  }
+  
+  .profile-backup-delete-modal-header {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  
+  .profile-backup-delete-modal-cancel,
+  .profile-backup-delete-modal-confirm {
+    padding: 6px 16px;
+    font-size: 14px;
+  }
+}

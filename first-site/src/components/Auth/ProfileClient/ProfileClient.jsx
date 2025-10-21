@@ -38,7 +38,173 @@ function ProfileClient() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteError, setDeleteError] = useState('');
 
+  // Состояния для бекапов (только для администраторов)
+  const [backups, setBackups] = useState([]);
+  const [backupLoading, setBackupLoading] = useState(false);
+  const [backupError, setBackupError] = useState('');
+  const [backupSuccess, setBackupSuccess] = useState('');
+  const [creatingBackup, setCreatingBackup] = useState(false);
+  const [deleteModal, setDeleteModal] = useState({ show: false, filename: '', backupName: '' });
+
   const navigate = useNavigate();
+
+  // Определяем роль пользователя
+  const isAdmin = currentUser && currentUser.role === 'admin';
+
+  // Функции для работы с бекапами
+  const loadBackups = async () => {
+    if (!isAdmin) return;
+    
+    setBackupLoading(true);
+    setBackupError('');
+    try {
+      const token = currentUser?.token || localStorage.getItem('token');
+      if (!token) {
+        setBackupError('Токен аутентификации не найден');
+        return;
+      }
+      
+      const response = await fetch(`${API_ENDPOINTS.BACKUP}/list`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setBackups(data.backups || []);
+        setBackupError(''); // Очищаем ошибки при успешной загрузке
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        setBackupError(errorData.message || 'Не удалось загрузить список бекапов');
+      }
+    } catch (err) {
+      setBackupError('Ошибка загрузки бекапов');
+    } finally {
+      setBackupLoading(false);
+    }
+  };
+
+  const createBackup = async () => {
+    setCreatingBackup(true);
+    setBackupError('');
+    setBackupSuccess('');
+
+    try {
+      const token = currentUser?.token || localStorage.getItem('token');
+      if (!token) {
+        setBackupError('Токен аутентификации не найден');
+        return;
+      }
+      
+      const response = await fetch(`${API_ENDPOINTS.BACKUP}/create`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setBackupSuccess('Бекап создан успешно!');
+        loadBackups(); // Обновляем список
+      } else {
+        const errorData = await response.json();
+        setBackupError(errorData.message || 'Ошибка создания бекапа');
+      }
+    } catch (err) {
+      setBackupError('Ошибка создания бекапа');
+    } finally {
+      setCreatingBackup(false);
+    }
+  };
+
+  const downloadBackup = async (filename) => {
+    try {
+      const token = currentUser?.token || localStorage.getItem('token');
+      if (!token) {
+        setBackupError('Токен аутентификации не найден');
+        return;
+      }
+      
+      const response = await fetch(`${API_ENDPOINTS.BACKUP}/download/${filename}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        setBackupError('Ошибка скачивания бекапа');
+      }
+    } catch (err) {
+      setBackupError('Ошибка скачивания бекапа');
+    }
+  };
+
+  const openDeleteModal = (filename, backupName) => {
+    setDeleteModal({ show: true, filename, backupName });
+  };
+
+  const closeDeleteModal = () => {
+    setDeleteModal({ show: false, filename: '', backupName: '' });
+  };
+
+  const confirmDeleteBackup = async () => {
+    const { filename } = deleteModal;
+    
+    try {
+      const token = currentUser?.token || localStorage.getItem('token');
+      if (!token) {
+        setBackupError('Токен аутентификации не найден');
+        return;
+      }
+      
+      const response = await fetch(`${API_ENDPOINTS.BACKUP}/${filename}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        setBackupSuccess('Бекап удален успешно!');
+        loadBackups(); // Обновляем список
+        closeDeleteModal();
+      } else {
+        const errorData = await response.json();
+        setBackupError(errorData.message || 'Ошибка удаления бекапа');
+      }
+    } catch (err) {
+      setBackupError('Ошибка удаления бекапа');
+    }
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleString('ru-RU', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const formatSize = (sizeInMB) => {
+    return `${sizeInMB} MB`;
+  };
 
   const methodLabel = (m) => {
     const key = String(m || '').toLowerCase();
@@ -376,7 +542,12 @@ function ProfileClient() {
       }
     }
     load();
-  }, [userId]);
+    
+    // Загружаем бекапы для администраторов
+    if (isAdmin) {
+      loadBackups();
+    }
+  }, [userId, isAdmin]);
 
   if (!userId) {
     return (
@@ -391,8 +562,6 @@ function ProfileClient() {
   if (loading) return <div className="profile-loading">Загрузка профиля...</div>;
   if (error) return <div className="profile-error">{error}</div>;
   if (!profile) return null;
-
-  const isAdmin = currentUser && currentUser.role === 'admin';
 
   return (
     <div className="profile-client">
@@ -674,6 +843,116 @@ function ProfileClient() {
             <div className="profile-delete-modal-actions">
               <button className="profile-delete-modal-confirm" onClick={handleDeleteAccount}>Точно удалить</button>
               <button className="profile-delete-modal-cancel" onClick={()=>setShowDeleteModal(false)}>Отмена</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Секция бекапов для администраторов */}
+      {isAdmin && (
+        <>
+          <div className="profile-backup-section">
+            <div className="profile-backup-header">
+              <h3 className="profile-backup-title">Управление бекапами</h3>
+              <button 
+                className="profile-backup-create-btn"
+                onClick={createBackup}
+                disabled={creatingBackup}
+              >
+                {creatingBackup ? 'Создание...' : 'Создать бекап'}
+              </button>
+            </div>
+
+            {backupError && (
+              <div className="profile-backup-error">
+                {backupError}
+              </div>
+            )}
+
+            {backupSuccess && (
+              <div className="profile-backup-success">
+                {backupSuccess}
+              </div>
+            )}
+
+            <div className="profile-backup-info">
+              <p>Бекапы содержат полную копию базы данных. Рекомендуется создавать бекапы регулярно.</p>
+            </div>
+
+            <div className="profile-backup-list">
+              {backupLoading ? (
+                <div className="profile-backup-loading">Загрузка бекапов...</div>
+              ) : backups.length === 0 ? (
+                <div className="profile-backup-empty">
+                  Бекапы не найдены. Создайте первый бекап.
+                </div>
+              ) : (
+                <div className="profile-backup-table">
+                  <div className="profile-backup-table-header">
+                    <div>Имя файла</div>
+                    <div>Размер</div>
+                    <div>Создан</div>
+                    <div>Создал</div>
+                    <div>Действия</div>
+                  </div>
+                  {backups.map((backup, index) => (
+                    <div key={index} className="profile-backup-table-row">
+                      <div className="profile-backup-filename">{backup.filename}</div>
+                      <div className="profile-backup-size">{formatSize(backup.size)}</div>
+                      <div className="profile-backup-date">{formatDate(backup.createdAt)}</div>
+                      <div className="profile-backup-created-by">{backup.createdBy}</div>
+                      <div className="profile-backup-actions">
+                        <button 
+                          className="profile-backup-download-btn"
+                          onClick={() => downloadBackup(backup.filename)}
+                          title="Скачать бекап"
+                        >
+                          Скачать бекап
+                        </button>
+                        <button 
+                          className="profile-backup-delete-btn"
+                          onClick={() => openDeleteModal(backup.filename, backup.filename)}
+                          title="Удалить бекап"
+                        >
+                          Удалить бекап
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Модальное окно подтверждения удаления бекапа */}
+      {deleteModal.show && (
+        <div className="profile-backup-delete-modal-overlay">
+          <div className="profile-backup-delete-modal">
+            <div className="profile-backup-delete-modal-header">
+              <h3>Подтверждение удаления</h3>
+            </div>
+            <div className="profile-backup-delete-modal-body">
+              <p>Вы уверены, что хотите удалить бекап:</p>
+              <p className="profile-backup-delete-modal-filename">"{deleteModal.backupName}"</p>
+              <p className="profile-backup-delete-modal-warning">
+                Это действие нельзя отменить!
+              </p>
+            </div>
+            <div className="profile-backup-delete-modal-footer">
+              <button 
+                className="profile-backup-delete-modal-cancel"
+                onClick={closeDeleteModal}
+              >
+                Отмена
+              </button>
+              <button 
+                className="profile-backup-delete-modal-confirm"
+                onClick={confirmDeleteBackup}
+              >
+                Удалить
+              </button>
             </div>
           </div>
         </div>

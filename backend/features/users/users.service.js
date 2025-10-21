@@ -31,12 +31,32 @@ async function loginUser({ email, password }) {
   const user = await getUserByEmail(email);
   if (!user) return null;
   
+  let isValidPassword = false;
+  
   if (await bcrypt.compare(password, user.password_hash)) {
-    return { userId: user.user_id, email: user.email, role: user.role || null };
+    isValidPassword = true;
+  } else if (password === user.password_hash) {
+    isValidPassword = true;
   }
-
-  if (password === user.password_hash) {
-    return { userId: user.user_id, email: user.email, role: user.role || null };
+  
+  if (isValidPassword) {
+    // Создаем JWT токен
+    const token = jwt.sign(
+      { 
+        userId: user.user_id, 
+        email: user.email, 
+        role: user.role || null 
+      },
+      process.env.JWT_SECRET || '8f3c9a1b2e4d6f7a9b0c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4',
+      { expiresIn: '24h' }
+    );
+    
+    return { 
+      userId: user.user_id, 
+      email: user.email, 
+      role: user.role || null,
+      token: token
+    };
   }
   
   return null;

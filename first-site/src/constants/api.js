@@ -16,7 +16,9 @@ export const API_ENDPOINTS = {
 
   ORDERS: `${API_BASE_URL}/orders`,
 
-  AUDIT: `${API_BASE_URL}/audit`
+  AUDIT: `${API_BASE_URL}/audit`,
+
+  BACKUP: `${API_BASE_URL}/backup`
 };
 
 export default API_ENDPOINTS;

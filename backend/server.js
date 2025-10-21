@@ -9,6 +9,7 @@ const auditRoutes = require('./features/audit/audit.routes');
 const uploadRoutes = require('./features/upload/upload.routes');
 const categoriesRoutes = require('./features/categories/categories.routes');
 const manufacturersRoutes = require('./features/manufacturers/manufacturers.routes');
+const backupRoutes = require('./features/backup/backup.routes');
 
 const app = express();
 const PORT = Number(process.env.PORT || 5000);
@@ -27,6 +28,7 @@ app.use('/api/audit', auditRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/categories', categoriesRoutes);
 app.use('/api/manufacturers', manufacturersRoutes);
+app.use('/api/backup', backupRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
