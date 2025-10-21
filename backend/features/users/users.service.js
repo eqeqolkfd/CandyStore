@@ -83,8 +83,8 @@ async function registerUser({ firstName, lastName, email, password }) {
       from: adminEmail,
       to: email,
       subject: 'Добро пожаловать в SweetShop!',
-      text: `Здравствуйте, ${firstName}! Ваш профиль в SweetShop успешно создан. Ваш пароль: ${password}\nЕго хеш: ${hashedPassword}`,
-      html: `<p>Здравствуйте, <b>${firstName}</b>!<br/>Ваш профиль в SweetShop успешно создан.<br/><b>Ваш пароль: </b>${password}<br/><b>Его хеш: </b>${hashedPassword}</p>`
+      text: `Здравствуйте, ${firstName}! Ваш профиль в SweetShop успешно создан. Ваш пароль: ${password}`,
+      html: `<p>Здравствуйте, <b>${firstName}</b>!<br/>Ваш профиль в SweetShop успешно создан.<br/><b>Ваш пароль: </b>${password}</p>`
     });
 
     return { userId: inserted.user_id, email, role: 'client', token };

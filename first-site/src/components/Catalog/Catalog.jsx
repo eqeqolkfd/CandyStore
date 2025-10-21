@@ -20,6 +20,8 @@ function Catalog() {
 
   const [confirmAdd, setConfirmAdd] = useState(null);
   const [favorites, setFavorites] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [manufacturers, setManufacturers] = useState([]);
   const navigate = useNavigate();
   const getCurrentUser = () => {
     const stored = typeof window !== 'undefined' ? localStorage.getItem('currentUser') : null;
@@ -37,6 +39,30 @@ function Catalog() {
       ...prev,
       [key]: value
     }));
+  };
+
+  const loadCategories = async () => {
+    try {
+      const response = await fetch(API_ENDPOINTS.CATEGORIES);
+      if (response.ok) {
+        const data = await response.json();
+        setCategories(data);
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки категорий:', error);
+    }
+  };
+
+  const loadManufacturers = async () => {
+    try {
+      const response = await fetch(API_ENDPOINTS.MANUFACTURERS);
+      if (response.ok) {
+        const data = await response.json();
+        setManufacturers(data);
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки производителей:', error);
+    }
   };
 
   const normalizeImg = (url) => {
@@ -149,6 +175,11 @@ function Catalog() {
   }, []);
 
   useEffect(() => {
+    loadCategories();
+    loadManufacturers();
+  }, []);
+
+  useEffect(() => {
     if (!selectedProduct) return;
 
     const handleKeyDown = (e) => {
@@ -195,11 +226,11 @@ function Catalog() {
           className="catalog-filter-select"
         >
           <option value="">Все категории</option>
-          <option value="Шоколад">Шоколад</option>
-          <option value="Конфеты">Конфеты</option>
-          <option value="Торты">Торты</option>
-          <option value="Чизкейки">Чизкейки</option>
-          <option value="Капкейк">Капкейк</option>
+          {categories.map(category => (
+            <option key={category.id} value={category.name}>
+              {category.name}
+            </option>
+          ))}
         </select>
 
         <select 
@@ -208,8 +239,11 @@ function Catalog() {
           className="catalog-filter-select"
         >
           <option value="">Все производители</option>
-          <option value="Сладкая Фабрика">Сладкая Фабрика</option>
-          <option value="Шоколадная фабрика">Шоколадная фабрика</option>
+          {manufacturers.map(manufacturer => (
+            <option key={manufacturer.id} value={manufacturer.name}>
+              {manufacturer.name}
+            </option>
+          ))}
         </select>
 
         <select 

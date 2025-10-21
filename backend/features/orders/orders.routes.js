@@ -83,3 +83,44 @@ router.put('/admin/orders/:id/status', async (req, res) => {
     res.status(500).json({ error: 'Failed to update order status' });
   }
 });
+
+router.delete('/admin/cleanup-deleted-users', async (req, res) => {
+  try {
+    const checkQuery = await pool.query(`
+      SELECT o.order_id, o.user_id, u.user_id as user_exists
+      FROM orders o 
+      LEFT JOIN users u ON u.user_id = o.user_id 
+      WHERE u.user_id IS NULL
+    `);
+    
+    console.log('Orders to delete:', checkQuery.rows);
+    
+    if (checkQuery.rows.length === 0) {
+      console.log('No orders to delete');
+      return res.json({ 
+        success: true, 
+        deletedCount: 0,
+        message: 'Нет заказов удаленных пользователей для удаления'
+      });
+    }
+    
+    const orderIds = checkQuery.rows.map(row => row.order_id);
+    console.log('Deleting orders with IDs:', orderIds);
+    
+    const result = await pool.query(`
+      DELETE FROM orders 
+      WHERE order_id = ANY($1)
+    `, [orderIds]);
+    
+    console.log('Cleanup result:', result.rowCount, 'orders deleted');
+    
+    res.json({ 
+      success: true, 
+      deletedCount: result.rowCount,
+      message: `Удалено ${result.rowCount} заказов удаленных пользователей`
+    });
+  } catch (e) {
+    console.error('Ошибка удаления заказов удаленных пользователей:', e);
+    res.status(500).json({ error: 'Failed to cleanup orders of deleted users' });
+  }
+});

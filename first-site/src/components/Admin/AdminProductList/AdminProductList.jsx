@@ -54,7 +54,6 @@ const AdminProductList = () => {
   const [categoryLoading, setCategoryLoading] = useState(false);
   const [manufacturerLoading, setManufacturerLoading] = useState(false);
 
-  // Состояния для загрузки списков категорий и производителей
   const [categories, setCategories] = useState([]);
   const [manufacturers, setManufacturers] = useState([]);
   const [loadingLists, setLoadingLists] = useState(false);
@@ -63,7 +62,6 @@ const AdminProductList = () => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
-  // Загрузка списков категорий и производителей
   const loadCategories = async () => {
     try {
       const response = await fetch(CATEGORIES_API_URL);
@@ -583,7 +581,7 @@ const AdminProductList = () => {
 
         <div className="admin-management-section">
           <div className="admin-management-header">
-            <h3>Управление справочниками</h3>
+            <h3>Управление категориями и производителями</h3>
           </div>
 
           <div className="admin-form-section">

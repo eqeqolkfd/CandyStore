@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './OrdersAdmin.css';
-
-const API = 'http://localhost:5000/api';
+import { API_ENDPOINTS } from '../../../constants/api';
 
 function OrdersAdmin() {
   const [orders, setOrders] = useState([]);
@@ -9,6 +8,7 @@ function OrdersAdmin() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [savingId, setSavingId] = useState(null);
+  const [cleaningUp, setCleaningUp] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -16,8 +16,8 @@ function OrdersAdmin() {
       setError('');
       try {
         const [oRes, sRes] = await Promise.all([
-          fetch(`${API}/orders/admin/all`),
-          fetch(`${API}/orders/admin/statuses`)
+          fetch(`${API_ENDPOINTS.ORDERS}/admin/all`),
+          fetch(`${API_ENDPOINTS.ORDERS}/admin/statuses`)
         ]);
         const o = oRes.ok ? await oRes.json() : [];
         const s = sRes.ok ? await sRes.json() : [];
@@ -35,7 +35,7 @@ function OrdersAdmin() {
   const saveStatus = async (orderId, code) => {
     setSavingId(orderId);
     try {
-      const res = await fetch(`${API}/orders/admin/orders/${orderId}/status`, {
+      const res = await fetch(`${API_ENDPOINTS.ORDERS}/admin/orders/${orderId}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code })
@@ -49,12 +49,48 @@ function OrdersAdmin() {
     }
   };
 
+  const deleteOrdersOfDeletedUsers = async () => {
+    setCleaningUp(true);
+    try {
+      const res = await fetch(`${API_ENDPOINTS.ORDERS}/admin/cleanup-deleted-users`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        const data = await res.json();
+        console.log(data.message);
+        
+        const [oRes, sRes] = await Promise.all([
+          fetch(`${API_ENDPOINTS.ORDERS}/admin/all`),
+          fetch(`${API_ENDPOINTS.ORDERS}/admin/statuses`)
+        ]);
+        const o = oRes.ok ? await oRes.json() : [];
+        const s = sRes.ok ? await sRes.json() : [];
+        setOrders(Array.isArray(o) ? o : []);
+        setStatuses(Array.isArray(s) ? s : []);
+      }
+    } catch (e) {
+      console.error('Ошибка удаления заказов удаленных пользователей:', e);
+    } finally {
+      setCleaningUp(false);
+    }
+  };
+
   if (loading) return <div className="orders-admin">Загрузка...</div>;
   if (error) return <div className="orders-admin error">{error}</div>;
 
   return (
     <div className="orders-admin">
-      <h2>Список заказов</h2>
+      <div className="orders-admin-header">
+        <h2>Список заказов</h2>
+        <button 
+          className="orders-cleanup-btn"
+          onClick={deleteOrdersOfDeletedUsers}
+          disabled={cleaningUp}
+          title="Удалить заказы удаленных пользователей"
+        >
+          {cleaningUp ? 'Очистка...' : 'Очистить заказы удаленных пользователей'}
+        </button>
+      </div>
       <table className="orders-admin-table">
         <thead>
           <tr>
@@ -70,7 +106,7 @@ function OrdersAdmin() {
           {orders.map(o => (
             <tr key={o.order_id}>
               <td>{o.order_id}</td>
-              <td>{o.first_name || o.last_name ? `${o.first_name || ''} ${o.last_name || ''}`.trim() : o.user_id}</td>
+              <td>{`${o.first_name || ''} ${o.last_name || ''}`.trim()}</td>
               <td>{o.email || '—'}</td>
               <td>{new Date(o.created_at).toLocaleString('ru-RU')}</td>
               <td>{Number(o.total_amount).toLocaleString('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 })}</td>

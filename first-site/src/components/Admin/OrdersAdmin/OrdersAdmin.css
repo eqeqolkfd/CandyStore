@@ -1,5 +1,31 @@
 .orders-admin { padding: 16px; }
-.orders-admin h2 { margin: 0 0 16px; font-size: 24px; color: #fff; font-weight: 700; }
+.orders-admin-header { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  margin-bottom: 16px; 
+}
+.orders-admin h2 { margin: 0; font-size: 24px; color: #fff; font-weight: 700; }
+.orders-cleanup-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+.orders-cleanup-btn:hover {
+  background: #c82333;
+}
+.orders-cleanup-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+.orders-cleanup-btn:disabled:hover {
+  background: #6c757d;
+}
 
 .orders-admin-table { width: 100%; border-collapse: separate; border-spacing: 0; background: #fff; border: 1px solid #e8e8e8; border-radius: 10px; overflow: hidden; box-shadow: 0 6px 16px rgba(0,0,0,0.06); }
 .orders-admin-table thead th { background: #f7f7f9; color: #444; text-align: left; font-weight: 600; font-size: 14px; padding: 12px 14px; border-bottom: 1px solid #e8e8e8; }

@@ -401,7 +401,9 @@ function ProfileClient() {
         {!isEditing && (
           <>
           <button className="profile-edit-btn" onClick={handleEditStart}>Редактировать</button>
-          <button className="profile-delete-btn" onClick={()=>setShowDeleteModal(true)}>Удалить аккаунт</button>
+          {!isAdmin && (
+            <button className="profile-delete-btn" onClick={()=>setShowDeleteModal(true)}>Удалить аккаунт</button>
+          )}
           </>
         )}
         </div>
