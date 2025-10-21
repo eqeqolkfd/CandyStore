@@ -957,6 +957,98 @@
   font-size: 14px;
 }
 
+.profile-backup-upload-section {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 25px;
+  border: 1px solid #dee2e6;
+}
+
+.profile-backup-upload-section h4 {
+  margin: 0 0 15px 0;
+  color: #495057;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.profile-backup-upload-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.profile-backup-file-input {
+  display: none;
+}
+
+.profile-backup-file-label {
+  background: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #495057;
+  font-size: 14px;
+  min-width: 200px;
+  text-align: center;
+  flex: 1;
+}
+
+.profile-backup-file-label:hover {
+  border-color: #9E8279;
+  background: #f0f0f0;
+}
+
+.profile-backup-restore-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.profile-backup-restore-btn:hover:not(:disabled) {
+  background: #218838;
+  transform: translateY(-1px);
+}
+
+.profile-backup-restore-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.profile-backup-clear-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  min-width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-backup-clear-btn:hover {
+  background: #c82333;
+  transform: translateY(-1px);
+}
+
 .profile-backup-loading,
 .profile-backup-empty {
   text-align: center;

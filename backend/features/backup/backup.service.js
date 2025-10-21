@@ -30,7 +30,7 @@ class BackupService {
 
   async createBackup(userId = null) {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-    const filename = `shop_backup_${timestamp}.sql`;
+    const filename = `shop_backup_${timestamp}.bak`;
     const filepath = path.join(this.backupDir, filename);
 
     try {
@@ -169,14 +169,67 @@ class BackupService {
     }
   }
 
+  // Восстановить из загруженного файла
+  async restoreFromUploadedFile(filePath, userId = null) {
+    try {
+      console.log('Начинаем восстановление из файла:', filePath);
+      
+      // Проверяем существование файла
+      await fs.access(filePath);
+      const fileStats = await fs.stat(filePath);
+      console.log('Файл существует, размер:', fileStats.size, 'байт');
+      console.log('Расширение файла:', path.extname(filePath));
+
+      const dbConfig = {
+        host: process.env.DB_HOST || 'localhost',
+        port: process.env.DB_PORT || '5432',
+        database: process.env.DB_NAME || 'shop',
+        username: process.env.DB_USER || 'postgres',
+        password: process.env.DB_PASSWORD || '1*'
+      };
+
+      console.log('Конфигурация БД:', { ...dbConfig, password: '***' });
+
+      // Команда psql для восстановления
+      const psqlCommand = `psql -h ${dbConfig.host} -p ${dbConfig.port} -U ${dbConfig.username} -d ${dbConfig.database} -f "${filePath}"`;
+      
+      console.log('Выполняем команду:', psqlCommand.replace(dbConfig.password, '***'));
+      
+      // Устанавливаем переменную окружения для пароля
+      const env = { ...process.env, PGPASSWORD: dbConfig.password };
+
+      console.log('Восстановление базы данных из загруженного файла...');
+      const result = await execAsync(psqlCommand, { env });
+      
+      console.log('Результат выполнения psql:', result.stdout);
+      if (result.stderr) {
+        console.warn('Предупреждения psql:', result.stderr);
+      }
+
+      console.log('База данных восстановлена из загруженного файла успешно');
+    } catch (error) {
+      console.error('Ошибка восстановления из загруженного файла:', error);
+      console.error('Детали ошибки:', {
+        message: error.message,
+        code: error.code,
+        signal: error.signal,
+        stdout: error.stdout,
+        stderr: error.stderr
+      });
+      throw new Error(`Не удалось восстановить базу данных: ${error.message}`);
+    }
+  }
+
   // Удалить бекап
   async deleteBackup(filename) {
     try {
+      console.log(`Начинаем удаление бекапа: ${filename}`);
+      
       const client = await pool.connect();
       try {
         // Получаем информацию о бекапе из базы данных
         const result = await client.query(
-          'SELECT file_path FROM backups WHERE filename = $1',
+          'SELECT file_path, file_size_mb FROM backups WHERE filename = $1',
           [filename]
         );
 
@@ -185,18 +238,43 @@ class BackupService {
         }
 
         const filepath = result.rows[0].file_path;
+        const fileSize = result.rows[0].file_size_mb;
+        
+        console.log(`Найден бекап в БД: ${filepath}, размер: ${fileSize} MB`);
 
-        // Удаляем файл с диска
+        // Проверяем существование файла перед удалением
+        let fileExists = false;
         try {
-          await fs.unlink(filepath);
-          console.log(`Файл бекапа ${filename} удален с диска`);
-        } catch (fileError) {
-          console.warn(`Не удалось удалить файл ${filepath}:`, fileError.message);
+          await fs.access(filepath);
+          fileExists = true;
+          console.log(`Файл существует: ${filepath}`);
+        } catch (accessError) {
+          console.warn(`Файл не найден на диске: ${filepath}`);
+        }
+
+        // Удаляем файл с диска (если существует)
+        if (fileExists) {
+          try {
+            await fs.unlink(filepath);
+            console.log(`✅ Файл бекапа ${filename} успешно удален с диска: ${filepath}`);
+          } catch (fileError) {
+            console.error(`❌ Ошибка удаления файла ${filepath}:`, fileError.message);
+            throw new Error(`Не удалось удалить файл с диска: ${fileError.message}`);
+          }
+        } else {
+          console.warn(`⚠️ Файл ${filepath} не найден на диске, но запись в БД будет удалена`);
         }
 
         // Удаляем запись из базы данных
-        await client.query('DELETE FROM backups WHERE filename = $1', [filename]);
-        console.log(`Бекап ${filename} удален из базы данных`);
+        const deleteResult = await client.query('DELETE FROM backups WHERE filename = $1', [filename]);
+        console.log(`✅ Запись бекапа ${filename} удалена из базы данных (удалено записей: ${deleteResult.rowCount})`);
+        
+        return {
+          success: true,
+          message: `Бекап ${filename} успешно удален`,
+          fileDeleted: fileExists,
+          recordsDeleted: deleteResult.rowCount
+        };
       } finally {
         client.release();
       }

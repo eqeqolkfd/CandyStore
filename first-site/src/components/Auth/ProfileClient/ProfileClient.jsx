@@ -45,6 +45,8 @@ function ProfileClient() {
   const [backupSuccess, setBackupSuccess] = useState('');
   const [creatingBackup, setCreatingBackup] = useState(false);
   const [deleteModal, setDeleteModal] = useState({ show: false, filename: '', backupName: '' });
+  const [restoreFile, setRestoreFile] = useState(null);
+  const [restoringFromFile, setRestoringFromFile] = useState(false);
 
   const navigate = useNavigate();
 
@@ -171,6 +173,8 @@ function ProfileClient() {
         return;
       }
       
+      console.log('Удаляем бекап:', filename);
+      
       const response = await fetch(`${API_ENDPOINTS.BACKUP}/${filename}`, {
         method: 'DELETE',
         headers: {
@@ -180,15 +184,106 @@ function ProfileClient() {
       });
 
       if (response.ok) {
-        setBackupSuccess('Бекап удален успешно!');
+        const result = await response.json();
+        console.log('Результат удаления:', result);
+        
+        let successMessage = 'Бекап удален успешно!';
+        if (result.fileDeleted) {
+          successMessage += ' (файл удален с диска)';
+        } else {
+          successMessage += ' (файл не найден на диске, но запись из БД удалена)';
+        }
+        
+        setBackupSuccess(successMessage);
         loadBackups(); // Обновляем список
         closeDeleteModal();
       } else {
         const errorData = await response.json();
+        console.error('Ошибка удаления:', errorData);
         setBackupError(errorData.message || 'Ошибка удаления бекапа');
       }
     } catch (err) {
-      setBackupError('Ошибка удаления бекапа');
+      console.error('Ошибка при удалении бекапа:', err);
+      setBackupError('Ошибка удаления бекапа: ' + err.message);
+    }
+  };
+
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      console.log('Выбран файл:', file.name, 'Размер:', file.size, 'Тип:', file.type);
+      
+      if (file.name.endsWith('.bak') || file.name.endsWith('.sql')) {
+        setRestoreFile(file);
+        setBackupError('');
+        setBackupSuccess('');
+      } else {
+        setBackupError('Разрешены только файлы .bak и .sql');
+        setRestoreFile(null);
+        // Очищаем input при ошибке
+        event.target.value = '';
+      }
+    } else {
+      setRestoreFile(null);
+    }
+  };
+
+  const restoreFromFile = async () => {
+    if (!restoreFile) {
+      setBackupError('Выберите файл для восстановления');
+      return;
+    }
+
+    setRestoringFromFile(true);
+    setBackupError('');
+    setBackupSuccess('');
+
+    try {
+      const token = currentUser?.token || localStorage.getItem('token');
+      if (!token) {
+        setBackupError('Токен аутентификации не найден');
+        return;
+      }
+
+      // Создаем FormData для загрузки файла
+      const formData = new FormData();
+      formData.append('backupFile', restoreFile);
+
+      console.log('Отправка файла на восстановление:', restoreFile.name);
+
+      const response = await fetch(`${API_ENDPOINTS.BACKUP}/restore-upload`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      console.log('Ответ сервера:', response.status, response.statusText);
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Результат восстановления:', result);
+        setBackupSuccess('База данных восстановлена из загруженного файла!');
+        clearFileInput();
+      } else {
+        const errorData = await response.json();
+        console.error('Ошибка восстановления:', errorData);
+        setBackupError(errorData.message || 'Ошибка восстановления из файла');
+      }
+    } catch (err) {
+      console.error('Ошибка при восстановлении:', err);
+      setBackupError('Ошибка восстановления из файла: ' + err.message);
+    } finally {
+      setRestoringFromFile(false);
+    }
+  };
+
+  const clearFileInput = () => {
+    setRestoreFile(null);
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput) {
+      fileInput.value = '';
     }
   };
 
@@ -877,6 +972,39 @@ function ProfileClient() {
 
             <div className="profile-backup-info">
               <p>Бекапы содержат полную копию базы данных. Рекомендуется создавать бекапы регулярно.</p>
+            </div>
+
+            <div className="profile-backup-upload-section">
+              <h4>Восстановление из файла</h4>
+              <div className="profile-backup-upload-controls">
+                <input
+                  type="file"
+                  accept=".bak,.sql"
+                  onChange={handleFileUpload}
+                  className="profile-backup-file-input"
+                  id="backup-file-input"
+                />
+                <label htmlFor="backup-file-input" className="profile-backup-file-label">
+                  {restoreFile ? `Выбран: ${restoreFile.name}` : 'Выберите файл .bak или .sql'}
+                </label>
+                {restoreFile && (
+                  <button
+                    className="profile-backup-clear-btn"
+                    onClick={clearFileInput}
+                    type="button"
+                    title="Очистить выбранный файл"
+                  >
+                    ✕
+                  </button>
+                )}
+                <button
+                  className="profile-backup-restore-btn"
+                  onClick={restoreFromFile}
+                  disabled={!restoreFile || restoringFromFile}
+                >
+                  {restoringFromFile ? 'Восстановление...' : 'Восстановить из файла'}
+                </button>
+              </div>
             </div>
 
             <div className="profile-backup-list">

@@ -30,6 +30,26 @@ app.use('/api/categories', categoriesRoutes);
 app.use('/api/manufacturers', manufacturersRoutes);
 app.use('/api/backup', backupRoutes);
 
+// Глобальный обработчик ошибок
+app.use((error, req, res, next) => {
+  console.error('🚨 Глобальная ошибка:', error);
+  res.status(500).json({ 
+    success: false, 
+    message: 'Внутренняя ошибка сервера',
+    error: error.message 
+  });
+});
+
+// Обработчик для несуществующих маршрутов
+app.use((req, res) => {
+  console.log('❌ Несуществующий маршрут:', req.method, req.originalUrl);
+  res.status(404).json({ 
+    success: false, 
+    message: 'Маршрут не найден' 
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`JWT_SECRET установлен: ${!!process.env.JWT_SECRET}`);
 });

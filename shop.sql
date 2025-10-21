@@ -145,6 +145,7 @@ CREATE TABLE audit_logs (
     created_at      TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
+
 CREATE TABLE backups (
     backup_id       SERIAL PRIMARY KEY,
     filename        VARCHAR(255) NOT NULL UNIQUE,
