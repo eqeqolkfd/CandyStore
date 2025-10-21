@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './Orders.css';
+import { API_ENDPOINTS } from '../../constants/api';
 
 function Orders() {
   const [orders, setOrders] = useState([]);
@@ -59,7 +60,7 @@ function Orders() {
           setLoading(false);
           return;
         }
-        const res = await fetch(`http://localhost:5000/api/orders?userId=${userId}`);
+        const res = await fetch(`${API_ENDPOINTS.ORDERS}?userId=${userId}`);
         if (!res.ok) throw new Error('Failed to fetch orders');
         const data = await res.json();
         setOrders(data);

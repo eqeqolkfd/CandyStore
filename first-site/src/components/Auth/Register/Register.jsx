@@ -2,6 +2,7 @@ import './Register.css';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_ENDPOINTS } from '../../../constants/api';
 
 function Register() {
   const [firstName, setFirstName] = useState('');
@@ -66,7 +67,7 @@ function Register() {
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
     try {
-      const res = await fetch('http://localhost:5000/api/users/register', {
+      const res = await fetch(API_ENDPOINTS.REGISTER, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ firstName, lastName, email, password })

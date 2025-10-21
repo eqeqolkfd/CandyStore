@@ -22,6 +22,14 @@ const useHotkeys = (userRole) => {
         return;
       }
       
+      if (event.shiftKey && event.key === '#') {
+        event.preventDefault();
+        if (userRole === 'client' || userRole === 'manager' || userRole === 'admin') {
+          navigate('/profile');
+        }
+        return;
+      }
+      
       if (event.altKey) {
         const key = event.key;
         

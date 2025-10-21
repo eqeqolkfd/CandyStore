@@ -1,6 +1,7 @@
 import './Login.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import { API_ENDPOINTS } from '../../../constants/api';
 
 function Login() {
   const [email, setEmail] = useState('');
@@ -39,7 +40,7 @@ function Login() {
     if (Object.keys(newErrors).length > 0) return;
 
     try {
-      const res = await fetch('http://localhost:5000/api/users/login', {
+      const res = await fetch(API_ENDPOINTS.LOGIN, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })

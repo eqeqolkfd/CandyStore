@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import './Catalog.css';
 import { useNavigate } from 'react-router-dom';
 
-const API_URL = 'http://localhost:5000/api/products';
+import { API_ENDPOINTS } from '../../constants/api';
+
+const API_URL = API_ENDPOINTS.PRODUCTS;
 
 function Catalog() {
   const [products, setProducts] = useState([]);

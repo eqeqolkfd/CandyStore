@@ -1,6 +1,7 @@
 import './Header.css';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import { API_ENDPOINTS } from '../../constants/api';
 
 function Header() {
   const navigate = useNavigate();
@@ -31,7 +32,7 @@ function Header() {
           </ul>
         </div>
         <ul className="list-header-right">
-          {isAuthorized && <li className="menu-button"><Link to="/profile">Профиль</Link></li>}
+          {isAuthorized && <li className="menu-button"><Link to="/profile">Профиль <kbd>Shift+#</kbd></Link></li>}
           {isAuthorized && (
             <button
               className="logout-button"
@@ -41,7 +42,7 @@ function Header() {
                   const cu = storedUser ? JSON.parse(storedUser) : null;
                   if (cu?.userId) {
                     try {
-                      await fetch('http://localhost:5000/api/users/logout', {
+                      await fetch(API_ENDPOINTS.LOGOUT, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ userId: cu.userId })

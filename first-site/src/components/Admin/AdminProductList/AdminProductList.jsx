@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react';
 import "./AdminProductList.css";
 import { useNavigate } from 'react-router-dom';
+import { API_ENDPOINTS } from '../../../constants/api';
 
-const API_URL = 'http://localhost:5000/api/products'; // совпадает с Catalog
+const API_URL = API_ENDPOINTS.PRODUCTS;
+const CATEGORIES_API_URL = API_ENDPOINTS.CATEGORIES;
+const MANUFACTURERS_API_URL = API_ENDPOINTS.MANUFACTURERS;
+const UPLOAD_API_URL = API_ENDPOINTS.UPLOAD_PRODUCT_IMAGE;
 
 const AdminProductList = () => {
   const [products, setProducts] = useState([]);
@@ -17,13 +21,11 @@ const AdminProductList = () => {
   });
   const navigate = useNavigate();
 
-  // Состояния для модальных окон
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   
-  // Состояния для форм
   const [productForm, setProductForm] = useState({
     name: '',
     description: '',
@@ -39,8 +41,51 @@ const AdminProductList = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
 
+  const [categoryForm, setCategoryForm] = useState({
+    name: '',
+    description: ''
+  });
+  const [manufacturerForm, setManufacturerForm] = useState({
+    name: '',
+    description: ''
+  });
+  const [categoryErrors, setCategoryErrors] = useState({});
+  const [manufacturerErrors, setManufacturerErrors] = useState({});
+  const [categoryLoading, setCategoryLoading] = useState(false);
+  const [manufacturerLoading, setManufacturerLoading] = useState(false);
+
+  // Состояния для загрузки списков категорий и производителей
+  const [categories, setCategories] = useState([]);
+  const [manufacturers, setManufacturers] = useState([]);
+  const [loadingLists, setLoadingLists] = useState(false);
+
   const updateFilters = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  // Загрузка списков категорий и производителей
+  const loadCategories = async () => {
+    try {
+      const response = await fetch(CATEGORIES_API_URL);
+      if (response.ok) {
+        const data = await response.json();
+        setCategories(data);
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки категорий:', error);
+    }
+  };
+
+  const loadManufacturers = async () => {
+    try {
+      const response = await fetch(MANUFACTURERS_API_URL);
+      if (response.ok) {
+        const data = await response.json();
+        setManufacturers(data);
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки производителей:', error);
+    }
   };
 
   useEffect(() => {
@@ -78,7 +123,11 @@ const AdminProductList = () => {
       .finally(() => setLoading(false));
   }, [filters]);
 
-  // поиск по имени
+  useEffect(() => {
+    loadCategories();
+    loadManufacturers();
+  }, []);
+
   const items = Array.isArray(products) ? products : [];
   const filteredItems = items.filter(item =>
     (item.name || item.name_product || '')
@@ -100,7 +149,6 @@ const AdminProductList = () => {
     return url.replace(/^.*(\/images\/[^/]+)$/i, '$1').replace(/\\/g, '/');
   };
 
-  // Функции для работы с модальными окнами
   const openAddModal = () => {
     setProductForm({
       name: '',
@@ -149,7 +197,6 @@ const AdminProductList = () => {
     setFormErrors({});
   };
 
-  // Валидация формы
   const validateForm = () => {
     const errors = {};
     const nameStr = String(productForm.name ?? '').trim();
@@ -165,7 +212,6 @@ const AdminProductList = () => {
     if (priceStr && Number(priceStr) < 0) errors.price = 'Цена не может быть отрицательной';
     if (weightStr && Number(weightStr) < 0) errors.weight = 'Вес не может быть отрицательным';
     
-    // Для создания товара изображение обязательно
     if (showAddModal && !selectedFile && !productForm.imageUrl) {
       errors.image = 'Изображение обязательно';
     }
@@ -174,7 +220,6 @@ const AdminProductList = () => {
     return Object.keys(errors).length === 0;
   };
 
-  // Обработка изменения формы
   const handleFormChange = (field, value) => {
     setProductForm(prev => ({ ...prev, [field]: value }));
     if (formErrors[field]) {
@@ -182,13 +227,11 @@ const AdminProductList = () => {
     }
   };
 
-  // Обработка выбора файла
   const handleFileSelect = (event) => {
     const file = event.target.files[0];
     if (file) {
       setSelectedFile(file);
       
-      // Создаем превью изображения
       const reader = new FileReader();
       reader.onload = (e) => {
         setImagePreview(e.target.result);
@@ -197,12 +240,11 @@ const AdminProductList = () => {
     }
   };
 
-  // Загрузка изображения на сервер
   const uploadImage = async (file) => {
     const formData = new FormData();
     formData.append('image', file);
 
-    const response = await fetch('http://localhost:5000/api/upload/product-image', {
+    const response = await fetch(UPLOAD_API_URL, {
       method: 'POST',
       body: formData
     });
@@ -215,7 +257,6 @@ const AdminProductList = () => {
     return result.imageUrl;
   };
 
-  // Создание товара
   const handleCreateProduct = async () => {
     if (!validateForm()) return;
     
@@ -223,7 +264,6 @@ const AdminProductList = () => {
     try {
       let imageUrl = null;
       
-      // Если выбран файл, загружаем его
       if (selectedFile) {
         imageUrl = await uploadImage(selectedFile);
       } else if (productForm.imageUrl) {
@@ -263,7 +303,6 @@ const AdminProductList = () => {
     }
   };
 
-  // Обновление товара
   const handleUpdateProduct = async () => {
     if (!validateForm() || !selectedProduct) return;
     
@@ -271,7 +310,6 @@ const AdminProductList = () => {
     try {
       let imageUrl = productForm.imageUrl;
       
-      // Если выбран новый файл, загружаем его
       if (selectedFile) {
         imageUrl = await uploadImage(selectedFile);
       }
@@ -310,7 +348,6 @@ const AdminProductList = () => {
     }
   };
 
-  // Удаление товара
   const handleDeleteProduct = async () => {
     if (!selectedProduct) return;
     
@@ -336,6 +373,76 @@ const AdminProductList = () => {
     }
   };
 
+  const handleCreateCategory = async () => {
+    const errors = {};
+    if (!categoryForm.name.trim()) errors.name = 'Название категории обязательно';
+    setCategoryErrors(errors);
+    
+    if (Object.keys(errors).length > 0) return;
+    
+    setCategoryLoading(true);
+    try {
+      const res = await fetch(CATEGORIES_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: categoryForm.name.trim(),
+          description: categoryForm.description.trim() || null
+        })
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Ошибка создания категории');
+      }
+
+      setCategoryForm({ name: '', description: '' });
+      setCategoryErrors({});
+      alert('Категория успешно создана!');
+      loadCategories();
+    } catch (e) {
+      console.error(e);
+      setCategoryErrors({ submit: e.message });
+    } finally {
+      setCategoryLoading(false);
+    }
+  };
+
+  const handleCreateManufacturer = async () => {
+    const errors = {};
+    if (!manufacturerForm.name.trim()) errors.name = 'Название производителя обязательно';
+    setManufacturerErrors(errors);
+    
+    if (Object.keys(errors).length > 0) return;
+    
+    setManufacturerLoading(true);
+    try {
+      const res = await fetch(MANUFACTURERS_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: manufacturerForm.name.trim(),
+          description: manufacturerForm.description.trim() || null
+        })
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Ошибка создания производителя');
+      }
+
+      setManufacturerForm({ name: '', description: '' });
+      setManufacturerErrors({});
+      alert('Производитель успешно создан!');
+      loadManufacturers();
+    } catch (e) {
+      console.error(e);
+      setManufacturerErrors({ submit: e.message });
+    } finally {
+      setManufacturerLoading(false);
+    }
+  };
+
   if (loading) return <div className="admin-list-loading">Загрузка...</div>;
   if (error) return <div className="admin-list-error">{error}</div>;
 
@@ -348,127 +455,203 @@ const AdminProductList = () => {
         </button>
       </div>
       
-      <div className="admin-controls">
-        <div className="admin-search">
-          <input
-            type="text"
-            placeholder="Поиск товаров..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="admin-search-input"
-          />
-        </div>
+      <div className="admin-main-content">
+        <div className="admin-products-section">
+          <div className="admin-controls">
+            <div className="admin-search">
+              <input
+                type="text"
+                placeholder="Поиск товаров..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="admin-search-input"
+              />
+            </div>
 
-        <div className="admin-filters">
-          <select
-            value={filters.category}
-            onChange={(e) => updateFilters('category', e.target.value)}
-            className="admin-filter-select"
-          >
-            <option value="">Все категории</option>
-            <option value="Шоколад">Шоколад</option>
-            <option value="Конфеты">Конфеты</option>
-            <option value="Торты">Торты</option>
-            <option value="Чизкейки">Чизкейки</option>
-            <option value="Капкейк">Капкейк</option>
-          </select>
-
-          <select
-            value={filters.manufacturer}
-            onChange={(e) => updateFilters('manufacturer', e.target.value)}
-            className="admin-filter-select"
-          >
-            <option value="">Все производители</option>
-            <option value="Сладкая Фабрика">Сладкая Фабрика</option>
-            <option value="Шоколадная фабрика">Шоколадная фабрика</option>
-          </select>
-
-          <select
-            value={filters.priceSort}
-            onChange={(e) => updateFilters('priceSort', e.target.value)}
-            className="admin-filter-select"
-          >
-            <option value="">Цена</option>
-            <option value="ASC">По возрастанию</option>
-            <option value="DESC">По убыванию</option>
-          </select>
-
-          <select
-            value={filters.weightSort}
-            onChange={(e) => updateFilters('weightSort', e.target.value)}
-            className="admin-filter-select"
-          >
-            <option value="">Вес</option>
-            <option value="ASC">По возрастанию</option>
-            <option value="DESC">По убыванию</option>
-          </select>
-        </div>
-      </div>
-
-      <div className="admin-catalog-grid">
-        {filteredItems.length === 0 ? (
-          <div className="admin-list-empty">
-            {searchTerm ? 'Товары не найдены' : 'Нет товаров'}
-          </div>
-        ) : (
-          filteredItems.map((p) => {
-            const id = p.product_id || p.id;
-            const name = p.name || p.name_product || 'Товар';
-            const image = p.image_url || p.photo_url || '';
-            const price = p.price ?? 0;
-            return (
-              <article
-                key={id}
-                className="admin-product-card"
-                role="article"
-                tabIndex={0}
-                onKeyDown={(e) => { if (e.key === 'Enter') {/* noop */} }}
+            <div className="admin-filters">
+              <select
+                value={filters.category}
+                onChange={(e) => updateFilters('category', e.target.value)}
+                className="admin-filter-select"
               >
-                <div className="admin-product-thumb">
-                  {image ? <img src={normalizeImg(image)} alt={name} /> : <div className="admin-thumb-placeholder">Нет фото</div>}
-                </div>
+                <option value="">Все категории</option>
+                {categories.map(category => (
+                  <option key={category.id} value={category.name}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
 
-                <div className="admin-product-body">
-                  <h3 className="admin-product-title">{name}</h3>
-                  <p className="admin-product-desc">{normalizeDescription(p.description || p.name_description)}</p>
+              <select
+                value={filters.manufacturer}
+                onChange={(e) => updateFilters('manufacturer', e.target.value)}
+                className="admin-filter-select"
+              >
+                <option value="">Все производители</option>
+                {manufacturers.map(manufacturer => (
+                  <option key={manufacturer.id} value={manufacturer.name}>
+                    {manufacturer.name}
+                  </option>
+                ))}
+              </select>
 
-                  <div className="admin-meta-grid">
-                    { (p.category || p.category_name) && <span className="admin-meta-chip">Категория: {p.category || p.category_name}</span> }
-                    { (p.manufacturer || p.manufacturer_name) && <span className="admin-meta-chip">Производитель: {p.manufacturer || p.manufacturer_name}</span> }
-                    { (p.weightGrams || p.weight_grams) && <span className="admin-meta-chip">Вес: {p.weightGrams || p.weight_grams} г</span> }
-                    { p.sku && <span className="admin-meta-chip">Артикул: {p.sku}</span> }
-                  </div>
+              <select
+                value={filters.priceSort}
+                onChange={(e) => updateFilters('priceSort', e.target.value)}
+                className="admin-filter-select"
+              >
+                <option value="">Цена</option>
+                <option value="ASC">По возрастанию</option>
+                <option value="DESC">По убыванию</option>
+              </select>
 
-                  <div className="admin-product-footer">
-                    <span className="admin-product-price">
-                      {Number(price).toLocaleString("ru-RU", { style: "currency", currency: "RUB", maximumFractionDigits: 0 })}
-                    </span>
+              <select
+                value={filters.weightSort}
+                onChange={(e) => updateFilters('weightSort', e.target.value)}
+                className="admin-filter-select"
+              >
+                <option value="">Вес</option>
+                <option value="ASC">По возрастанию</option>
+                <option value="DESC">По убыванию</option>
+              </select>
+            </div>
+          </div>
 
-                    <div className="admin-product-actions">
-                      <button
-                        className="admin-action-btn"
-                        onClick={(e) => { e.stopPropagation(); openEditModal(p); }}
-                        title="Редактировать"
-                      >
-                        Редактировать
-                      </button>
-                      <button
-                        className="admin-action-btn admin-action-delete"
-                        onClick={(e) => { e.stopPropagation(); openDeleteModal(p); }}
-                        title="Удалить"
-                      >
-                        Удалить
-                      </button>
+          <div className="admin-catalog-grid">
+            {filteredItems.length === 0 ? (
+              <div className="admin-list-empty">
+                {searchTerm ? 'Товары не найдены' : 'Нет товаров'}
+              </div>
+            ) : (
+              filteredItems.map((p) => {
+                const id = p.product_id || p.id;
+                const name = p.name || p.name_product || 'Товар';
+                const image = p.image_url || p.photo_url || '';
+                const price = p.price ?? 0;
+                return (
+                  <article
+                    key={id}
+                    className="admin-product-card"
+                    role="article"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter') {} }}
+                  >
+                    <div className="admin-product-thumb">
+                      {image ? <img src={normalizeImg(image)} alt={name} /> : <div className="admin-thumb-placeholder">Нет фото</div>}
                     </div>
-                  </div>
-                </div>
-              </article>
-            );
-          })
-        )}
+
+                    <div className="admin-product-body">
+                      <h3 className="admin-product-title">{name}</h3>
+                      <p className="admin-product-desc">{normalizeDescription(p.description || p.name_description)}</p>
+
+                      <div className="admin-meta-grid">
+                        { (p.category || p.category_name) && <span className="admin-meta-chip">Категория: {p.category || p.category_name}</span> }
+                        { (p.manufacturer || p.manufacturer_name) && <span className="admin-meta-chip">Производитель: {p.manufacturer || p.manufacturer_name}</span> }
+                        { (p.weightGrams || p.weight_grams) && <span className="admin-meta-chip">Вес: {p.weightGrams || p.weight_grams} г</span> }
+                        { p.sku && <span className="admin-meta-chip">Артикул: {p.sku}</span> }
+                      </div>
+
+                      <div className="admin-product-footer">
+                        <span className="admin-product-price">
+                          {Number(price).toLocaleString("ru-RU", { style: "currency", currency: "RUB", maximumFractionDigits: 0 })}
+                        </span>
+
+                        <div className="admin-product-actions">
+                          <button
+                            className="admin-action-btn"
+                            onClick={(e) => { e.stopPropagation(); openEditModal(p); }}
+                            title="Редактировать"
+                          >
+                            Редактировать
+                          </button>
+                          <button
+                            className="admin-action-btn admin-action-delete"
+                            onClick={(e) => { e.stopPropagation(); openDeleteModal(p); }}
+                            title="Удалить"
+                          >
+                            Удалить
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })
+            )}
+          </div>
+        </div>
+
+        <div className="admin-management-section">
+          <div className="admin-management-header">
+            <h3>Управление справочниками</h3>
+          </div>
+
+          <div className="admin-form-section">
+            <h4>Создать категорию</h4>
+            <form onSubmit={(e) => { e.preventDefault(); handleCreateCategory(); }}>
+              <div className="admin-form-group">
+                <label>Название категории *</label>
+                <input
+                  type="text"
+                  value={categoryForm.name}
+                  onChange={(e) => setCategoryForm(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Введите название категории"
+                />
+                {categoryErrors.name && <div className="admin-form-error">{categoryErrors.name}</div>}
+              </div>
+
+              <div className="admin-form-group">
+                <label>Описание</label>
+                <textarea
+                  value={categoryForm.description}
+                  onChange={(e) => setCategoryForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Введите описание категории"
+                  rows="3"
+                />
+              </div>
+
+              {categoryErrors.submit && <div className="admin-form-error">{categoryErrors.submit}</div>}
+
+              <button type="submit" disabled={categoryLoading} className="admin-submit-btn">
+                {categoryLoading ? 'Создание...' : 'Создать категорию'}
+              </button>
+            </form>
+          </div>
+
+          <div className="admin-form-section">
+            <h4>Создать производителя</h4>
+            <form onSubmit={(e) => { e.preventDefault(); handleCreateManufacturer(); }}>
+              <div className="admin-form-group">
+                <label>Название производителя *</label>
+                <input
+                  type="text"
+                  value={manufacturerForm.name}
+                  onChange={(e) => setManufacturerForm(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Введите название производителя"
+                />
+                {manufacturerErrors.name && <div className="admin-form-error">{manufacturerErrors.name}</div>}
+              </div>
+
+              <div className="admin-form-group">
+                <label>Описание</label>
+                <textarea
+                  value={manufacturerForm.description}
+                  onChange={(e) => setManufacturerForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Введите описание производителя"
+                  rows="3"
+                />
+              </div>
+
+              {manufacturerErrors.submit && <div className="admin-form-error">{manufacturerErrors.submit}</div>}
+
+              <button type="submit" disabled={manufacturerLoading} className="admin-submit-btn">
+                {manufacturerLoading ? 'Создание...' : 'Создать производителя'}
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
 
-      {/* Модальное окно добавления товара */}
       {showAddModal && (
         <div className="admin-modal-backdrop" onClick={closeModals}>
           <div className="admin-modal-card" onClick={e => e.stopPropagation()}>
@@ -532,11 +715,11 @@ const AdminProductList = () => {
                       onChange={(e) => handleFormChange('category', e.target.value)}
                     >
                       <option value="">Выберите категорию</option>
-                      <option value="Шоколад">Шоколад</option>
-                      <option value="Конфеты">Конфеты</option>
-                      <option value="Торты">Торты</option>
-                      <option value="Чизкейки">Чизкейки</option>
-                      <option value="Капкейк">Капкейк</option>
+                      {categories.map(category => (
+                        <option key={category.id} value={category.name}>
+                          {category.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
@@ -547,8 +730,11 @@ const AdminProductList = () => {
                       onChange={(e) => handleFormChange('manufacturer', e.target.value)}
                     >
                       <option value="">Выберите производителя</option>
-                      <option value="Сладкая Фабрика">Сладкая Фабрика</option>
-                      <option value="Шоколадная фабрика">Шоколадная фабрика</option>
+                      {manufacturers.map(manufacturer => (
+                        <option key={manufacturer.id} value={manufacturer.name}>
+                          {manufacturer.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -597,7 +783,6 @@ const AdminProductList = () => {
         </div>
       )}
 
-      {/* Модальное окно редактирования товара */}
       {showEditModal && (
         <div className="admin-modal-backdrop" onClick={closeModals}>
           <div className="admin-modal-card" onClick={e => e.stopPropagation()}>
@@ -661,11 +846,11 @@ const AdminProductList = () => {
                       onChange={(e) => handleFormChange('category', e.target.value)}
                     >
                       <option value="">Выберите категорию</option>
-                      <option value="Шоколад">Шоколад</option>
-                      <option value="Конфеты">Конфеты</option>
-                      <option value="Торты">Торты</option>
-                      <option value="Чизкейки">Чизкейки</option>
-                      <option value="Капкейк">Капкейк</option>
+                      {categories.map(category => (
+                        <option key={category.id} value={category.name}>
+                          {category.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
@@ -676,8 +861,11 @@ const AdminProductList = () => {
                       onChange={(e) => handleFormChange('manufacturer', e.target.value)}
                     >
                       <option value="">Выберите производителя</option>
-                      <option value="Сладкая Фабрика">Сладкая Фабрика</option>
-                      <option value="Шоколадная фабрика">Шоколадная фабрика</option>
+                      {manufacturers.map(manufacturer => (
+                        <option key={manufacturer.id} value={manufacturer.name}>
+                          {manufacturer.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -732,7 +920,6 @@ const AdminProductList = () => {
         </div>
       )}
 
-      {/* Модальное окно подтверждения удаления */}
       {showDeleteModal && selectedProduct && (
         <div className="admin-modal-backdrop" onClick={closeModals}>
           <div className="admin-modal-card admin-delete-modal" onClick={e => e.stopPropagation()}>
