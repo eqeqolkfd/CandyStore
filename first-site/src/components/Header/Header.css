@@ -88,6 +88,15 @@ header {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
+.menu-button kbd.hotkey-hint {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.menu-button:hover kbd.hotkey-hint {
+  opacity: 1;
+}
+
 
 @media (max-width: 1199.98px) {
   .header-nav {

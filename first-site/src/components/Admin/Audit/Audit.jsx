@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import './Audit.css';
+import { API_ENDPOINTS } from '../../../constants/api';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = API_ENDPOINTS.AUDIT;
 
 const Audit = () => {
   const [auditLogs, setAuditLogs] = useState([]);
@@ -44,7 +45,7 @@ const Audit = () => {
         ...filters
       });
 
-      const url = `${API_URL}/audit?${params}`;
+      const url = `${API_URL}?${params}`;
 
       const response = await fetch(url, {
         method: 'GET',

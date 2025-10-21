@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './Cart.css';
+import { API_ENDPOINTS } from '../../constants/api';
 
 function Cart() {
   const [cartItems, setCartItems] = useState([]);
@@ -347,7 +348,7 @@ function Cart() {
                   setCheckoutSubmitting(true);
                   
                   try {
-                    const response = await fetch('http://localhost:5000/api/orders', {
+                    const response = await fetch(API_ENDPOINTS.ORDERS, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({
@@ -365,7 +366,7 @@ function Cart() {
                     if (response.ok) {
                       const { orderId } = await response.json();
                       try {
-                        await fetch('http://localhost:5000/api/payments', {
+                        await fetch(API_ENDPOINTS.PAYMENTS, {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({

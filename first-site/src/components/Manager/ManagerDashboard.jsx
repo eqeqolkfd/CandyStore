@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import './ManagerDashboard.css';
+import { API_ENDPOINTS } from '../../constants/api';
 
-const API = 'http://localhost:5000/api';
+const API = API_ENDPOINTS.ORDERS;
 
 function ManagerDashboard() {
   const [topProducts, setTopProducts] = useState([]); // {name, total_qty, total_sum}
@@ -14,10 +15,10 @@ function ManagerDashboard() {
       setError('');
       try {
         // Берём реальные заказы и агрегируем позиции
-        const res = await fetch(`${API}/orders/admin/all`);
+        const res = await fetch(`${API}/admin/all`);
         const orders = res.ok ? await res.json() : [];
         const orderIds = Array.isArray(orders) ? orders.map(o => o.order_id) : [];
-        const itemReqs = orderIds.map(id => fetch(`${API}/orders?orderId=${id}`));
+        const itemReqs = orderIds.map(id => fetch(`${API}?orderId=${id}`));
         const itemRes = await Promise.all(itemReqs);
         const itemJson = await Promise.all(itemRes.map(r => r.ok ? r.json() : null));
         const map = new Map();

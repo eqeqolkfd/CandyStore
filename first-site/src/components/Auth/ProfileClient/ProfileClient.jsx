@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import './ProfileClient.css';
 import { useNavigate } from 'react-router-dom';
+import { API_ENDPOINTS } from '../../../constants/api';
 
 function ProfileClient() {
   const stored = typeof window !== 'undefined' ? localStorage.getItem('currentUser') : null;
@@ -74,7 +75,7 @@ function ProfileClient() {
     setModalLoading(true);
     setModalProducts([]);
     try {
-      const r = await fetch(`http://localhost:5000/api/orders?orderId=${orderId}`);
+      const r = await fetch(`${API_ENDPOINTS.ORDERS}?orderId=${orderId}`);
       if (!r.ok) {
         setModalProducts([{ error: 'Ошибка загрузки информации о заказе' }]);
       } else {
@@ -196,7 +197,7 @@ function ProfileClient() {
     
     setPasswordCheckLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/users/check-password', {
+      const response = await fetch(`${API_ENDPOINTS.USERS}/check-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -287,7 +288,7 @@ function ProfileClient() {
         updateData.newPassword = editForm.newPassword;
       }
 
-      const response = await fetch('http://localhost:5000/api/users/update', {
+      const response = await fetch(`${API_ENDPOINTS.USERS}/update`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -331,7 +332,7 @@ function ProfileClient() {
   async function handleDeleteAccount() {
     setDeleteError('');
     try {
-      const response = await fetch('http://localhost:5000/api/users/delete', {
+      const response = await fetch(`${API_ENDPOINTS.USERS}/delete`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -360,8 +361,8 @@ function ProfileClient() {
           return;
         }
         const [meRes, payRes] = await Promise.all([
-          fetch(`http://localhost:5000/api/users/me?userId=${userId}`),
-          fetch(`http://localhost:5000/api/users/payments?userId=${userId}`)
+          fetch(`${API_ENDPOINTS.USERS}/me?userId=${userId}`),
+          fetch(`${API_ENDPOINTS.USERS}/payments?userId=${userId}`)
         ]);
         if (!meRes.ok) throw new Error('Не удалось получить профиль');
         const me = await meRes.json();

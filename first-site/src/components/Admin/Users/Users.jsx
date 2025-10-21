@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Users.css';
+import { API_ENDPOINTS } from '../../../constants/api';
 
-const API_URL = 'http://localhost:5000/api/users';
+const API_URL = API_ENDPOINTS.USERS;
 
 const roleNames = {
   admin: 'Администратор',
