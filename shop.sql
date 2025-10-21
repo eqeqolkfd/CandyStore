@@ -811,6 +811,10 @@ VALUES
 SELECT setval('users_user_id_seq', 1, true);
 
 SELECT setval('products_product_id_seq', (SELECT MAX(product_id) FROM products), true);
+
+SELECT setval('categories_category_id_seq', (SELECT MAX(category_id) FROM categories), true);
+
+SELECT setval('manufacturers_manufacturer_id_seq', (SELECT MAX(manufacturer_id) FROM manufacturers), true);
   
 INSERT INTO user_roles (user_id, role_id)
 SELECT 1, role_id FROM roles WHERE name_role = 'admin';
@@ -820,6 +824,8 @@ select * from order_statuses;
 select * from products;
 
 select * from manufacturers;
+
+select * from categories;
 
 select * from orders;
 
