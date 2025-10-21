@@ -13,7 +13,7 @@ const ensureBackupsDir = async () => {
     await fs.access(backupPath);
   } catch {
     await fs.mkdir(backupPath, { recursive: true });
-    console.log('📁 Создана папка backups:', backupPath);
+    console.log('Создана папка backups:', backupPath);
   }
 };
 
@@ -24,7 +24,7 @@ ensureBackupsDir();
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const backupPath = path.join(__dirname, '../../../backups');
-    console.log('📁 Путь для загрузки файлов:', backupPath);
+    console.log('Путь для загрузки файлов:', backupPath);
     cb(null, backupPath);
   },
   filename: function (req, file, cb) {
@@ -32,7 +32,7 @@ const storage = multer.diskStorage({
     // Сохраняем с оригинальным расширением (.bak или .sql)
     const originalExt = path.extname(file.originalname);
     const filename = `restore_${timestamp}${originalExt}`;
-    console.log('📄 Имя файла для сохранения:', filename);
+    console.log('Имя файла для сохранения:', filename);
     cb(null, filename);
   }
 });
@@ -40,11 +40,11 @@ const storage = multer.diskStorage({
 const upload = multer({ 
   storage: storage,
   fileFilter: function (req, file, cb) {
-    console.log('📁 Проверка файла:', file.originalname, 'Тип:', file.mimetype);
+    console.log('Проверка файла:', file.originalname, 'Тип:', file.mimetype);
     if (file.originalname.endsWith('.bak') || file.originalname.endsWith('.sql')) {
       cb(null, true);
     } else {
-      console.log('❌ Неподдерживаемый тип файла:', file.originalname);
+      console.log('Неподдерживаемый тип файла:', file.originalname);
       cb(new Error('Разрешены только файлы .bak и .sql'), false);
     }
   },
@@ -56,13 +56,13 @@ const upload = multer({
 // Middleware для обработки ошибок multer
 const handleMulterError = (error, req, res, next) => {
   if (error instanceof multer.MulterError) {
-    console.error('❌ Ошибка multer:', error.message);
+    console.error(' Ошибка multer:', error.message);
     if (error.code === 'LIMIT_FILE_SIZE') {
       return res.status(400).json({ success: false, message: 'Файл слишком большой (максимум 100MB)' });
     }
     return res.status(400).json({ success: false, message: 'Ошибка загрузки файла: ' + error.message });
   } else if (error) {
-    console.error('❌ Ошибка загрузки файла:', error.message);
+    console.error('Ошибка загрузки файла:', error.message);
     return res.status(400).json({ success: false, message: error.message });
   }
   next();
@@ -148,24 +148,24 @@ router.delete('/:filename', authenticateToken, requireAdmin, async (req, res) =>
 // Восстановить из загруженного файла
 router.post('/restore-upload', authenticateToken, requireAdmin, upload.single('backupFile'), handleMulterError, async (req, res) => {
   try {
-    console.log('🚀 Получен запрос на восстановление из файла');
-    console.log('📁 req.file:', req.file);
-    console.log('👤 req.user:', req.user);
-    console.log('📋 req.headers:', req.headers);
+    console.log('Получен запрос на восстановление из файла');
+    console.log('req.file:', req.file);
+    console.log('req.user:', req.user);
+    console.log('req.headers:', req.headers);
 
     if (!req.file) {
-      console.error('❌ Файл не был загружен');
+      console.error('Файл не был загружен');
       return res.status(400).json({ success: false, message: 'Файл не был загружен' });
     }
 
-    console.log('✅ Файл загружен:', req.file.originalname, 'Путь:', req.file.path, 'Размер:', req.file.size);
+    console.log(' Файл загружен:', req.file.originalname, 'Путь:', req.file.path, 'Размер:', req.file.size);
     
     // Проверяем существование файла перед восстановлением
     try {
       await fs.access(req.file.path);
-      console.log('✅ Файл существует на диске');
+      console.log('Файл существует на диске');
     } catch (accessError) {
-      console.error('❌ Файл не найден на диске:', req.file.path);
+      console.error('Файл не найден на диске:', req.file.path);
       return res.status(500).json({ success: false, message: 'Загруженный файл не найден на сервере' });
     }
 
@@ -176,14 +176,14 @@ router.post('/restore-upload', authenticateToken, requireAdmin, upload.single('b
     // Удаляем временный файл после восстановления
     try {
       await fs.unlink(req.file.path);
-      console.log('🗑️ Временный файл удален:', req.file.path);
+      console.log('Временный файл удален:', req.file.path);
     } catch (unlinkError) {
-      console.warn('⚠️ Не удалось удалить временный файл:', unlinkError.message);
+      console.warn('Не удалось удалить временный файл:', unlinkError.message);
     }
 
     res.json({ success: true, message: 'База данных восстановлена из загруженного файла' });
   } catch (error) {
-    console.error('❌ Ошибка восстановления из загруженного файла:', error);
+    console.error('Ошибка восстановления из загруженного файла:', error);
     res.status(500).json({ success: false, message: 'Ошибка восстановления из загруженного файла', error: error.message });
   }
 });
