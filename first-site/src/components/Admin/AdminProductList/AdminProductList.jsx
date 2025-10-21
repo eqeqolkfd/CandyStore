@@ -396,7 +396,6 @@ const AdminProductList = () => {
 
       setCategoryForm({ name: '', description: '' });
       setCategoryErrors({});
-      alert('Категория успешно создана!');
       loadCategories();
     } catch (e) {
       console.error(e);
@@ -431,7 +430,6 @@ const AdminProductList = () => {
 
       setManufacturerForm({ name: '', description: '' });
       setManufacturerErrors({});
-      alert('Производитель успешно создан!');
       loadManufacturers();
     } catch (e) {
       console.error(e);

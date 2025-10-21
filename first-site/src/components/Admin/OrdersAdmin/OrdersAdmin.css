@@ -5,6 +5,40 @@
   align-items: center; 
   margin-bottom: 16px; 
 }
+
+.orders-admin-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.orders-search-input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #fff;
+  color: #333;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  min-width: 250px;
+}
+
+.orders-search-input:focus {
+  outline: none;
+  border-color: #9E8279;
+  box-shadow: 0 0 0 3px rgba(158,130,121,0.2);
+}
+
+.orders-search-input::placeholder {
+  color: #999;
+}
+
+.orders-search-info {
+  font-size: 14px;
+  color: #fff;
+  margin-top: 4px;
+  font-weight: 500;
+}
 .orders-admin h2 { margin: 0; font-size: 24px; color: #fff; font-weight: 700; }
 .orders-cleanup-btn {
   background: #dc3545;
@@ -55,6 +89,15 @@
     font-size: 22px;
   }
   
+  .orders-admin-controls {
+    gap: 8px;
+  }
+  
+  .orders-search-input {
+    min-width: 200px;
+    font-size: 13px;
+  }
+  
   .orders-admin-table {
     font-size: 13px;
   }
@@ -73,6 +116,24 @@
   .orders-admin h2 {
     font-size: 20px;
     margin-bottom: 12px;
+  }
+  
+  .orders-admin-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .orders-admin-controls {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  
+  .orders-search-input {
+    min-width: auto;
+    width: 100%;
   }
   
   .orders-admin-table {
@@ -133,6 +194,11 @@
     margin-bottom: 10px;
   }
   
+  .orders-search-input {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+  
   .orders-admin-table tr {
     padding: 12px 8px;
     margin-bottom: 6px;
@@ -162,6 +228,11 @@
   .orders-admin h2 {
     font-size: 16px;
     margin-bottom: 8px;
+  }
+  
+  .orders-search-input {
+    font-size: 13px;
+    padding: 8px 10px;
   }
   
   .orders-admin-table tr {

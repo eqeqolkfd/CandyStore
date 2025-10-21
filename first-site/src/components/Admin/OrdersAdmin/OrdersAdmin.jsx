@@ -4,11 +4,13 @@ import { API_ENDPOINTS } from '../../../constants/api';
 
 function OrdersAdmin() {
   const [orders, setOrders] = useState([]);
+  const [filteredOrders, setFilteredOrders] = useState([]);
   const [statuses, setStatuses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [savingId, setSavingId] = useState(null);
   const [cleaningUp, setCleaningUp] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     async function load() {
@@ -21,7 +23,9 @@ function OrdersAdmin() {
         ]);
         const o = oRes.ok ? await oRes.json() : [];
         const s = sRes.ok ? await sRes.json() : [];
-        setOrders(Array.isArray(o) ? o : []);
+        const ordersData = Array.isArray(o) ? o : [];
+        setOrders(ordersData);
+        setFilteredOrders(ordersData);
         setStatuses(Array.isArray(s) ? s : []);
       } catch (e) {
         setError('Не удалось загрузить заказы');
@@ -32,6 +36,21 @@ function OrdersAdmin() {
     load();
   }, []);
 
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredOrders(orders);
+    } else {
+      const filtered = orders.filter(order => {
+        if (!order.order_id) return false;
+        const orderIdStr = String(order.order_id);
+        const searchStr = searchTerm.trim().toLowerCase();
+        return orderIdStr.toLowerCase().includes(searchStr);
+      });
+      setFilteredOrders(filtered);
+    }
+  }, [searchTerm, orders]);
+
+
   const saveStatus = async (orderId, code) => {
     setSavingId(orderId);
     try {
@@ -41,7 +60,9 @@ function OrdersAdmin() {
         body: JSON.stringify({ code })
       });
       if (!res.ok) throw new Error('Failed to update');
-      setOrders(prev => prev.map(o => o.order_id === orderId ? { ...o, status_code: code, status_name: statuses.find(x=>x.code===code)?.name_orderstatuses || o.status_name } : o));
+      const updatedOrders = orders.map(o => o.order_id === orderId ? { ...o, status_code: code, status_name: statuses.find(x=>x.code===code)?.name_orderstatuses || o.status_name } : o);
+      setOrders(updatedOrders);
+      setFilteredOrders(updatedOrders);
     } catch (e) {
       setError('Не удалось сохранить статус');
     } finally {
@@ -65,7 +86,9 @@ function OrdersAdmin() {
         ]);
         const o = oRes.ok ? await oRes.json() : [];
         const s = sRes.ok ? await sRes.json() : [];
-        setOrders(Array.isArray(o) ? o : []);
+        const ordersData = Array.isArray(o) ? o : [];
+        setOrders(ordersData);
+        setFilteredOrders(ordersData);
         setStatuses(Array.isArray(s) ? s : []);
       }
     } catch (e) {
@@ -81,15 +104,36 @@ function OrdersAdmin() {
   return (
     <div className="orders-admin">
       <div className="orders-admin-header">
-        <h2>Список заказов</h2>
-        <button 
-          className="orders-cleanup-btn"
-          onClick={deleteOrdersOfDeletedUsers}
-          disabled={cleaningUp}
-          title="Удалить заказы удаленных пользователей"
-        >
-          {cleaningUp ? 'Очистка...' : 'Очистить заказы удаленных пользователей'}
-        </button>
+        <div>
+          <h2>Список заказов</h2>
+          {searchTerm && (
+            <div className="orders-search-info">
+              Найдено: {filteredOrders.length} из {orders.length} заказов
+              {filteredOrders.length === 0 && (
+                <span style={{ color: '#dc3545', marginLeft: '10px' }}>
+                  (Заказы с номером "{searchTerm}" не найдены)
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+        <div className="orders-admin-controls">
+          <input
+            type="text"
+            placeholder="Поиск по номеру заказа..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="orders-search-input"
+          />
+          <button 
+            className="orders-cleanup-btn"
+            onClick={deleteOrdersOfDeletedUsers}
+            disabled={cleaningUp}
+            title="Удалить заказы удаленных пользователей"
+          >
+            {cleaningUp ? 'Очистка...' : 'Очистить заказы удаленных пользователей'}
+          </button>
+        </div>
       </div>
       <table className="orders-admin-table">
         <thead>
@@ -103,26 +147,34 @@ function OrdersAdmin() {
           </tr>
         </thead>
         <tbody>
-          {orders.map(o => (
-            <tr key={o.order_id}>
-              <td>{o.order_id}</td>
-              <td>{`${o.first_name || ''} ${o.last_name || ''}`.trim()}</td>
-              <td>{o.email || '—'}</td>
-              <td>{new Date(o.created_at).toLocaleString('ru-RU')}</td>
-              <td>{Number(o.total_amount).toLocaleString('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 })}</td>
-              <td>
-                <select
-                  value={o.status_code || 'new'}
-                  onChange={(e)=> saveStatus(o.order_id, e.target.value)}
-                  disabled={savingId === o.order_id}
-                >
-                  {statuses.map(s => (
-                    <option key={s.status_id} value={s.code}>{s.name_orderstatuses}</option>
-                  ))}
-                </select>
+          {filteredOrders.length === 0 && searchTerm ? (
+            <tr>
+              <td colSpan="6" style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                Заказы с номером "{searchTerm}" не найдены
               </td>
             </tr>
-          ))}
+          ) : (
+            filteredOrders.map(o => (
+                <tr key={o.order_id}>
+                  <td>{o.order_id}</td>
+                  <td>{`${o.first_name || ''} ${o.last_name || ''}`.trim()}</td>
+                  <td>{o.email || '—'}</td>
+                  <td>{new Date(o.created_at).toLocaleString('ru-RU')}</td>
+                  <td>{Number(o.total_amount).toLocaleString('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 })}</td>
+                  <td>
+                    <select
+                      value={o.status_code || 'new'}
+                      onChange={(e)=> saveStatus(o.order_id, e.target.value)}
+                      disabled={savingId === o.order_id}
+                    >
+                      {statuses.map(s => (
+                        <option key={s.status_id} value={s.code}>{s.name_orderstatuses}</option>
+                      ))}
+                    </select>
+                  </td>
+                </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>
@@ -130,4 +182,3 @@ function OrdersAdmin() {
 }
 
 export default OrdersAdmin;
-
