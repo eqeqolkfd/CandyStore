@@ -1,8 +1,10 @@
 .mgr { padding: 16px; }
 .mgr h2 { margin: 0 0 16px; color: #fff; }
-.mgr-actions { display: flex; gap: 10px; margin-bottom: 16px; }
+.mgr-actions { display: flex; gap: 10px; margin-bottom: 16px; align-items: center; }
 .mgr-btn { padding: 8px 14px; background: #9E8279; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; }
 .mgr-btn:hover { filter: brightness(1.05); }
+.mgr-select { padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; background: #fff; font-size: 14px; color: #333; cursor: pointer; min-width: 140px; }
+.mgr-select:focus { outline: none; border-color: #9E8279; box-shadow: 0 0 0 2px rgba(158, 130, 121, 0.2); }
 .mgr-error { color: #c00; }
 .mgr-report { background: #fff; border: 1px solid #eee; border-radius: 10px; padding: 16px; }
 .mgr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
@@ -48,6 +50,12 @@
     font-size: 13px;
   }
   
+  .mgr-select {
+    padding: 7px 10px;
+    font-size: 13px;
+    min-width: 120px;
+  }
+  
   .mgr-report {
     padding: 14px;
   }
@@ -85,6 +93,12 @@
   .mgr-btn {
     padding: 6px 10px;
     font-size: 12px;
+  }
+  
+  .mgr-select {
+    padding: 6px 8px;
+    font-size: 12px;
+    min-width: 100px;
   }
   
   .mgr-report {
@@ -170,6 +184,12 @@
     font-size: 11px;
   }
   
+  .mgr-select {
+    padding: 5px 6px;
+    font-size: 11px;
+    min-width: 90px;
+  }
+  
   .mgr-report {
     padding: 10px;
   }
@@ -251,6 +271,12 @@
   .mgr-btn {
     padding: 4px 6px;
     font-size: 10px;
+  }
+  
+  .mgr-select {
+    padding: 4px 5px;
+    font-size: 10px;
+    min-width: 80px;
   }
   
   .mgr-report {
@@ -336,6 +362,12 @@
     font-size: 9px;
   }
   
+  .mgr-select {
+    padding: 3px 4px;
+    font-size: 9px;
+    min-width: 70px;
+  }
+  
   .mgr-report {
     padding: 6px;
   }
@@ -417,6 +449,12 @@
   .mgr-btn {
     padding: 10px 18px;
     font-size: 16px;
+  }
+  
+  .mgr-select {
+    padding: 10px 14px;
+    font-size: 16px;
+    min-width: 160px;
   }
   
   .mgr-report {

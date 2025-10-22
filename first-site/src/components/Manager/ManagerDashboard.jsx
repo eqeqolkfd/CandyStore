@@ -8,6 +8,27 @@ function ManagerDashboard() {
   const [topProducts, setTopProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedPeriod, setSelectedPeriod] = useState('all');
+
+  const getDateFilter = (period) => {
+    const now = new Date();
+    switch (period) {
+      case 'today':
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        return today.toISOString();
+      case 'week':
+        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        return weekAgo.toISOString();
+      case 'month':
+        const monthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+        return monthAgo.toISOString();
+      case 'year':
+        const yearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+        return yearAgo.toISOString();
+      default:
+        return null;
+    }
+  };
 
   useEffect(() => {
     async function load() {
@@ -16,7 +37,20 @@ function ManagerDashboard() {
       try {
         const res = await fetch(`${API}/admin/all`);
         const orders = res.ok ? await res.json() : [];
-        const orderIds = Array.isArray(orders) ? orders.map(o => o.order_id) : [];
+        
+        let filteredOrders = orders;
+        if (selectedPeriod !== 'all') {
+          const dateFilter = getDateFilter(selectedPeriod);
+          if (dateFilter) {
+            filteredOrders = orders.filter(order => {
+              const orderDate = new Date(order.created_at);
+              const filterDate = new Date(dateFilter);
+              return orderDate >= filterDate;
+            });
+          }
+        }
+        
+        const orderIds = Array.isArray(filteredOrders) ? filteredOrders.map(o => o.order_id) : [];
         const itemReqs = orderIds.map(id => fetch(`${API}?orderId=${id}`));
         const itemRes = await Promise.all(itemReqs);
         const itemJson = await Promise.all(itemRes.map(r => r.ok ? r.json() : null));
@@ -44,10 +78,20 @@ function ManagerDashboard() {
       }
     }
     load();
-  }, []);
+  }, [selectedPeriod]);
 
   const totalQty = useMemo(() => topProducts.reduce((s, p) => s + p.total_qty, 0), [topProducts]);
   const maxQty = useMemo(() => Math.max(1, ...topProducts.map(p => p.total_qty)), [topProducts]);
+
+  const getPeriodLabel = (period) => {
+    switch (period) {
+      case 'today': return ' (сегодня)';
+      case 'week': return ' (за неделю)';
+      case 'month': return ' (за месяц)';
+      case 'year': return ' (за год)';
+      default: return '';
+    }
+  };
 
   const exportCSV = () => {
     const header = 'Наименование;Количество;Сумма\n';
@@ -73,13 +117,24 @@ function ManagerDashboard() {
     <div className="mgr">
       <h2>Панель менеджера</h2>
       <div className="mgr-actions">
+        <select 
+          className="mgr-select" 
+          value={selectedPeriod} 
+          onChange={(e) => setSelectedPeriod(e.target.value)}
+        >
+          <option value="all">Все время</option>
+          <option value="today">Сегодня</option>
+          <option value="week">За неделю</option>
+          <option value="month">За месяц</option>
+          <option value="year">За год</option>
+        </select>
         <button className="mgr-btn" onClick={exportCSV}>Экспорт CSV</button>
       </div>
 
       <div id="mgr-report" className="mgr-report">
         <div className="mgr-grid">
           <div className="mgr-card">
-            <h3>Большой столбчатый график: продажи (qty)</h3>
+            <h3>Большой столбчатый график: продажи (qty){getPeriodLabel(selectedPeriod)}</h3>
             <div className="mgr-bar-chart mgr-bar-chart--big">
               {topProducts.map((p, idx) => (
                 <div key={idx} className="mgr-bar-item">
@@ -94,7 +149,7 @@ function ManagerDashboard() {
           </div>
 
           <div className="mgr-card">
-            <h3>Большая круговая диаграмма: доли продаж</h3>
+            <h3>Большая круговая диаграмма: доли продаж{getPeriodLabel(selectedPeriod)}</h3>
             <div className="mgr-pie big">
               {(() => {
                 let acc = 0;
