@@ -23,15 +23,13 @@ function Users() {
   const [search, setSearch] = useState('');
   const [sortDir, setSortDir] = useState('asc');
 
-  // модалка редактирования роли
-  const [editUser, setEditUser] = useState(null); // { ...user }
+  const [editUser, setEditUser] = useState(null);
   const [editRole, setEditRole] = useState('');
   const [editFirstName, setEditFirstName] = useState('');
   const [editLastName, setEditLastName] = useState('');
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError] = useState('');
 
-  // модалка добавления пользователя
   const [showAddModal, setShowAddModal] = useState(false);
   const [addLoading, setAddLoading] = useState(false);
   const [addError, setAddError] = useState('');
@@ -45,7 +43,6 @@ function Users() {
   const [addFormErrors, setAddFormErrors] = useState({});
   const [showAddPassword, setShowAddPassword] = useState(false);
   
-  // Модальное окно удаления пользователя
   const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
 
@@ -71,11 +68,9 @@ function Users() {
   const handleAddFormChange = e => {
     const { name, value } = e.target;
     setAddForm(f => ({ ...f, [name]: value }));
-    // валидация по мере ввода
     setAddFormErrors(prev => ({ ...prev, [name]: validateField(name, value, addForm) }));
   };
 
-  // Валидационные функции (по примеру Register)
   function validateEmail(val) {
     if (!val) return 'Введите почту';
     if (/[А-Яа-яЁё]/.test(val)) return 'Почта не должна содержать русские буквы';
@@ -127,7 +122,6 @@ function Users() {
     }
   }
 
-  // Текущий пользователь (из localStorage)
   const currentUser = useMemo(() => {
     try {
       const stored = typeof window !== 'undefined' ? localStorage.getItem('currentUser') : null;
@@ -178,7 +172,6 @@ function Users() {
       const headers = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = 'Bearer ' + token;
 
-      // Поддерживаем два варианта backend: DELETE /api/users/:id или DELETE /api/users/delete с JSON body
       let res = await fetch(`${API_URL}/${user_id}`, { method: 'DELETE', headers });
       if (res.status === 404) {
         res = await fetch(`${API_URL}/delete`, {
@@ -192,7 +185,6 @@ function Users() {
         const txt = await res.text();
         throw new Error(txt || `HTTP ${res.status}`);
       }
-      // Обновляем страницу для отображения изменений
       window.location.reload();
     } catch (e) {
       console.error(e);
@@ -216,7 +208,6 @@ function Users() {
     closeDeleteUserModal();
   };
 
-  // Открыть модалку редактирования роли
   const openEditRole = (user) => {
     const myId = currentUser?.userId ?? currentUser?.user_id ?? currentUser?.id ?? null;
     if (myId != null && String(myId) === String(user.user_id || user.id)) {
@@ -243,7 +234,6 @@ function Users() {
     setEditLoading(true);
     setEditError('');
 
-    // Проверяем, что не пытаемся назначить роль администратора
     if (editRole === 'admin') {
       setEditError('Нельзя назначить роль администратора через интерфейс');
       setEditLoading(false);
@@ -283,8 +273,7 @@ function Users() {
       }
 
       closeEditModal();
-      
-      // Обновляем страницу для отображения изменений
+
       window.location.reload();
     } catch (e) {
       console.error('Ошибка сохранения роли:', e);
@@ -317,7 +306,6 @@ function Users() {
         throw new Error(errTxt || `HTTP ${res.status}`);
       }
 
-      // Закрываем и обновляем список (лог аудита запишется на бэке как UPDATE_PROFILE)
       closeEditModal();
       window.location.reload();
     } catch (e) {
@@ -337,7 +325,6 @@ function Users() {
     if (token) headers['Authorization'] = 'Bearer ' + token;
 
     try {
-      // 1) Сохраняем имя/фамилию, если изменились
       const firstChanged = (editFirstName ?? '') !== (editUser.first_name ?? '');
       const lastChanged  = (editLastName  ?? '') !== (editUser.last_name  ?? '');
       if (firstChanged || lastChanged) {
@@ -358,7 +345,6 @@ function Users() {
         }
       }
 
-      // 2) Сохраняем роль, если изменилась
       const currentRole = String((editUser.role || editUser.name_role || 'client')).toLowerCase();
       if (editRole && editRole !== currentRole) {
         const r2 = await fetch(`${API_URL}/role`, {
@@ -373,18 +359,13 @@ function Users() {
       }
 
       closeEditModal();
-      
-      // Если текущий пользователь изменил свою роль, перенаправляем его
       const currentUserId = currentUser?.userId || currentUser?.user_id;
       if (currentUserId && String(currentUserId) === String(id)) {
-        // Пользователь изменил свою роль - обновляем localStorage
         const updatedUser = {
           ...currentUser,
           role: editRole
         };
         localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-        
-        // Перенаправляем на соответствующую страницу
         if (editRole === 'admin') {
           navigate('/admin/users');
         } else if (editRole === 'manager') {
@@ -393,7 +374,6 @@ function Users() {
           navigate('/catalog');
         }
       } else {
-        // Обычное обновление списка пользователей
         window.location.reload();
       }
     } catch (e) {
@@ -404,21 +384,18 @@ function Users() {
     }
   };
 
-  // Добавление пользователя — с валидацией
   const handleAddSubmit = async (e) => {
     e && e.preventDefault && e.preventDefault();
     setAddLoading(true);
     setAddError('');
     setAddFormErrors({});
 
-    // валидация всех полей
     const errs = {};
     errs.firstName = validateName(addForm.firstName);
     errs.lastName = validateLastName(addForm.lastName);
     errs.email = validateEmail(addForm.email) || validateEmailLength(addForm.email);
     errs.password = validatePassword(addForm.password);
 
-    // удаляем пустые ошибки
     Object.keys(errs).forEach(k => { if (!errs[k]) delete errs[k]; });
 
     if (Object.keys(errs).length > 0) {
@@ -431,7 +408,6 @@ function Users() {
       const headers = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = 'Bearer ' + token;
 
-      // 1. Регистрируем пользователя через админский API (без отправки писем)
       const regRes = await fetch(`${API_URL}/admin-create`, {
         method: 'POST',
         headers,
@@ -455,7 +431,6 @@ function Users() {
         return;
       }
 
-      // Получаем userId из ответа
       const userId = regData?.userId || regData?.user_id || regData?.id;
       
       if (!regRes.ok) {
@@ -471,10 +446,7 @@ function Users() {
         return;
       }
 
-      // 3. Закрываем модалку и обновляем страницу
       closeAddModal();
-      
-      // Обновляем страницу для отображения нового пользователя
       window.location.reload();
     } catch (err) {
       console.error('Создание пользователя:', err);
@@ -484,7 +456,6 @@ function Users() {
     }
   };
 
-  // Фильтрация + сортировка с исключением самого админа (если это нужно)
   const filteredSorted = useMemo(() => {
     const q = (search || '').trim().toLowerCase();
     let list = users.slice();
@@ -588,7 +559,6 @@ function Users() {
         </div>
       )}
 
-      {/* Модалка редактирования роли */}
       {editUser && (
         <div className="users-role-modal-backdrop" onClick={closeEditModal}>
           <div className="users-role-modal-card" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
@@ -631,7 +601,6 @@ function Users() {
         </div>
       )}
 
-      {/* Модалка добавления пользователя */}
       {showAddModal && (
         <div className="users-add-modal-backdrop" onClick={closeAddModal}>
           <div className="users-add-modal-card" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true">
@@ -709,7 +678,6 @@ function Users() {
         </div>
       )}
 
-      {/* Модальное окно подтверждения удаления пользователя */}
       {showDeleteUserModal && selectedUser && (
         <div className="users-modal-backdrop" onClick={closeDeleteUserModal}>
           <div className="users-modal-card users-delete-modal" onClick={e => e.stopPropagation()}>

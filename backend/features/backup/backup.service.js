@@ -54,7 +54,6 @@ class BackupService {
 
       console.log(`Бекап создан: ${filename} (${fileSizeInMB} MB)`);
 
-      // Сохраняем информацию о бекапе в базу данных
       const client = await pool.connect();
       try {
         const result = await client.query(
@@ -80,7 +79,6 @@ class BackupService {
     }
   }
 
-  // Получить список всех бекапов
   async getBackupsList() {
     try {
       const client = await pool.connect();
@@ -121,7 +119,6 @@ class BackupService {
     }
   }
 
-  // Получить путь к файлу бекапа
   async getBackupPath(filename) {
     const filepath = path.join(this.backupDir, filename);
     
@@ -133,12 +130,10 @@ class BackupService {
     }
   }
 
-  // Восстановить базу данных из бекапа
   async restoreFromBackup(filename) {
     const filepath = path.join(this.backupDir, filename);
     
     try {
-      // Проверяем существование файла
       await fs.access(filepath);
     } catch {
       throw new Error('Файл бекапа не найден');
@@ -153,10 +148,8 @@ class BackupService {
         password: process.env.DB_PASSWORD || '1*'
       };
 
-      // Команда psql для восстановления
       const psqlCommand = `psql -h ${dbConfig.host} -p ${dbConfig.port} -U ${dbConfig.username} -d ${dbConfig.database} -f "${filepath}"`;
-      
-      // Устанавливаем переменную окружения для пароля
+
       const env = { ...process.env, PGPASSWORD: dbConfig.password };
 
       console.log('Восстановление базы данных...');
@@ -169,12 +162,10 @@ class BackupService {
     }
   }
 
-  // Восстановить из загруженного файла
   async restoreFromUploadedFile(filePath, userId = null) {
     try {
       console.log('Начинаем восстановление из файла:', filePath);
-      
-      // Проверяем существование файла
+
       await fs.access(filePath);
       const fileStats = await fs.stat(filePath);
       console.log('Файл существует, размер:', fileStats.size, 'байт');
@@ -190,12 +181,10 @@ class BackupService {
 
       console.log('Конфигурация БД:', { ...dbConfig, password: '***' });
 
-      // Команда psql для восстановления
       const psqlCommand = `psql -h ${dbConfig.host} -p ${dbConfig.port} -U ${dbConfig.username} -d ${dbConfig.database} -f "${filePath}"`;
       
       console.log('Выполняем команду:', psqlCommand.replace(dbConfig.password, '***'));
-      
-      // Устанавливаем переменную окружения для пароля
+
       const env = { ...process.env, PGPASSWORD: dbConfig.password };
 
       console.log('Восстановление базы данных из загруженного файла...');
@@ -220,14 +209,12 @@ class BackupService {
     }
   }
 
-  // Удалить бекап
   async deleteBackup(filename) {
     try {
       console.log(`Начинаем удаление бекапа: ${filename}`);
       
       const client = await pool.connect();
       try {
-        // Получаем информацию о бекапе из базы данных
         const result = await client.query(
           'SELECT file_path, file_size_mb FROM backups WHERE filename = $1',
           [filename]
@@ -242,7 +229,6 @@ class BackupService {
         
         console.log(`Найден бекап в БД: ${filepath}, размер: ${fileSize} MB`);
 
-        // Проверяем существование файла перед удалением
         let fileExists = false;
         try {
           await fs.access(filepath);
@@ -252,7 +238,6 @@ class BackupService {
           console.warn(`Файл не найден на диске: ${filepath}`);
         }
 
-        // Удаляем файл с диска (если существует)
         if (fileExists) {
           try {
             await fs.unlink(filepath);
@@ -265,7 +250,6 @@ class BackupService {
           console.warn(`⚠️ Файл ${filepath} не найден на диске, но запись в БД будет удалена`);
         }
 
-        // Удаляем запись из базы данных
         const deleteResult = await client.query('DELETE FROM backups WHERE filename = $1', [filename]);
         console.log(`✅ Запись бекапа ${filename} удалена из базы данных (удалено записей: ${deleteResult.rowCount})`);
         
@@ -284,7 +268,6 @@ class BackupService {
     }
   }
 
-  // Очистить старые бекапы (старше указанного количества дней)
   async cleanupOldBackups(daysToKeep = 30) {
     try {
       const files = await fs.readdir(this.backupDir);

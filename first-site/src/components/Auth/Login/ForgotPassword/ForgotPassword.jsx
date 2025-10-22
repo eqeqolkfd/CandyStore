@@ -11,7 +11,6 @@ function ForgotPassword() {
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
 
-  // Валидация email (из Login.jsx)
   function validateEmail(val) {
     if (!val) return '';
     if (/[А-Яа-яЁё]/.test(val)) return 'Почта не должна содержать русские буквы';
@@ -21,7 +20,6 @@ function ForgotPassword() {
     return '';
   }
 
-  // Обработка отправки email для восстановления пароля
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
     setServerError('');
@@ -51,8 +49,7 @@ function ForgotPassword() {
         setServerError(data?.error || 'Ошибка отправки письма');
         return;
       }
-      
-      // Показываем успешное сообщение
+
       setSuccess(true);
       setServerError('');
     } catch (err) {
@@ -68,7 +65,6 @@ function ForgotPassword() {
         <h2 className="auth-title">Восстановление пароля</h2>
         
         {success ? (
-          // Сообщение об успешной отправке
           <div className="success-message">
             <div className="success-icon">✓</div>
             <h3>Письмо отправлено!</h3>
@@ -79,7 +75,6 @@ function ForgotPassword() {
             </div>
           </div>
         ) : (
-          // Форма ввода email
           <form className="auth-form" onSubmit={handleEmailSubmit} noValidate>
             <div className="form-field">
               <label htmlFor="forgot-email">E-mail</label>

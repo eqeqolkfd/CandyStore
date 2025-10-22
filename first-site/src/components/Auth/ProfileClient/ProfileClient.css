@@ -874,7 +874,6 @@
   }
 }
 
-/* Стили для секции бекапов */
 .profile-backup-section {
   margin-top: 40px;
   padding: 24px;
@@ -1160,7 +1159,6 @@
   transform: scale(1.05);
 }
 
-/* Адаптивность для бекапов */
 @media (max-width: 1024px) {
   .profile-backup-section {
     margin-top: 30px;
@@ -1259,7 +1257,6 @@
   }
 }
 
-/* Стили для модального окна удаления бекапа */
 .profile-backup-delete-modal-overlay {
   position: fixed;
   left: 0;
@@ -1356,7 +1353,6 @@
   background: #c82333;
 }
 
-/* Адаптивность для модального окна */
 @media (max-width: 768px) {
   .profile-backup-delete-modal {
     min-width: 280px;

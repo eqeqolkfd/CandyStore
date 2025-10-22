@@ -1,11 +1,10 @@
 const jwt = require('jsonwebtoken');
 
-// Middleware для проверки JWT токена
 const authenticateToken = (req, res, next) => {
   console.log('🔐 Проверка аутентификации для:', req.method, req.path);
   
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+  const token = authHeader && authHeader.split(' ')[1];
 
   console.log('📋 Authorization header:', authHeader);
   console.log('🎫 Token:', token ? `${token.substring(0, 20)}...` : 'НЕТ');
@@ -29,7 +28,6 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// Middleware для проверки роли администратора
 const requireAdmin = (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({ success: false, message: 'Пользователь не аутентифицирован' });

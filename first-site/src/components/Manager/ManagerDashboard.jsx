@@ -5,7 +5,7 @@ import { API_ENDPOINTS } from '../../constants/api';
 const API = API_ENDPOINTS.ORDERS;
 
 function ManagerDashboard() {
-  const [topProducts, setTopProducts] = useState([]); // {name, total_qty, total_sum}
+  const [topProducts, setTopProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -14,7 +14,6 @@ function ManagerDashboard() {
       setLoading(true);
       setError('');
       try {
-        // Берём реальные заказы и агрегируем позиции
         const res = await fetch(`${API}/admin/all`);
         const orders = res.ok ? await res.json() : [];
         const orderIds = Array.isArray(orders) ? orders.map(o => o.order_id) : [];
@@ -58,7 +57,6 @@ function ManagerDashboard() {
       const sum = p.total_sum || 0;
       return `${name};${qty};${sum}`;
     }).join('\n');
-    // Добавляем BOM для правильного отображения кириллицы в Excel
     const BOM = '\uFEFF';
     const blob = new Blob([BOM + header + rows], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);

@@ -40,7 +40,6 @@ async function loginUser({ email, password }) {
   }
   
   if (isValidPassword) {
-    // Создаем JWT токен
     const token = jwt.sign(
       { 
         userId: user.user_id, 

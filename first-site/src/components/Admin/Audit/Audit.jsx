@@ -14,15 +14,14 @@ const Audit = () => {
     dateFrom: '',
     dateTo: ''
   });
-  const [searchUser, setSearchUser] = useState(''); // Отдельное состояние для поиска пользователя
+  const [searchUser, setSearchUser] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [sortBy, setSortBy] = useState('timestamp');
   const [sortOrder, setSortOrder] = useState('desc');
-  const [isSearching, setIsSearching] = useState(false); // Состояние для индикатора поиска
+  const [isSearching, setIsSearching] = useState(false);
 
 
-  // Загрузка журнала аудита
   useEffect(() => {
     loadAuditLogs();
   }, [currentPage, sortBy, sortOrder, filters]);
@@ -82,7 +81,6 @@ const Audit = () => {
     }
   };
 
-  // Функция для выполнения поиска
   const handleSearch = () => {
     setFilters(prev => ({
       ...prev,
@@ -166,7 +164,6 @@ const Audit = () => {
         <p>Полная история действий всех пользователей в системе</p>
       </div>
 
-      {/* Фильтры */}
       <div className="audit-filters">
         <div className="audit-filter-group">
           <label>Действие:</label>
@@ -214,7 +211,6 @@ const Audit = () => {
         </div>
       </div>
 
-      {/* Статистика */}
       <div className="audit-stats">
         <div className="audit-stat-item">
           <span className="audit-stat-number">{auditLogs.length}</span>
@@ -234,7 +230,6 @@ const Audit = () => {
         </div>
       </div>
 
-      {/* Таблица журнала */}
       <div className="audit-table-container">
         <table className="audit-table">
           <thead>
@@ -309,7 +304,6 @@ const Audit = () => {
                         )}
                       </>
                     )}
-                    {/* Было/Стало на базе before_data/after_data для ключевых экшенов */}
                     {['CHANGE_ROLE','UPDATE_PRODUCT','UPDATE_USER','CHANGE_PASSWORD','UPDATE_PROFILE'].includes(log.action) && (
                       <>
                         {log.before_data && (
@@ -337,7 +331,6 @@ const Audit = () => {
         </table>
       </div>
 
-      {/* Пагинация */}
       {totalPages > 1 && (
         <div className="audit-pagination">
           <button

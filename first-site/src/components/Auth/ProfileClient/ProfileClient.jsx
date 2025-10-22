@@ -15,8 +15,7 @@ function ProfileClient() {
   const [modalOrder, setModalOrder] = useState(null);
   const [modalProducts, setModalProducts] = useState([]);
   const [modalLoading, setModalLoading] = useState(false);
-  
-  // Состояния для редактирования профиля
+
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
     first_name: '',
@@ -38,7 +37,6 @@ function ProfileClient() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteError, setDeleteError] = useState('');
 
-  // Состояния для бекапов (только для администраторов)
   const [backups, setBackups] = useState([]);
   const [backupLoading, setBackupLoading] = useState(false);
   const [backupError, setBackupError] = useState('');
@@ -50,10 +48,8 @@ function ProfileClient() {
 
   const navigate = useNavigate();
 
-  // Определяем роль пользователя
   const isAdmin = currentUser && currentUser.role === 'admin';
 
-  // Функции для работы с бекапами
   const loadBackups = async () => {
     if (!isAdmin) return;
     
@@ -76,7 +72,7 @@ function ProfileClient() {
       if (response.ok) {
         const data = await response.json();
         setBackups(data.backups || []);
-        setBackupError(''); // Очищаем ошибки при успешной загрузке
+        setBackupError('');
       } else {
         const errorData = await response.json().catch(() => ({}));
         setBackupError(errorData.message || 'Не удалось загрузить список бекапов');
@@ -111,7 +107,7 @@ function ProfileClient() {
       if (response.ok) {
         const data = await response.json();
         setBackupSuccess('Бекап создан успешно!');
-        loadBackups(); // Обновляем список
+        loadBackups();
       } else {
         const errorData = await response.json();
         setBackupError(errorData.message || 'Ошибка создания бекапа');
@@ -195,7 +191,7 @@ function ProfileClient() {
         }
         
         setBackupSuccess(successMessage);
-        loadBackups(); // Обновляем список
+        loadBackups();
         closeDeleteModal();
       } else {
         const errorData = await response.json();
@@ -220,7 +216,6 @@ function ProfileClient() {
       } else {
         setBackupError('Разрешены только файлы .bak и .sql');
         setRestoreFile(null);
-        // Очищаем input при ошибке
         event.target.value = '';
       }
     } else {
@@ -245,7 +240,6 @@ function ProfileClient() {
         return;
       }
 
-      // Создаем FormData для загрузки файла
       const formData = new FormData();
       formData.append('backupFile', restoreFile);
 
@@ -315,12 +309,9 @@ function ProfileClient() {
     return '—';
   };
 
-  // Для отображения в платежах: метод влияет на статус
   const displayedPaymentStatus = (payment) => {
     const methodKey = String(payment?.method_payments || '').toLowerCase();
-    // При получении (meet/cod) — всегда "В ожидании"
     if (methodKey === 'meet' || methodKey === 'cod') return 'В ожидании';
-    // Онлайн: карта / СБП — всегда "Оплачен"
     if (methodKey === 'card' || methodKey === 'sbp') return 'Оплачен';
     return paymentStatusLabel(payment?.payment_status);
   };
@@ -341,7 +332,6 @@ function ProfileClient() {
         setModalProducts([{ error: 'Ошибка загрузки информации о заказе' }]);
       } else {
         const data = await r.json();
-        // Ожидается поле items (или products)
         setModalProducts((Array.isArray(data.items) && data.items.length > 0)
           ? data.items
           : (Array.isArray(data) && data.length > 0 ? data[0].items : [])
@@ -356,13 +346,11 @@ function ProfileClient() {
 
   const normalizeImg = (url) => {
     if (!url) return '';
-    // Оставить только путь начиная с /images/
     const m = url.match(/[/\\]images[/\\][^/\\]+$/i);
     if (m) return '/images/' + m[0].split(/[/\\]/g).pop();
     return url.replace(/^.*(\/images\/[^/]+)$/i, '$1').replace(/\\/g, '/');
   };
 
-  // Функции валидации (из Register.jsx)
   function validateName(val) {
     if (val.length > 50) return 'Максимум 50 символов';
     return '';
@@ -381,7 +369,6 @@ function ProfileClient() {
     return '';
   }
 
-  // Функции для редактирования профиля
   const handleEditStart = () => {
     setEditForm({
       first_name: profile.first_name || '',
@@ -419,7 +406,6 @@ function ProfileClient() {
       [field]: value
     }));
 
-    // Валидация в реальном времени
     let error = '';
     if (field === 'first_name') {
       error = validateName(value);
@@ -430,7 +416,6 @@ function ProfileClient() {
     } else if (field === 'confirmOldPassword') {
       error = editForm.oldPassword !== value ? 'Пароли не совпадают' : '';
     } else if (field === 'oldPassword') {
-      // Проверяем правильность старого пароля
       if (value.trim()) {
         const isValid = await checkOldPassword(value);
         if (!isValid) {
@@ -452,7 +437,6 @@ function ProfileClient() {
     }));
   };
 
-  // Функция для проверки правильности старого пароля
   const checkOldPassword = async (password) => {
     if (!password.trim()) return false;
     
@@ -482,8 +466,7 @@ function ProfileClient() {
   const handleEditSave = async () => {
     setEditLoading(true);
     setEditError('');
-    
-    // Валидация перед отправкой
+
     const newErrors = {};
     
     if (!editForm.first_name.trim()) {
@@ -500,14 +483,12 @@ function ProfileClient() {
       if (lastNameError) newErrors.last_name = lastNameError;
     }
 
-    // Валидация паролей только если пользователь хочет их изменить
     const wantsToChangePassword = editForm.oldPassword || editForm.confirmOldPassword || editForm.newPassword;
     
     if (wantsToChangePassword) {
       if (!editForm.oldPassword.trim()) {
         newErrors.oldPassword = 'Введите старый пароль';
       } else {
-        // Дополнительная проверка правильности старого пароля
         const isValidOldPassword = await checkOldPassword(editForm.oldPassword);
         if (!isValidOldPassword) {
           newErrors.oldPassword = 'Неверный старый пароль';
@@ -536,14 +517,12 @@ function ProfileClient() {
     }
     
     try {
-      // Подготавливаем данные для отправки
       const updateData = {
         userId: userId,
         first_name: editForm.first_name,
         last_name: editForm.last_name
       };
-      
-      // Добавляем пароли только если пользователь хочет их изменить
+
       if (wantsToChangePassword) {
         updateData.oldPassword = editForm.oldPassword;
         updateData.newPassword = editForm.newPassword;
@@ -573,7 +552,6 @@ function ProfileClient() {
         newPassword: '' 
       });
       
-      // Обновляем данные в localStorage если это текущий пользователь
       if (currentUser && currentUser.userId === userId) {
         const updatedCurrentUser = {
           ...currentUser,
@@ -637,8 +615,7 @@ function ProfileClient() {
       }
     }
     load();
-    
-    // Загружаем бекапы для администраторов
+
     if (isAdmin) {
       loadBackups();
     }
@@ -943,7 +920,6 @@ function ProfileClient() {
         </div>
       )}
 
-      {/* Секция бекапов для администраторов */}
       {isAdmin && (
         <>
           <div className="profile-backup-section">
@@ -1054,7 +1030,6 @@ function ProfileClient() {
         </>
       )}
 
-      {/* Модальное окно подтверждения удаления бекапа */}
       {deleteModal.show && (
         <div className="profile-backup-delete-modal-overlay">
           <div className="profile-backup-delete-modal">

@@ -16,7 +16,6 @@ function Register() {
   const [serverError, setServerError] = useState('');
   const navigate = useNavigate();
 
-  // Проверки
   function validateEmail(val) {
     if (!val) return '';
     if (/[А-Яа-яЁё]/.test(val)) return 'Почта не должна содержать русские буквы';
@@ -77,7 +76,6 @@ function Register() {
         setServerError(data?.error || 'Ошибка регистрации');
         return;
       }
-      // Сохраняем только необходимое для авторизации
       localStorage.setItem('currentUser', JSON.stringify({ userId: data.userId, email: data.email, role: data.role }));
       navigate('/');
     } catch (err) {
@@ -158,13 +156,11 @@ function Register() {
               />
               <button className="icon-eye-btn" type="button" tabIndex={-1} onClick={() => setShowPassword(v => !v)} aria-label={showPassword ? 'Скрыть пароль' : 'Показать пароль'}>
                 {showPassword ? (
-                  // Закрытый глаз (svg fill="#888")
                   <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M1 11s4-6 10-6 10 6 10 6-4 6-10 6-10-6-10-6Zm10 3.5A3.5 3.5 0 1 0 11 7a3.5 3.5 0 0 0 0 7Z" stroke="#888" strokeWidth="1.7"/>
                     <path d="M5 5l12 12" stroke="#888" strokeWidth="1.7" strokeLinecap="round"/>
                   </svg>
                 ) : (
-                  // Открытый глаз
                   <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M1 11s4-6 10-6 10 6 10 6-4 6-10 6-10-6-10-6Zm10 3.5A3.5 3.5 0 1 0 11 7a3.5 3.5 0 0 0 0 7Z" stroke="#888" strokeWidth="1.7"/>
                   </svg>

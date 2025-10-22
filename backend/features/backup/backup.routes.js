@@ -6,7 +6,6 @@ const router = express.Router();
 const backupService = require('./backup.service');
 const { authenticateToken, requireAdmin } = require('../../middleware/auth');
 
-// Создаем папку backups если её нет
 const ensureBackupsDir = async () => {
   const backupPath = path.join(__dirname, '../../../backups');
   try {
@@ -17,10 +16,8 @@ const ensureBackupsDir = async () => {
   }
 };
 
-// Инициализируем папку при загрузке модуля
 ensureBackupsDir();
 
-// Настройка multer для загрузки файлов
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const backupPath = path.join(__dirname, '../../../backups');
@@ -29,7 +26,6 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-    // Сохраняем с оригинальным расширением (.bak или .sql)
     const originalExt = path.extname(file.originalname);
     const filename = `restore_${timestamp}${originalExt}`;
     console.log('Имя файла для сохранения:', filename);
@@ -49,11 +45,10 @@ const upload = multer({
     }
   },
   limits: {
-    fileSize: 100 * 1024 * 1024 // 100MB
+    fileSize: 100 * 1024 * 1024
   }
 });
 
-// Middleware для обработки ошибок multer
 const handleMulterError = (error, req, res, next) => {
   if (error instanceof multer.MulterError) {
     console.error(' Ошибка multer:', error.message);
@@ -68,7 +63,6 @@ const handleMulterError = (error, req, res, next) => {
   next();
 };
 
-// Создать бекап
 router.post('/create', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const result = await backupService.createBackup(req.user.userId);
@@ -79,7 +73,6 @@ router.post('/create', authenticateToken, requireAdmin, async (req, res) => {
   }
 });
 
-// Получить список бекапов
 router.get('/list', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const backups = await backupService.getBackupsList();
@@ -90,7 +83,6 @@ router.get('/list', authenticateToken, requireAdmin, async (req, res) => {
   }
 });
 
-// Скачать бекап
 router.get('/download/:filename', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { filename } = req.params;
@@ -108,7 +100,6 @@ router.get('/download/:filename', authenticateToken, requireAdmin, async (req, r
   }
 });
 
-// Восстановить из бекапа
 router.post('/restore', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { filename } = req.body;
@@ -124,7 +115,6 @@ router.post('/restore', authenticateToken, requireAdmin, async (req, res) => {
   }
 });
 
-// Удалить бекап
 router.delete('/:filename', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { filename } = req.params;
@@ -145,7 +135,6 @@ router.delete('/:filename', authenticateToken, requireAdmin, async (req, res) =>
   }
 });
 
-// Восстановить из загруженного файла
 router.post('/restore-upload', authenticateToken, requireAdmin, upload.single('backupFile'), handleMulterError, async (req, res) => {
   try {
     console.log('Получен запрос на восстановление из файла');
@@ -159,8 +148,6 @@ router.post('/restore-upload', authenticateToken, requireAdmin, upload.single('b
     }
 
     console.log(' Файл загружен:', req.file.originalname, 'Путь:', req.file.path, 'Размер:', req.file.size);
-    
-    // Проверяем существование файла перед восстановлением
     try {
       await fs.access(req.file.path);
       console.log('Файл существует на диске');
@@ -172,8 +159,7 @@ router.post('/restore-upload', authenticateToken, requireAdmin, upload.single('b
     await backupService.restoreFromUploadedFile(req.file.path, req.user.userId);
     
     console.log('✅ Восстановление завершено успешно');
-    
-    // Удаляем временный файл после восстановления
+
     try {
       await fs.unlink(req.file.path);
       console.log('Временный файл удален:', req.file.path);

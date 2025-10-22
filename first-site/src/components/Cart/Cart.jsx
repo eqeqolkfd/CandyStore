@@ -19,8 +19,8 @@ function Cart() {
   const [paymentMethod, setPaymentMethod] = useState('');
   const [checkoutSubmitting, setCheckoutSubmitting] = useState(false);
   const [formErrors, setFormErrors] = useState({});
-  const [unitType, setUnitType] = useState('house'); // 'house' | 'apartment'
-  const [postCheckoutStatus, setPostCheckoutStatus] = useState(''); // '', 'pending', 'paid'
+  const [unitType, setUnitType] = useState('house');
+  const [postCheckoutStatus, setPostCheckoutStatus] = useState('');
 
   const normalizeImg = (url) => {
     if (!url) return '';
@@ -34,9 +34,8 @@ function Cart() {
   const userId = currentUser?.userId || null;
   const cartKey = userId ? `cart_${userId}` : null;
 
-  // Validators (aligned to DB constraints) + content rules
-  const onlyCyrillic = (v) => /^[А-Яа-яЁё\s-]+$/.test(v); // буквы/пробел/дефис
-  const cyrillicOrDigits = (v) => /^[0-9А-Яа-яЁё\-\/]+$/.test(v); // цифры/кириллица/ - /
+  const onlyCyrillic = (v) => /^[А-Яа-яЁё\s-]+$/.test(v);
+  const cyrillicOrDigits = (v) => /^[0-9А-Яа-яЁё\-\/]+$/.test(v);
 
   const validateCity = (v) => {
     if (!v) return 'Введите город';
@@ -404,11 +403,9 @@ function Cart() {
                           const val = e.target.value;
                           setUnitType(val);
                           if (val === 'house') {
-                            // Очистить квартиру
                             setAddress({ ...address, apartment: '' });
                             setFormErrors({ ...formErrors, apartment: '' });
                           } else {
-                            // Очистить дом
                             setAddress({ ...address, house: '' });
                             setFormErrors({ ...formErrors, house: '' });
                           }
@@ -504,7 +501,6 @@ function Cart() {
                         placeholder="101000"
                         value={address.postalCode}
                         onChange={(e) => {
-                          // Разрешаем только цифры и максимум 6
                           const digits = (e.target.value || '').replace(/\D/g, '').slice(0, 6);
                           setAddress({ ...address, postalCode: digits });
                           setFormErrors({ ...formErrors, postalCode: validatePostalCode(digits) });
@@ -527,7 +523,6 @@ function Cart() {
                         setDeliveryMethod(v);
                         setFormErrors({ ...formErrors, deliveryMethod: validateDelivery(v) });
                         if (v === 'pickup') {
-                          // Автозаполнение адреса для самовывоза (из футера магазина)
                           setUnitType('house');
                           setAddress({
                             city: 'Москва',
@@ -544,7 +539,6 @@ function Cart() {
                             apartment: ''
                           }));
                         } else {
-                          // Очистить адрес и сделать поля редактируемыми
                           setAddress({ city: '', street: '', house: '', apartment: '', postalCode: '' });
                           setUnitType('house');
                           setFormErrors(prev => ({ ...prev, city: '', street: '', house: '', apartment: '' }));

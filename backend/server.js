@@ -30,7 +30,6 @@ app.use('/api/categories', categoriesRoutes);
 app.use('/api/manufacturers', manufacturersRoutes);
 app.use('/api/backup', backupRoutes);
 
-// Глобальный обработчик ошибок
 app.use((error, req, res, next) => {
   console.error('🚨 Глобальная ошибка:', error);
   res.status(500).json({ 
@@ -40,7 +39,6 @@ app.use((error, req, res, next) => {
   });
 });
 
-// Обработчик для несуществующих маршрутов
 app.use((req, res) => {
   console.log('❌ Несуществующий маршрут:', req.method, req.originalUrl);
   res.status(404).json({ 
