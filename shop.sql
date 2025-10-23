@@ -117,15 +117,7 @@ CREATE TABLE reviews (
 CREATE INDEX idx_reviews_product ON reviews(product_id);
 CREATE INDEX idx_reviews_user ON reviews(user_id);
 
-CREATE TABLE feedback (
-    feedback_id SERIAL PRIMARY KEY,
-    user_id     INT REFERENCES users(user_id) ON DELETE SET NULL,
-    topic       VARCHAR(200),
-    message_feedback TEXT NOT NULL,
-    email       VARCHAR(255),
-    created_at  TIMESTAMP WITH TIME ZONE DEFAULT now(),
-    status      VARCHAR(50) DEFAULT 'new'
-);
+
 
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_products_name ON products(name_product);
@@ -135,7 +127,7 @@ CREATE TABLE audit_logs (
     timestamp_logs TIMESTAMP WITH TIME ZONE DEFAULT now(),
     action_logs          VARCHAR(50) NOT NULL,
     user_id         INT REFERENCES users(user_id) ON DELETE SET NULL,
-    target_type     VARCHAR(20), -- USER, PRODUCT, ORDER, etc.
+    target_type     VARCHAR(20),
     target_id       INT,
     target_name     VARCHAR(255),
     details         JSONB,
@@ -243,7 +235,7 @@ BEGIN
     ELSIF TG_OP = 'DELETE' THEN
         v_before := to_jsonb(OLD);
         v_after  := NULL;
-    ELSE -- UPDATE
+    ELSE
         v_before := to_jsonb(OLD);
         v_after  := to_jsonb(NEW);
     END IF;
@@ -266,7 +258,7 @@ BEGIN
     v_user_agent_txt := current_setting('audit.user_agent', true);
 
     v_json := COALESCE(v_after, v_before);
-    v_singular := regexp_replace(v_table, 's$', ''); -- very simple singularization
+    v_singular := regexp_replace(v_table, 's$', ''); 
 
     IF v_json IS NOT NULL THEN
         v_target_id_txt := COALESCE(
@@ -850,3 +842,7 @@ select * from roles;
 select * from user_roles;
 
 select * from audit_logs;
+
+select * from addresses;
+
+select * from order_items;
