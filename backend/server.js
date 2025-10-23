@@ -47,7 +47,13 @@ app.use((req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-  console.log(`JWT_SECRET установлен: ${!!process.env.JWT_SECRET}`);
-});
+// Export app for testing
+module.exports = app;
+
+// Only start server if not in test environment
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`JWT_SECRET установлен: ${!!process.env.JWT_SECRET}`);
+  });
+}
