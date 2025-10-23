@@ -14,7 +14,7 @@ const useHotkeys = (userRole) => {
         return;
       }
       
-      if (event.altKey && event.key === '-') {
+      if (event.altKey && event.shiftKey) {
         event.preventDefault();
         if (userRole === 'admin') {
           navigate('/admin/audit');

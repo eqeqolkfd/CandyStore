@@ -54,6 +54,25 @@ const AdminProductList = () => {
   const [categoryLoading, setCategoryLoading] = useState(false);
   const [manufacturerLoading, setManufacturerLoading] = useState(false);
 
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [editingManufacturer, setEditingManufacturer] = useState(null);
+  const [editCategoryForm, setEditCategoryForm] = useState({
+    name: '',
+    description: ''
+  });
+  const [editManufacturerForm, setEditManufacturerForm] = useState({
+    name: '',
+    description: ''
+  });
+  const [editCategoryErrors, setEditCategoryErrors] = useState({});
+  const [editManufacturerErrors, setEditManufacturerErrors] = useState({});
+  const [editCategoryLoading, setEditCategoryLoading] = useState(false);
+  const [editManufacturerLoading, setEditManufacturerLoading] = useState(false);
+  const [showDeleteCategoryModal, setShowDeleteCategoryModal] = useState(false);
+  const [showDeleteManufacturerModal, setShowDeleteManufacturerModal] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
+  const [manufacturerToDelete, setManufacturerToDelete] = useState(null);
+
   const [categories, setCategories] = useState([]);
   const [manufacturers, setManufacturers] = useState([]);
   const [loadingLists, setLoadingLists] = useState(false);
@@ -85,6 +104,7 @@ const AdminProductList = () => {
       console.error('Ошибка загрузки производителей:', error);
     }
   };
+
 
   useEffect(() => {
     setLoading(true);
@@ -439,6 +459,175 @@ const AdminProductList = () => {
     }
   };
 
+
+  const openDeleteCategoryModal = (category) => {
+    setCategoryToDelete(category);
+    setShowDeleteCategoryModal(true);
+  };
+
+  const closeDeleteCategoryModal = () => {
+    setShowDeleteCategoryModal(false);
+    setCategoryToDelete(null);
+  };
+
+  const handleDeleteCategory = async () => {
+    if (!categoryToDelete) return;
+    
+    try {
+      const categoryId = categoryToDelete.category_id || categoryToDelete.id;
+      const res = await fetch(`${CATEGORIES_API_URL}/${categoryId}`, {
+        method: 'DELETE'
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Ошибка удаления категории');
+      }
+
+      closeDeleteCategoryModal();
+      loadCategories();
+    } catch (e) {
+      console.error(e);
+      setShowDeleteCategoryModal(false);
+      alert('Ошибка удаления категории: ' + e.message);
+    }
+  };
+
+  const openDeleteManufacturerModal = (manufacturer) => {
+    setManufacturerToDelete(manufacturer);
+    setShowDeleteManufacturerModal(true);
+  };
+
+  const closeDeleteManufacturerModal = () => {
+    setShowDeleteManufacturerModal(false);
+    setManufacturerToDelete(null);
+  };
+
+  const handleDeleteManufacturer = async () => {
+    if (!manufacturerToDelete) return;
+    
+    try {
+      const manufacturerId = manufacturerToDelete.manufacturer_id || manufacturerToDelete.id;
+      const res = await fetch(`${MANUFACTURERS_API_URL}/${manufacturerId}`, {
+        method: 'DELETE'
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Ошибка удаления производителя');
+      }
+
+      closeDeleteManufacturerModal();
+      loadManufacturers();
+    } catch (e) {
+      console.error(e);
+      setShowDeleteManufacturerModal(false);
+      alert('Ошибка удаления производителя: ' + e.message);
+    }
+  };
+
+  const openEditCategory = (category) => {
+    setEditCategoryForm({
+      name: category.name || category.name_categories || '',
+      description: category.description || ''
+    });
+    setEditCategoryErrors({});
+    setEditingCategory(category);
+  };
+
+  const closeEditCategory = () => {
+    setEditingCategory(null);
+    setEditCategoryForm({ name: '', description: '' });
+    setEditCategoryErrors({});
+  };
+
+  const handleUpdateCategory = async () => {
+    if (!editingCategory) return;
+    
+    const errors = {};
+    if (!editCategoryForm.name.trim()) errors.name = 'Название категории обязательно';
+    setEditCategoryErrors(errors);
+    
+    if (Object.keys(errors).length > 0) return;
+    
+    setEditCategoryLoading(true);
+    try {
+      const categoryId = editingCategory.category_id || editingCategory.id;
+      const res = await fetch(`${CATEGORIES_API_URL}/${categoryId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editCategoryForm.name.trim(),
+          description: editCategoryForm.description.trim() || null
+        })
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Ошибка обновления категории');
+      }
+
+      closeEditCategory();
+      loadCategories();
+    } catch (e) {
+      console.error(e);
+      setEditCategoryErrors({ submit: e.message });
+    } finally {
+      setEditCategoryLoading(false);
+    }
+  };
+
+  const openEditManufacturer = (manufacturer) => {
+    setEditManufacturerForm({
+      name: manufacturer.name || manufacturer.name_manufacturers || '',
+      description: manufacturer.description || ''
+    });
+    setEditManufacturerErrors({});
+    setEditingManufacturer(manufacturer);
+  };
+
+  const closeEditManufacturer = () => {
+    setEditingManufacturer(null);
+    setEditManufacturerForm({ name: '', description: '' });
+    setEditManufacturerErrors({});
+  };
+
+  const handleUpdateManufacturer = async () => {
+    if (!editingManufacturer) return;
+    
+    const errors = {};
+    if (!editManufacturerForm.name.trim()) errors.name = 'Название производителя обязательно';
+    setEditManufacturerErrors(errors);
+    
+    if (Object.keys(errors).length > 0) return;
+    
+    setEditManufacturerLoading(true);
+    try {
+      const manufacturerId = editingManufacturer.manufacturer_id || editingManufacturer.id;
+      const res = await fetch(`${MANUFACTURERS_API_URL}/${manufacturerId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editManufacturerForm.name.trim(),
+          description: editManufacturerForm.description.trim() || null
+        })
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Ошибка обновления производителя');
+      }
+
+      closeEditManufacturer();
+      loadManufacturers();
+    } catch (e) {
+      console.error(e);
+      setEditManufacturerErrors({ submit: e.message });
+    } finally {
+      setEditManufacturerLoading(false);
+    }
+  };
+
   if (loading) return <div className="admin-list-loading">Загрузка...</div>;
   if (error) return <div className="admin-list-error">{error}</div>;
 
@@ -451,139 +640,175 @@ const AdminProductList = () => {
         </button>
       </div>
       
-      <div className="admin-main-content">
-        <div className="admin-products-section">
-          <div className="admin-controls">
-            <div className="admin-search">
-              <input
-                type="text"
-                placeholder="Поиск товаров..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="admin-search-input"
-              />
-            </div>
-
-            <div className="admin-filters">
-              <select
-                value={filters.category}
-                onChange={(e) => updateFilters('category', e.target.value)}
-                className="admin-filter-select"
-              >
-                <option value="">Все категории</option>
-                {categories.map(category => (
-                  <option key={category.id} value={category.name}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-
-              <select
-                value={filters.manufacturer}
-                onChange={(e) => updateFilters('manufacturer', e.target.value)}
-                className="admin-filter-select"
-              >
-                <option value="">Все производители</option>
-                {manufacturers.map(manufacturer => (
-                  <option key={manufacturer.id} value={manufacturer.name}>
-                    {manufacturer.name}
-                  </option>
-                ))}
-              </select>
-
-              <select
-                value={filters.priceSort}
-                onChange={(e) => updateFilters('priceSort', e.target.value)}
-                className="admin-filter-select"
-              >
-                <option value="">Цена</option>
-                <option value="ASC">По возрастанию</option>
-                <option value="DESC">По убыванию</option>
-              </select>
-
-              <select
-                value={filters.weightSort}
-                onChange={(e) => updateFilters('weightSort', e.target.value)}
-                className="admin-filter-select"
-              >
-                <option value="">Вес</option>
-                <option value="ASC">По возрастанию</option>
-                <option value="DESC">По убыванию</option>
-              </select>
-            </div>
+      <div className="admin-products-section">
+        <div className="admin-controls">
+          <div className="admin-search">
+            <input
+              type="text"
+              placeholder="Поиск товаров..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="admin-search-input"
+            />
           </div>
 
-          <div className="admin-catalog-grid">
-            {filteredItems.length === 0 ? (
-              <div className="admin-list-empty">
-                {searchTerm ? 'Товары не найдены' : 'Нет товаров'}
-              </div>
-            ) : (
-              filteredItems.map((p) => {
-                const id = p.product_id || p.id;
-                const name = p.name || p.name_product || 'Товар';
-                const image = p.image_url || p.photo_url || '';
-                const price = p.price ?? 0;
-                return (
-                  <article
-                    key={id}
-                    className="admin-product-card"
-                    role="article"
-                    tabIndex={0}
-                    onKeyDown={(e) => { if (e.key === 'Enter') {} }}
-                  >
-                    <div className="admin-product-thumb">
-                      {image ? <img src={normalizeImg(image)} alt={name} /> : <div className="admin-thumb-placeholder">Нет фото</div>}
-                    </div>
+          <div className="admin-filters">
+            <select
+              value={filters.category}
+              onChange={(e) => updateFilters('category', e.target.value)}
+              className="admin-filter-select"
+            >
+              <option value="">Все категории</option>
+              {categories.map(category => (
+                <option key={category.id} value={category.name}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
 
-                    <div className="admin-product-body">
-                      <h3 className="admin-product-title">{name}</h3>
-                      <p className="admin-product-desc">{normalizeDescription(p.description || p.name_description)}</p>
+            <select
+              value={filters.manufacturer}
+              onChange={(e) => updateFilters('manufacturer', e.target.value)}
+              className="admin-filter-select"
+            >
+              <option value="">Все производители</option>
+              {manufacturers.map(manufacturer => (
+                <option key={manufacturer.id} value={manufacturer.name}>
+                  {manufacturer.name}
+                </option>
+              ))}
+            </select>
 
-                      <div className="admin-meta-grid">
-                        { (p.category || p.category_name) && <span className="admin-meta-chip">Категория: {p.category || p.category_name}</span> }
-                        { (p.manufacturer || p.manufacturer_name) && <span className="admin-meta-chip">Производитель: {p.manufacturer || p.manufacturer_name}</span> }
-                        { (p.weightGrams || p.weight_grams) && <span className="admin-meta-chip">Вес: {p.weightGrams || p.weight_grams} г</span> }
-                        { p.sku && <span className="admin-meta-chip">Артикул: {p.sku}</span> }
-                      </div>
+            <select
+              value={filters.priceSort}
+              onChange={(e) => updateFilters('priceSort', e.target.value)}
+              className="admin-filter-select"
+            >
+              <option value="">Цена</option>
+              <option value="ASC">По возрастанию</option>
+              <option value="DESC">По убыванию</option>
+            </select>
 
-                      <div className="admin-product-footer">
-                        <span className="admin-product-price">
-                          {Number(price).toLocaleString("ru-RU", { style: "currency", currency: "RUB", maximumFractionDigits: 0 })}
-                        </span>
-
-                        <div className="admin-product-actions">
-                          <button
-                            className="admin-action-btn"
-                            onClick={(e) => { e.stopPropagation(); openEditModal(p); }}
-                            title="Редактировать"
-                          >
-                            Редактировать
-                          </button>
-                          <button
-                            className="admin-action-btn admin-action-delete"
-                            onClick={(e) => { e.stopPropagation(); openDeleteModal(p); }}
-                            title="Удалить"
-                          >
-                            Удалить
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </article>
-                );
-              })
-            )}
+            <select
+              value={filters.weightSort}
+              onChange={(e) => updateFilters('weightSort', e.target.value)}
+              className="admin-filter-select"
+            >
+              <option value="">Вес</option>
+              <option value="ASC">По возрастанию</option>
+              <option value="DESC">По убыванию</option>
+            </select>
           </div>
         </div>
 
-        <div className="admin-management-section">
-          <div className="admin-management-header">
-            <h3>Управление категориями и производителями</h3>
-          </div>
+        <div className="admin-catalog-grid">
+          {filteredItems.length === 0 ? (
+            <div className="admin-list-empty">
+              {searchTerm ? 'Товары не найдены' : 'Нет товаров'}
+            </div>
+          ) : (
+            filteredItems.map((p) => {
+              const id = p.product_id || p.id;
+              const name = p.name || p.name_product || 'Товар';
+              const image = p.image_url || p.photo_url || '';
+              const price = p.price ?? 0;
+              return (
+                <article
+                  key={id}
+                  className="admin-product-card"
+                  role="article"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter') {} }}
+                >
+                  <div className="admin-product-thumb">
+                    {image ? <img src={normalizeImg(image)} alt={name} /> : <div className="admin-thumb-placeholder">Нет фото</div>}
+                  </div>
 
-          <div className="admin-form-section">
-            <h4>Создать категорию</h4>
+                  <div className="admin-product-body">
+                    <h3 className="admin-product-title">{name}</h3>
+                    <p className="admin-product-desc">{normalizeDescription(p.description || p.name_description)}</p>
+
+                    <div className="admin-meta-grid">
+                      { (p.category || p.category_name) && <span className="admin-meta-chip">Категория: {p.category || p.category_name}</span> }
+                      { (p.manufacturer || p.manufacturer_name) && <span className="admin-meta-chip">Производитель: {p.manufacturer || p.manufacturer_name}</span> }
+                      { (p.weightGrams || p.weight_grams) && <span className="admin-meta-chip">Вес: {p.weightGrams || p.weight_grams} г</span> }
+                      { p.sku && <span className="admin-meta-chip">Артикул: {p.sku}</span> }
+                    </div>
+
+                    <div className="admin-product-footer">
+                      <span className="admin-product-price">
+                        {Number(price).toLocaleString("ru-RU", { style: "currency", currency: "RUB", maximumFractionDigits: 0 })}
+                      </span>
+
+                      <div className="admin-product-actions">
+                        <button
+                          className="admin-action-btn"
+                          onClick={(e) => { e.stopPropagation(); openEditModal(p); }}
+                          title="Редактировать"
+                        >
+                          Редактировать
+                        </button>
+                        <button
+                          className="admin-action-btn admin-action-delete"
+                          onClick={(e) => { e.stopPropagation(); openDeleteModal(p); }}
+                          title="Удалить"
+                        >
+                          Удалить
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              );
+            })
+          )}
+        </div>
+      </div>
+
+      <div className="admin-management-section">
+        <div className="admin-management-header">
+          <h3>Управление категориями и производителями</h3>
+        </div>
+
+        <div className="admin-form-section">
+          <h4>Категории</h4>
+          <div className="admin-list-container">
+            {categories.length === 0 ? (
+              <p className="admin-empty-list">Нет категорий</p>
+            ) : (
+              <div className="admin-list">
+                {categories.map(category => (
+                  <div key={category.category_id || category.id} className="admin-list-item">
+                    <div className="admin-list-item-info">
+                      <span className="admin-list-item-name">{category.name || category.name_categories}</span>
+                      {category.description && (
+                        <span className="admin-list-item-desc">{category.description}</span>
+                      )}
+                    </div>
+                    <div className="admin-list-item-actions">
+                      <button
+                        className="admin-edit-item-btn"
+                        onClick={() => openEditCategory(category)}
+                        title="Редактировать категорию"
+                      >
+                        Редактировать
+                      </button>
+                      <button
+                        className="admin-delete-item-btn"
+                        onClick={() => openDeleteCategoryModal(category)}
+                        title="Удалить категорию"
+                      >
+                        Удалить
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          <div className="admin-create-section">
+            <h5>Создать категорию</h5>
             <form onSubmit={(e) => { e.preventDefault(); handleCreateCategory(); }}>
               <div className="admin-form-group">
                 <label>Название категории *</label>
@@ -602,7 +827,7 @@ const AdminProductList = () => {
                   value={categoryForm.description}
                   onChange={(e) => setCategoryForm(prev => ({ ...prev, description: e.target.value }))}
                   placeholder="Введите описание категории"
-                  rows="3"
+                  rows="2"
                 />
               </div>
 
@@ -613,9 +838,47 @@ const AdminProductList = () => {
               </button>
             </form>
           </div>
+        </div>
 
-          <div className="admin-form-section">
-            <h4>Создать производителя</h4>
+        <div className="admin-form-section">
+          <h4>Производители</h4>
+          <div className="admin-list-container">
+            {manufacturers.length === 0 ? (
+              <p className="admin-empty-list">Нет производителей</p>
+            ) : (
+              <div className="admin-list">
+                {manufacturers.map(manufacturer => (
+                  <div key={manufacturer.manufacturer_id || manufacturer.id} className="admin-list-item">
+                    <div className="admin-list-item-info">
+                      <span className="admin-list-item-name">{manufacturer.name || manufacturer.name_manufacturers}</span>
+                      {manufacturer.description && (
+                        <span className="admin-list-item-desc">{manufacturer.description}</span>
+                      )}
+                    </div>
+                    <div className="admin-list-item-actions">
+                      <button
+                        className="admin-edit-item-btn"
+                        onClick={() => openEditManufacturer(manufacturer)}
+                        title="Редактировать производителя"
+                      >
+                        Редактировать
+                      </button>
+                      <button
+                        className="admin-delete-item-btn"
+                        onClick={() => openDeleteManufacturerModal(manufacturer)}
+                        title="Удалить производителя"
+                      >
+                        Удалить
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          <div className="admin-create-section">
+            <h5>Создать производителя</h5>
             <form onSubmit={(e) => { e.preventDefault(); handleCreateManufacturer(); }}>
               <div className="admin-form-group">
                 <label>Название производителя *</label>
@@ -634,7 +897,7 @@ const AdminProductList = () => {
                   value={manufacturerForm.description}
                   onChange={(e) => setManufacturerForm(prev => ({ ...prev, description: e.target.value }))}
                   placeholder="Введите описание производителя"
-                  rows="3"
+                  rows="2"
                 />
               </div>
 
@@ -940,6 +1203,154 @@ const AdminProductList = () => {
                   className="admin-delete-btn"
                 >
                   {formLoading ? 'Удаление...' : 'Удалить товар'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editingCategory && (
+        <div className="admin-modal-backdrop" onClick={closeEditCategory}>
+          <div className="admin-modal-card" onClick={e => e.stopPropagation()}>
+            <div className="admin-modal-header">
+              <h3>Редактировать категорию</h3>
+              <button className="admin-modal-close" onClick={closeEditCategory}>×</button>
+            </div>
+            <div className="admin-modal-body">
+              <form onSubmit={(e) => { e.preventDefault(); handleUpdateCategory(); }}>
+                <div className="admin-form-group">
+                  <label>Название категории *</label>
+                  <input
+                    type="text"
+                    value={editCategoryForm.name}
+                    onChange={(e) => setEditCategoryForm(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="Введите название категории"
+                  />
+                  {editCategoryErrors.name && <div className="admin-form-error">{editCategoryErrors.name}</div>}
+                </div>
+
+                <div className="admin-form-group">
+                  <label>Описание</label>
+                  <textarea
+                    value={editCategoryForm.description}
+                    onChange={(e) => setEditCategoryForm(prev => ({ ...prev, description: e.target.value }))}
+                    placeholder="Введите описание категории"
+                    rows="3"
+                  />
+                </div>
+
+                {editCategoryErrors.submit && <div className="admin-form-error">{editCategoryErrors.submit}</div>}
+
+                <div className="admin-modal-actions">
+                  <button type="button" onClick={closeEditCategory} disabled={editCategoryLoading}>
+                    Отмена
+                  </button>
+                  <button type="submit" disabled={editCategoryLoading}>
+                    {editCategoryLoading ? 'Сохранение...' : 'Сохранить изменения'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editingManufacturer && (
+        <div className="admin-modal-backdrop" onClick={closeEditManufacturer}>
+          <div className="admin-modal-card" onClick={e => e.stopPropagation()}>
+            <div className="admin-modal-header">
+              <h3>Редактировать производителя</h3>
+              <button className="admin-modal-close" onClick={closeEditManufacturer}>×</button>
+            </div>
+            <div className="admin-modal-body">
+              <form onSubmit={(e) => { e.preventDefault(); handleUpdateManufacturer(); }}>
+                <div className="admin-form-group">
+                  <label>Название производителя *</label>
+                  <input
+                    type="text"
+                    value={editManufacturerForm.name}
+                    onChange={(e) => setEditManufacturerForm(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="Введите название производителя"
+                  />
+                  {editManufacturerErrors.name && <div className="admin-form-error">{editManufacturerErrors.name}</div>}
+                </div>
+
+                <div className="admin-form-group">
+                  <label>Описание</label>
+                  <textarea
+                    value={editManufacturerForm.description}
+                    onChange={(e) => setEditManufacturerForm(prev => ({ ...prev, description: e.target.value }))}
+                    placeholder="Введите описание производителя"
+                    rows="3"
+                  />
+                </div>
+
+                {editManufacturerErrors.submit && <div className="admin-form-error">{editManufacturerErrors.submit}</div>}
+
+                <div className="admin-modal-actions">
+                  <button type="button" onClick={closeEditManufacturer} disabled={editManufacturerLoading}>
+                    Отмена
+                  </button>
+                  <button type="submit" disabled={editManufacturerLoading}>
+                    {editManufacturerLoading ? 'Сохранение...' : 'Сохранить изменения'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteCategoryModal && categoryToDelete && (
+        <div className="admin-modal-backdrop" onClick={closeDeleteCategoryModal}>
+          <div className="admin-modal-card admin-delete-modal" onClick={e => e.stopPropagation()}>
+            <div className="admin-modal-header">
+              <h3>Подтверждение удаления</h3>
+              <button className="admin-modal-close" onClick={closeDeleteCategoryModal}>×</button>
+            </div>
+            <div className="admin-modal-body">
+              <p>Вы действительно хотите удалить категорию <strong>"{categoryToDelete.name || categoryToDelete.name_categories}"</strong>?</p>
+              <p className="admin-delete-warning">Это действие нельзя отменить.</p>
+              
+              <div className="admin-modal-actions">
+                <button type="button" onClick={closeDeleteCategoryModal}>
+                  Отмена
+                </button>
+                <button 
+                  type="button" 
+                  onClick={handleDeleteCategory} 
+                  className="admin-delete-btn"
+                >
+                  Удалить категорию
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteManufacturerModal && manufacturerToDelete && (
+        <div className="admin-modal-backdrop" onClick={closeDeleteManufacturerModal}>
+          <div className="admin-modal-card admin-delete-modal" onClick={e => e.stopPropagation()}>
+            <div className="admin-modal-header">
+              <h3>Подтверждение удаления</h3>
+              <button className="admin-modal-close" onClick={closeDeleteManufacturerModal}>×</button>
+            </div>
+            <div className="admin-modal-body">
+              <p>Вы действительно хотите удалить производителя <strong>"{manufacturerToDelete.name || manufacturerToDelete.name_manufacturers}"</strong>?</p>
+              <p className="admin-delete-warning">Это действие нельзя отменить.</p>
+              
+              <div className="admin-modal-actions">
+                <button type="button" onClick={closeDeleteManufacturerModal}>
+                  Отмена
+                </button>
+                <button 
+                  type="button" 
+                  onClick={handleDeleteManufacturer} 
+                  className="admin-delete-btn"
+                >
+                  Удалить производителя
                 </button>
               </div>
             </div>
