@@ -785,16 +785,16 @@ const AdminProductList = () => {
                         <span className="admin-list-item-desc">{category.description}</span>
                       )}
                     </div>
-                    <div className="admin-list-item-actions">
+                    <div className="admin-category-actions">
                       <button
-                        className="admin-edit-item-btn"
+                        className="admin-category-edit-btn"
                         onClick={() => openEditCategory(category)}
                         title="Редактировать категорию"
                       >
                         Редактировать
                       </button>
                       <button
-                        className="admin-delete-item-btn"
+                        className="admin-category-delete-btn"
                         onClick={() => openDeleteCategoryModal(category)}
                         title="Удалить категорию"
                       >
@@ -855,16 +855,16 @@ const AdminProductList = () => {
                         <span className="admin-list-item-desc">{manufacturer.description}</span>
                       )}
                     </div>
-                    <div className="admin-list-item-actions">
+                    <div className="admin-manufacturer-actions">
                       <button
-                        className="admin-edit-item-btn"
+                        className="admin-manufacturer-edit-btn"
                         onClick={() => openEditManufacturer(manufacturer)}
                         title="Редактировать производителя"
                       >
                         Редактировать
                       </button>
                       <button
-                        className="admin-delete-item-btn"
+                        className="admin-manufacturer-delete-btn"
                         onClick={() => openDeleteManufacturerModal(manufacturer)}
                         title="Удалить производителя"
                       >
@@ -1044,12 +1044,12 @@ const AdminProductList = () => {
 
       {showEditModal && (
         <div className="admin-modal-backdrop" onClick={closeModals}>
-          <div className="admin-modal-card" onClick={e => e.stopPropagation()}>
-            <div className="admin-modal-header">
+          <div className="admin-modal-card edit" onClick={e => e.stopPropagation()}>
+            <div className="admin-modal-header edit">
               <h3>Редактировать товар</h3>
               <button className="admin-modal-close" onClick={closeModals}>×</button>
             </div>
-            <div className="admin-modal-body">
+            <div className="admin-modal-body edit">
               <form onSubmit={(e) => { e.preventDefault(); handleUpdateProduct(); }}>
                 <div className="admin-form-group">
                   <label>Название товара *</label>
