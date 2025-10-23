@@ -570,11 +570,11 @@ function Users() {
             <div className="users-role-modal-body">
               <div className="users-role-modal-row"><strong>Пользователь:</strong> {editUser.first_name} {editUser.last_name} (ID {editUser.user_id ?? editUser.id})</div>
               <div className="users-role-modal-row users-edit-names">
-                <label>
+                <label className="users-role-modal-label">
                   Имя:
                   <input type="text" value={editFirstName} onChange={(e)=>setEditFirstName(e.target.value)} maxLength={50} />
                 </label>
-                <label>
+                <label className="users-role-modal-label">
                   Фамилия:
                   <input type="text" value={editLastName} onChange={(e)=>setEditLastName(e.target.value)} maxLength={50} />
                 </label>

@@ -22,7 +22,7 @@ function Header() {
             {isAdmin && <li className="menu-button"><Link to="/admin/users">Пользователи <kbd className="hotkey-hint">Alt+0</kbd></Link></li>}
             {isManager && <li className="menu-button"><Link to="/manager">Отчетность <kbd className="hotkey-hint">Alt+8</kbd></Link></li>}
             {isAdmin && <li className="menu-button"><Link to="/admin/orders">Заказы <kbd className="hotkey-hint">Shift+!</kbd></Link></li>}
-            {isAdmin && <li className="menu-button"><Link to="/admin/audit">Журнал аудита <kbd className="hotkey-hint">Alt+Shift</kbd></Link></li>}
+            {isAdmin && <li className="menu-button"><Link to="/admin/audit">Журнал аудита <kbd className="hotkey-hint">Alt+-</kbd></Link></li>}
             {!isAdmin && !isManager && <li className="menu-button"><Link to="/catalog">Каталог <kbd className="hotkey-hint">Alt+2</kbd></Link></li>}
             {!isAdmin && !isManager && isAuthorized && <li className="menu-button"><Link to="/favorites">Избранное <kbd className="hotkey-hint">Alt+5</kbd></Link></li>}
             {!isAdmin && !isManager && isAuthorized && <li className="menu-button"><Link to="/cart">Корзина <kbd className="hotkey-hint">Alt+6</kbd></Link></li>}

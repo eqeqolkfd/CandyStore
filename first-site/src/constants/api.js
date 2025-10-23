@@ -16,6 +16,8 @@ export const API_ENDPOINTS = {
 
   ORDERS: `${API_BASE_URL}/orders`,
 
+  PAYMENTS: `${API_BASE_URL}/payments`,
+
   AUDIT: `${API_BASE_URL}/audit`,
 
   BACKUP: `${API_BASE_URL}/backup`

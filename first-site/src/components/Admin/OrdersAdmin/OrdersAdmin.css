@@ -129,6 +129,10 @@
   font-size: 13px; 
   cursor: pointer; 
   transition: border-color 0.2s ease, box-shadow 0.2s ease; 
+  min-width: 120px;
+  max-width: 100%;
+  width: auto;
+  box-sizing: border-box;
 }
 
 .orders-admin-table select:focus { 
@@ -202,6 +206,11 @@
   .orders-admin-table tbody td {
     padding: 16px 18px;
   }
+  .orders-admin-table select {
+    min-width: 100px;
+    font-size: 13px;
+    padding: 8px 10px;
+  }
 }
 
 @media (max-width: 1024px) {
@@ -229,6 +238,12 @@
   .orders-admin-table thead th,
   .orders-admin-table tbody td {
     padding: 10px 12px;
+  }
+  
+  .orders-admin-table select {
+    min-width: 90px;
+    font-size: 12px;
+    padding: 6px 8px;
   }
 }
 
@@ -302,6 +317,8 @@
   
   .orders-admin-table select {
     width: 100%;
+    min-width: 80px;
+    max-width: 200px;
     padding: 10px 12px;
     font-size: 14px;
     margin-top: 4px;
@@ -339,6 +356,8 @@
   }
   
   .orders-admin-table select {
+    min-width: 70px;
+    max-width: 150px;
     padding: 8px 10px;
     font-size: 13px;
   }
@@ -375,6 +394,8 @@
   }
   
   .orders-admin-table select {
+    min-width: 60px;
+    max-width: 120px;
     padding: 6px 8px;
     font-size: 12px;
   }
@@ -382,5 +403,23 @@
   .orders-admin .error {
     font-size: 12px;
     padding: 8px 10px;
+  }
+}
+
+@media (max-width: 360px) {
+  .orders-admin-table select {
+    min-width: 50px;
+    max-width: 100px;
+    padding: 4px 6px;
+    font-size: 11px;
+  }
+  
+  .orders-admin-table tr {
+    padding: 8px 4px;
+  }
+  
+  .orders-admin-table td {
+    padding: 2px 0;
+    font-size: 11px;
   }
 }

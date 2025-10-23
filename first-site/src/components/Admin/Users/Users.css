@@ -2,11 +2,14 @@
   padding: 20px;
   background: #fff;
   border-radius: 10px;
-  max-width: 1100px;
+  max-width: 100%;
   margin: 30px auto;
   box-shadow: 0 6px 24px rgba(30,30,30,0.06);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   color: #222;
+  padding-left: 16px;
+  padding-right: 16px;
+  box-sizing: border-box;
 }
 
 .users-header {
@@ -15,6 +18,9 @@
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 12px;
+  flex-wrap: nowrap;
+  min-width: 0;
+  overflow: visible;
 }
 
 .users-header h2 {
@@ -26,19 +32,35 @@
   display: flex;
   gap: 10px;
   align-items: center;
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.users-actions-cell {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 .users-search {
-  padding: 8px 12px;
+  width: 100%;
+  max-width: 1200px;
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
   border-radius: 8px;
-  border: 1px solid #e6e6e6;
-  min-width: 260px;
+  font-size: 16px;
   outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  min-width: 700px !important;
 }
 
-.users-search:focus { 
-  box-shadow: 0 0 0 4px rgba(158,130,121,0.08); 
-  border-color: #9E8279; 
+.users-search:focus {
+  border-color: #9E8279;
+}
+
+.users-search::placeholder {
+  color: #999;
 }
 
 .users-controls {
@@ -58,6 +80,8 @@
   padding: 6px 8px;
   border-radius: 6px;
   border: 1px solid #ddd;
+  width: auto;
+  box-sizing: border-box;
 }
 
 .users-status {
@@ -66,8 +90,8 @@
   color: #666;
 }
 
-.users-error { 
-  color: #b00020; 
+.users-error {
+  color: #b00020;
 }
 
 .users-table-wrapper {
@@ -103,6 +127,7 @@
   box-shadow: 0 1px 0 rgba(0,0,0,0.03);
   border-radius: 8px;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 .users-table thead {
@@ -110,11 +135,14 @@
   color: #333;
 }
 
-.users-table th, .users-table td {
+.users-table th,
+.users-table td {
   padding: 10px 12px;
   text-align: left;
   border-bottom: 1px solid #f0f0f0;
   font-size: 14px;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .users-table th {
@@ -135,21 +163,25 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
-.users-actions-cell {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.btn-add, .btn-edit, .btn-delete {
+.btn-add,
+.btn-edit,
+.btn-delete,
+.users-delete-btn {
   border: none;
   cursor: pointer;
   padding: 8px 12px;
   border-radius: 8px;
   font-size: 13px;
   transition: transform 0.12s ease, opacity 0.12s;
+  white-space: nowrap;
+  min-width: 0;
+  box-sizing: border-box;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .btn-add {
@@ -158,9 +190,10 @@
   font-weight: 600;
 }
 
-.btn-add:hover { 
-  transform: translateY(-2px); 
-  opacity: .95; 
+.btn-add:hover {
+  transform: translateY(-1px);
+  opacity: .95;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 .btn-edit {
@@ -168,8 +201,9 @@
   color: #fff;
 }
 
-.btn-edit:hover { 
-  transform: translateY(-2px); 
+.btn-edit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 .btn-delete {
@@ -177,8 +211,9 @@
   color: #fff;
 }
 
-.btn-delete:hover { 
-  transform: translateY(-2px); 
+.btn-delete:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 .users-cards {
@@ -193,18 +228,22 @@
   padding: 12px;
   background: #fff;
   box-shadow: 0 2px 8px rgba(20,20,20,0.03);
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
-.user-card-row { 
-  margin-bottom: 6px; 
-  font-size: 14px; 
-  color: #333; 
+.user-card-row {
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: #333;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
-.user-card-actions { 
-  display: flex; 
-  gap: 8px; 
-  justify-content: flex-end; 
+.user-card-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
 }
 
 .users-role-modal-backdrop,
@@ -218,13 +257,14 @@
   justify-content: center;
   z-index: 2200;
   padding: 20px;
+  box-sizing: border-box;
 }
 
 .users-role-modal-card,
 .users-add-modal-card,
 .users-modal-card {
   width: 100%;
-  max-width: 520px;
+  max-width: 640px;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 20px 40px rgba(0,0,0,0.12);
@@ -234,6 +274,8 @@
   border: 1px solid rgba(0,0,0,0.04);
   max-height: 90vh;
   overflow-y: auto;
+  box-sizing: border-box;
+  margin: 0 12px;
 }
 
 .users-role-modal-header,
@@ -271,6 +313,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  box-sizing: border-box;
 }
 
 .users-role-modal-row,
@@ -286,16 +329,19 @@
   gap: 8px;
   font-size: 14px;
   color: #444;
+  box-sizing: border-box;
 }
 
 .users-role-modal-select,
 .users-add-modal-select {
-  margin-top: 4px;
-  padding: 8px 10px;
+  margin-top: 6px;
+  padding: 10px 12px;
   border-radius: 8px;
   border: 1px solid #ddd;
   background: #fff;
-  min-width: 180px;
+  font-size: 14px;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .users-role-modal-error,
@@ -313,14 +359,17 @@
   justify-content: flex-end;
   gap: 10px;
   border-top: 1px solid #f0f0f0;
+  box-sizing: border-box;
 }
 
-.btn-primary, .btn-secondary {
+.btn-primary,
+.btn-secondary {
   padding: 8px 12px;
   border-radius: 8px;
   font-size: 14px;
   cursor: pointer;
   border: none;
+  box-sizing: border-box;
 }
 
 .btn-primary {
@@ -341,15 +390,15 @@
 .users-add-modal-label select {
   margin-top: 6px;
   padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid #e2e2e2;
+  border-radius: 8px;
+  border: 1px solid #ddd;
   background: #fff;
   font-size: 14px;
   line-height: 1.3;
-  height: 44px;
   box-sizing: border-box;
   transition: border-color 0.2s, box-shadow 0.2s;
   outline: none;
+  width: 100%;
 }
 
 .users-role-modal-label input:focus,
@@ -367,6 +416,23 @@
   color: #999;
 }
 
+.users-role-modal-label textarea,
+.users-add-modal-label textarea {
+  height: auto;
+  resize: vertical;
+}
+
+.users-edit-names {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.users-edit-names .users-role-modal-label {
+  flex: 1;
+  min-width: 200px;
+}
+
 .users-add-modal-field-error,
 .users-role-modal-field-error {
   color: #d2322d;
@@ -379,10 +445,15 @@
   position: relative;
   display: flex;
   align-items: center;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .users-modal-password-wrapper input {
   padding-right: 44px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .users-modal-icon-eye {
@@ -402,9 +473,9 @@
   padding: 0;
 }
 
-.users-modal-icon-eye:focus { 
-  outline: 2px solid #9E8279; 
-  border-radius: 6px; 
+.users-modal-icon-eye:focus {
+  outline: 2px solid #9E8279;
+  border-radius: 6px;
 }
 
 .users-delete-warning {
@@ -414,16 +485,42 @@
 }
 
 .users-delete-btn {
-  background-color: #dc3545 !important;
-  color: white !important;
+  background: linear-gradient(180deg,#e3645f,#d23f39);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.12s ease, opacity 0.12s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .users-delete-btn:hover {
-  background-color: #c82333 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.users-modal-actions button:not(.users-delete-btn) {
+  background: #f3f3f3;
+  color: #333;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.12s ease, opacity 0.12s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.users-modal-actions button:not(.users-delete-btn):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 .users-delete-modal {
   max-width: 400px;
+  box-sizing: border-box;
 }
 
 @media (min-width: 1400px) {
@@ -431,28 +528,82 @@
     max-width: 1300px;
     padding: 24px;
   }
-  
   .users-header h2 {
     font-size: 1.6rem;
   }
-  
   .users-search {
-    min-width: 300px;
+    min-width: 800px !important;
+    max-width: 1200px;
+    padding: 8px 12px;
+    font-size: 13px;
   }
-  
+  .users-actions {
+    flex-shrink: 0;
+  }
   .users-table th,
   .users-table td {
     padding: 12px 16px;
     font-size: 15px;
   }
-  
   .users-email {
     max-width: 300px;
   }
-  
   .btn-add, .btn-edit, .btn-delete {
-    padding: 10px 16px;
-    font-size: 14px;
+    padding: 12px 20px;
+    font-size: 15px;
+    white-space: nowrap;
+  }
+}
+
+@media (min-width: 1080px) and (max-height: 1920px) {
+  .users-header {
+    flex-wrap: nowrap;
+    gap: 20px;
+  }
+  .users-actions {
+    flex-shrink: 0;
+  }
+  .users-search {
+    flex: 1;
+    min-width: 800px !important;
+    max-width: 1400px;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  .btn-add {
+    padding: 12px 20px;
+    font-size: 15px;
+    white-space: nowrap;
+  }
+}
+
+@media (min-width: 1600px) {
+  .admin-users-page {
+    max-width: 1400px;
+  }
+  .users-header {
+    flex-wrap: nowrap;
+    gap: 20px;
+  }
+  .users-actions {
+    flex-shrink: 0;
+  }
+  .users-search {
+    flex: 1;
+  }
+  .btn-add {
+    padding: 14px 24px;
+    font-size: 16px;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 1200px) {
+  .users-search {
+    min-width: 500px !important;
+    max-width: 1000px;
+    padding: 12px 16px;
+    font-size: 16px;
   }
 }
 
@@ -461,21 +612,20 @@
     padding: 16px;
     margin: 20px auto;
   }
-  
   .users-header h2 {
     font-size: 1.3rem;
   }
-  
   .users-search {
-    min-width: 200px;
+    min-width: 400px !important;
+    max-width: 800px;
+    padding: 12px 16px;
+    font-size: 16px;
   }
-  
   .users-table th,
   .users-table td {
     padding: 8px 10px;
     font-size: 13px;
   }
-  
   .users-email {
     max-width: 200px;
   }
@@ -486,42 +636,37 @@
     padding: 12px;
     margin: 15px auto;
   }
-  
   .users-header {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
   }
-  
   .users-actions {
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 8px;
   }
-  
   .users-search {
-    min-width: 180px;
+    min-width: 300px !important;
+    max-width: 100%;
     flex: 1;
+    padding: 12px 16px;
+    font-size: 16px;
   }
-  
   .users-controls {
     flex-wrap: wrap;
     gap: 8px;
   }
-  
   .users-table {
     font-size: 12px;
   }
-  
   .users-table th,
   .users-table td {
     padding: 6px 8px;
   }
-  
   .users-email {
     max-width: 150px;
   }
-  
   .btn-add, .btn-edit, .btn-delete {
     padding: 6px 10px;
     font-size: 12px;
@@ -529,62 +674,54 @@
 }
 
 @media (max-width: 720px) {
-  .users-table { 
-    display: none; 
+  .users-table {
+    display: none;
   }
-  
-  .users-cards { 
-    display: grid; 
-    grid-template-columns: 1fr; 
+  .users-cards {
+    display: grid;
+    grid-template-columns: 1fr;
     gap: 10px;
   }
-  
-  .users-header { 
-    flex-direction: column; 
-    align-items: stretch; 
-    gap: 10px; 
+  .users-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
   }
-  
-  .users-actions { 
-    justify-content: space-between; 
+  .users-actions {
+    justify-content: space-between;
     flex-direction: column;
     gap: 10px;
   }
-  
   .users-search {
     width: 100%;
-    min-width: auto;
+    min-width: 250px !important;
+    max-width: 100%;
+    padding: 12px 16px;
+    font-size: 16px;
   }
-  
   .users-controls {
     flex-direction: column;
     align-items: stretch;
     gap: 6px;
   }
-  
   .users-controls label {
     font-size: 12px;
   }
-  
   .users-controls select {
     margin-left: 0;
     margin-top: 4px;
     width: 100%;
   }
-  
   .user-card {
     padding: 10px;
   }
-  
   .user-card-row {
     font-size: 13px;
     margin-bottom: 4px;
   }
-  
   .user-card-actions {
     margin-top: 8px;
   }
-  
   .btn-add, .btn-edit, .btn-delete {
     padding: 8px 12px;
     font-size: 12px;
@@ -596,64 +733,54 @@
     padding: 8px;
     margin: 10px auto;
   }
-  
   .users-header h2 {
     font-size: 1.2rem;
   }
-  
   .users-search {
-    padding: 6px 10px;
-    font-size: 14px;
+    min-width: 200px !important;
+    max-width: 100%;
+    padding: 10px 14px;
+    font-size: 15px;
   }
-  
   .users-controls label {
     font-size: 11px;
   }
-  
   .users-controls select {
     padding: 4px 6px;
     font-size: 12px;
   }
-  
   .user-card {
     padding: 8px;
   }
-  
   .user-card-row {
     font-size: 12px;
     margin-bottom: 3px;
   }
-  
   .btn-add, .btn-edit, .btn-delete {
     padding: 6px 8px;
     font-size: 11px;
   }
-  
   .users-role-modal-card,
   .users-add-modal-card,
   .users-modal-card {
     margin: 5px;
     max-height: calc(100vh - 10px);
   }
-  
   .users-role-modal-header,
   .users-add-modal-header,
   .users-modal-header {
     padding: 10px 12px;
   }
-  
   .users-role-modal-header h3,
   .users-add-modal-header h3,
   .users-modal-header h3 {
     font-size: 14px;
   }
-  
   .users-role-modal-body,
   .users-add-modal-body,
   .users-modal-body {
     padding: 10px 12px;
   }
-  
   .users-role-modal-actions,
   .users-add-modal-actions,
   .users-modal-actions {
@@ -661,42 +788,62 @@
     flex-direction: column;
     gap: 8px;
   }
-  
   .btn-primary,
   .btn-secondary {
     width: 100%;
     padding: 10px 12px;
     font-size: 13px;
   }
-  
   .users-role-modal-label input,
   .users-add-modal-label input {
     padding: 8px 10px;
     font-size: 13px;
     height: 38px;
   }
-  
-  .users-modal-password-wrapper input { 
-    padding-right: 40px; 
+  .users-modal-password-wrapper input {
+    padding-right: 40px;
   }
 }
 
 @media (max-width: 420px) {
+  .users-search {
+    min-width: 150px !important;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
   .users-role-modal-label input,
   .users-add-modal-label input {
     padding: 8px 10px;
     font-size: 13px;
     height: 38px;
   }
-  
-  .users-modal-password-wrapper input { 
-    padding-right: 40px; 
+  .users-modal-password-wrapper input {
+    padding-right: 40px;
+  }
+  .users-table th,
+  .users-table td {
+    padding: 6px 8px;
   }
 }
-.admin-users-page, 
-.admin-users-page * {
-  box-sizing: border-box;
+
+@media (max-width: 360px) {
+  .users-search {
+    min-width: 120px !important;
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+  .users-header {
+    gap: 8px;
+  }
+  .users-actions {
+    gap: 6px;
+  }
+  .btn-add, .btn-edit, .btn-delete {
+    padding: 4px 6px;
+    font-size: 10px;
+  }
 }
+
 .users-search,
 .users-role-modal-label input,
 .users-add-modal-label input,
@@ -724,8 +871,10 @@
 
 @media (max-width: 900px) {
   .users-search {
-    min-width: 0;
+    min-width: 300px !important;
     width: 100%;
+    padding: 12px 16px;
+    font-size: 16px;
   }
 }
 
@@ -738,42 +887,22 @@
   hyphens: auto;
 }
 
-.users-table th,
-.users-table td {
-  min-width: 0;
-}
-
 .users-table td > * {
   max-width: 100%;
   box-sizing: border-box;
 }
 
-.users-role-modal-card,
-.users-add-modal-card,
-.users-modal-card {
-  width: 100%;
-  max-width: 520px;
-  box-sizing: border-box;
-  margin: 0 12px;
-}
-
-@media (min-width: 1400px) {
-  .users-role-modal-card,
-  .users-add-modal-card,
-  .users-modal-card {
-    max-width: 640px;
-  }
-}
-
 .users-role-modal-actions button,
 .users-add-modal-actions button,
 .users-modal-actions button,
-.btn-add, .btn-edit, .btn-delete {
+.btn-add,
+.btn-edit,
+.btn-delete {
   min-width: 0;
   white-space: nowrap;
+  box-sizing: border-box;
 }
 
-.admin-users-page .users-search[style],
 .admin-users-page .users-controls select[style] {
   min-width: 0 !important;
 }
@@ -783,22 +912,6 @@
 .user-card {
   max-width: 100%;
   box-sizing: border-box;
-}
-
-.users-modal-password-wrapper {
-  width: 100%;
-  box-sizing: border-box;
-}
-.users-modal-password-wrapper input {
-  width: 100%;
-  max-width: 100%;
-  padding-right: 44px;
-}
-
-@media (max-width: 420px) {
-  .users-table th, .users-table td {
-    padding: 6px 8px;
-  }
 }
 
 pre, code, .long-text {
@@ -818,14 +931,14 @@ pre, code, .long-text {
   -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 
-.users-table-wrapper { -webkit-overflow-scrolling: touch; }
+.users-table-wrapper {
+  -webkit-overflow-scrolling: touch;
+}
 
 .admin-users-page .flex-shrink-0 {
   flex-shrink: 1;
 }
 
-.admin-users-page {
-  max-width: 100%;
-  padding-left: 16px;
-  padding-right: 16px;
+.admin-users-page .users-controls select[style] {
+  min-width: 0 !important;
 }
