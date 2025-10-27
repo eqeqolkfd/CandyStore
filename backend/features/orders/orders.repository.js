@@ -40,11 +40,15 @@ async function insertOrderWithAddress({ userId, address, deliveryMethod, payment
       }))
     );
 
+    console.log('Creating order with items:', itemsJson);
+
     const orderRes = await client.query(
       `SELECT sp_create_order($1, $2, $3::json) AS order_id`,
       [userId, addressId, itemsJson]
     );
     const orderId = orderRes.rows[0].order_id;
+
+    console.log('Order created successfully:', orderId);
 
     await client.query(
       `UPDATE orders SET delivery_method = $1, payment_method = $2 WHERE order_id = $3`,
