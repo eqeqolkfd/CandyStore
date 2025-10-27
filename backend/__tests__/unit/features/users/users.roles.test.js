@@ -3,7 +3,6 @@ const {
   sendPasswordResetEmail
 } = require('../../../../features/users/users.service');
 
-// Mock dependencies
 jest.mock('../../../../features/users/users.repository', () => ({
   setUserRole: jest.fn(),
   getUserByEmail: jest.fn(),

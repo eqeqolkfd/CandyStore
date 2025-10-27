@@ -2,7 +2,6 @@ const {
   createOrderFromCart
 } = require('../../../../features/orders/orders.service');
 
-// Mock dependencies
 jest.mock('../../../../features/orders/orders.repository', () => ({
   insertOrderWithAddress: jest.fn()
 }));

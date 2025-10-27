@@ -3,7 +3,6 @@ const {
   registerUserWithoutEmail
 } = require('../../../../features/users/users.service');
 
-// Mock dependencies
 jest.mock('../../../../features/users/users.repository', () => ({
   emailExists: jest.fn(),
   insertUser: jest.fn(),

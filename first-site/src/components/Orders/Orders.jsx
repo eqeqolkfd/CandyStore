@@ -102,7 +102,7 @@ function Orders() {
         {orders.map(order => (
           <div className="order-card" key={order.order_id}>
             <div className="order-header">
-              <div className="order-id">Заказ №{order.order_id}</div>
+              <div className="order-id">Заказ №{order.user_order_number || order.order_id}</div>
               <div className="order-meta">
                 <span>{new Date(order.created_at).toLocaleString('ru-RU')}</span>
                 <span className={`order-status order-status-${order.status_code}`}>

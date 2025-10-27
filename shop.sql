@@ -76,6 +76,7 @@ CREATE TABLE orders (
     total_amount   NUMERIC(12,2) NOT NULL CHECK (total_amount >= 0),
     delivery_method VARCHAR(100),
     payment_method  VARCHAR(100),
+	user_order_number INT,
     created_at     TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
@@ -452,14 +453,20 @@ DECLARE
     v_product_id INT;
     v_quantity INT;
     v_price NUMERIC(10,2);
+	v_user_order_number INT;
 BEGIN
     SELECT status_id INTO v_status_new FROM order_statuses WHERE code = 'new' LIMIT 1;
     IF v_status_new IS NULL THEN
         RAISE EXCEPTION 'Order status code "new" not found in order_statuses';
     END IF;
 
-    INSERT INTO orders (user_id, address_id, status_id, total_amount, created_at)
-	VALUES (p_user_id, p_address_id, v_status_new, 0, now())
+ SELECT COALESCE(MAX(user_order_number), 0) + 1 
+    INTO v_user_order_number 
+    FROM orders 
+    WHERE user_id = p_user_id;
+
+    INSERT INTO orders (user_id, address_id, status_id, total_amount, user_order_number, created_at)
+	VALUES (p_user_id, p_address_id, v_status_new, 0, v_user_order_number, now())
 	RETURNING order_id INTO v_order_id;
 
     FOR elem IN SELECT * FROM json_array_elements(p_items)
@@ -846,3 +853,13 @@ select * from audit_logs;
 select * from addresses;
 
 select * from order_items;
+
+WITH numbered AS (
+  SELECT order_id, user_id, 
+         ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY created_at) as num
+  FROM orders
+)
+UPDATE orders o
+SET user_order_number = n.num
+FROM numbered n
+WHERE o.order_id = n.order_id AND o.user_order_number IS NULL;

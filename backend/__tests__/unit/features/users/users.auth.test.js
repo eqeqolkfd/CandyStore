@@ -3,7 +3,6 @@ const {
   loginUser
 } = require('../../../../features/users/users.service');
 
-// Mock dependencies
 jest.mock('../../../../features/users/users.repository', () => ({
   getUserRoleByEmailOrId: jest.fn(),
   getUserByEmail: jest.fn(),

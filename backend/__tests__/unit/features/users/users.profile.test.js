@@ -7,7 +7,6 @@ const {
   listUsers
 } = require('../../../../features/users/users.service');
 
-// Mock dependencies
 jest.mock('../../../../features/users/users.repository', () => ({
   getUserProfileById: jest.fn(),
   getPaymentsByUserId: jest.fn(),

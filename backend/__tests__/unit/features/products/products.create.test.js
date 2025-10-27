@@ -2,7 +2,6 @@ const {
   createProductService
 } = require('../../../../features/products/products.service');
 
-// Mock dependencies
 jest.mock('../../../../features/products/products.repository', () => ({
   createProduct: jest.fn(),
   findProductById: jest.fn()
@@ -55,7 +54,7 @@ describe('🛍️ ТОВАРЫ - Создание', () => {
 
     test('✅ должен обрабатывать createProduct с разными именами полей ID', async () => {
       const productData = { name: 'New Product' };
-      const mockCreated = { id: 1 }; // Different field name
+      const mockCreated = { id: 1 };
       const mockFull = {
         product_id: 1,
         name_product: 'New Product'

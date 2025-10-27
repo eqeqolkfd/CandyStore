@@ -156,7 +156,12 @@ function OrdersAdmin() {
           ) : (
             filteredOrders.map(o => (
                 <tr key={o.order_id}>
-                  <td>{o.order_id}</td>
+                  <td>
+                    {o.user_order_number ? `#${o.user_order_number}` : o.order_id}
+                    <small style={{ display: 'block', color: '#888', fontSize: '0.85em' }}>
+                      ID: {o.order_id}
+                    </small>
+                  </td>
                   <td>{`${o.first_name || ''} ${o.last_name || ''}`.trim()}</td>
                   <td>{o.email || '—'}</td>
                   <td>{new Date(o.created_at).toLocaleString('ru-RU')}</td>

@@ -2,7 +2,6 @@ const {
   listOrdersByUser
 } = require('../../../../features/orders/orders.service');
 
-// Mock dependencies
 jest.mock('../../../../features/orders/orders.repository', () => ({
   fetchOrdersByUser: jest.fn()
 }));

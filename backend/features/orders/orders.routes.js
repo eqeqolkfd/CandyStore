@@ -44,7 +44,7 @@ module.exports = router;
 router.get('/admin/all', async (req, res) => {
   try {
     const r = await pool.query(`
-      SELECT o.order_id, o.user_id, o.total_amount, o.created_at,
+      SELECT o.order_id, o.user_id, o.user_order_number, o.total_amount, o.created_at,
              o.delivery_method, o.payment_method,
              s.code AS status_code, s.name_orderstatuses AS status_name,
              COALESCE((SELECT COUNT(1) FROM order_items oi WHERE oi.order_id = o.order_id), 0) AS items_count,

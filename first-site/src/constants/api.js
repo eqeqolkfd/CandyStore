@@ -11,6 +11,7 @@ export const API_ENDPOINTS = {
   LOGIN: `${API_BASE_URL}/users/login`,
   REGISTER: `${API_BASE_URL}/users/register`,
   LOGOUT: `${API_BASE_URL}/users/logout`,
+  FORGOT_PASSWORD: `${API_BASE_URL}/users/forgot-password`,
 
   UPLOAD_PRODUCT_IMAGE: `${API_BASE_URL}/upload/product-image`,
 

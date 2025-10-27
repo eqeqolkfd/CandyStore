@@ -69,7 +69,7 @@ router.post('/register', async (req, res) => {
       targetType: 'USER',
       targetId: result.userId,
       targetName: `${firstName} ${lastName}`,
-      details: { 
+      details: {
         email: email,
         role: result.role || 'client',
         method: 'self_registration'
@@ -78,7 +78,7 @@ router.post('/register', async (req, res) => {
       ipAddress: req.ip || req.connection.remoteAddress,
       userAgent: req.get('User-Agent')
     });
-    
+
     res.status(201).json(result);
   } catch (e) {
     res.status(500).json({ error: e.message });

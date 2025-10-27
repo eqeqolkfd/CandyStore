@@ -2,7 +2,6 @@ const {
   deleteProductService
 } = require('../../../../features/products/products.service');
 
-// Mock dependencies
 jest.mock('../../../../features/products/products.repository', () => ({
   findProductById: jest.fn(),
   deleteProduct: jest.fn()

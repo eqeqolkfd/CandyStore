@@ -33,11 +33,19 @@ async function loginUser({ email, password }) {
   
   let isValidPassword = false;
   
-  if (await bcrypt.compare(password, user.password_hash)) {
+  console.log('Login attempt:', { email, passwordLength: password?.length, hashLength: user.password_hash?.length });
+  
+  const bcryptResult = await bcrypt.compare(password, user.password_hash);
+  console.log('Bcrypt compare result:', bcryptResult);
+  
+  if (bcryptResult) {
     isValidPassword = true;
   } else if (password === user.password_hash) {
+    console.log('Direct password match (unhashed)');
     isValidPassword = true;
   }
+  
+  console.log('Final validation:', isValidPassword);
   
   if (isValidPassword) {
     const token = jwt.sign(
@@ -77,8 +85,6 @@ async function registerUser({ firstName, lastName, email, password }) {
     if (!roleId) throw new Error('Role client not found');
     await assignUserRole(client, inserted.user_id, roleId);
 
-    await client.query('COMMIT');
-
     const adminEmail = await getAdminEmail();
     if (!adminEmail) throw new Error('Admin email not found');
 
@@ -98,13 +104,24 @@ async function registerUser({ firstName, lastName, email, password }) {
       }
     });
 
-    await transporter.sendMail({
-      from: adminEmail,
-      to: email,
-      subject: 'Добро пожаловать в SweetShop!',
-      text: `Здравствуйте, ${firstName}! Ваш профиль в SweetShop успешно создан. Ваш пароль: ${password}`,
-      html: `<p>Здравствуйте, <b>${firstName}</b>!<br/>Ваш профиль в SweetShop успешно создан.<br/><b>Ваш пароль: </b>${password}</p>`
-    });
+    try {
+      await transporter.sendMail({
+        from: adminEmail,
+        to: email,
+        subject: 'Добро пожаловать в SweetShop!',
+        text: `Здравствуйте, ${firstName}! Ваш профиль в SweetShop успешно создан. Ваш пароль: ${password}`,
+        html: `<p>Здравствуйте, <b>${firstName}</b>!<br/>Ваш профиль в SweetShop успешно создан.<br/><b>Ваш пароль: </b>${password}</p>`
+      });
+    } catch (emailError) {
+      console.error('Ошибка отправки email:', emailError.message);
+      await client.query('ROLLBACK');
+      if (emailError.message && emailError.message.includes('invalid mailbox')) {
+        throw new Error('Указанной почты не существует!');
+      }
+      throw new Error('Не удалось отправить письмо на указанную почту');
+    }
+
+    await client.query('COMMIT');
 
     return { userId: inserted.user_id, email, role: 'client', token };
   } catch (e) {
@@ -198,7 +215,13 @@ async function updateProfile({ userId, first_name, last_name, oldPassword, newPa
 
     if (newPassword !== undefined && newPassword.trim() !== '') {
       updateFields.push(`password_hash = $${paramIndex++}`);
-      updateValues.push(newPassword);
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      console.log('Updating password:', { 
+        newPasswordLength: newPassword.length, 
+        hashedLength: hashedPassword.length,
+        newPasswordPreview: newPassword.substring(0, 3) + '***'
+      });
+      updateValues.push(hashedPassword);
     }
 
     if (updateFields.length === 0) {
@@ -251,8 +274,11 @@ async function updateProfile({ userId, first_name, last_name, oldPassword, newPa
               `<p>Здравствуйте, <b>${updatedUser.first_name}</b>!<br/>Ваш пароль успешно изменён.<br/><b>Новый пароль: </b>${newPassword}</p>`
           });
         }
-      } catch(e) {
-        console.error('Не удалось отправить письмо о смене пароля:', e);
+      } catch(emailError) {
+        console.error('Не удалось отправить письмо о смене пароля:', emailError.message);
+        if (emailError.message && emailError.message.includes('invalid mailbox')) {
+          console.error('Указанной почты не существует!');
+        }
       }
     }
 
@@ -342,12 +368,13 @@ async function sendPasswordResetEmail(email) {
   }
 
   const newPassword = generateRandomPassword();
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
     await client.query(
       'UPDATE users SET password_hash = $1 WHERE user_id = $2',
-      [newPassword, user.user_id]
+      [hashedPassword, user.user_id]
     );
     await client.query('COMMIT');
   } catch (error) {
@@ -372,12 +399,16 @@ async function sendPasswordResetEmail(email) {
     await transporter.sendMail({
       from: adminEmail,
       to: email,
-      subject: 'Восстановление пароля - Кондитерская',
+      subject: 'Восстановление пароля - SweetShop',
       text: `Здравствуйте, ${user.first_name}! По вашему запросу администратор сгенерировал новый пароль для вашего аккаунта. Ваш новый пароль: ${newPassword}`,
       html: `<p>Здравствуйте, <b>${user.first_name}</b>!<br/>По вашему запросу администратор сгенерировал новый пароль для вашего аккаунта.<br/><b>Ваш новый пароль: </b>${newPassword}</p>`
     });
   } catch (emailError) {
     console.error('Ошибка отправки email:', emailError.message);
+    if (emailError.message && emailError.message.includes('invalid mailbox')) {
+      throw new Error('Указанной почты не существует!');
+    }
+    throw new Error('Не удалось отправить письмо на указанную почту');
   }
 
   console.log('=== ВОССТАНОВЛЕНИЕ ПАРОЛЯ ===');

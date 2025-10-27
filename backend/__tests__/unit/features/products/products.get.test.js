@@ -3,7 +3,6 @@ const {
   getProductById
 } = require('../../../../features/products/products.service');
 
-// Mock dependencies
 jest.mock('../../../../features/products/products.repository', () => ({
   findAllProducts: jest.fn(),
   findProductById: jest.fn()

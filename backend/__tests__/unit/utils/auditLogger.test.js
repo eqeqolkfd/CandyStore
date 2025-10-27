@@ -1,6 +1,5 @@
 const { logAuditEvent } = require('../../../utils/auditLogger');
 
-// Mock dependencies
 jest.mock('../../../features/audit/audit.service', () => ({
   createAuditLog: jest.fn()
 }));
@@ -81,7 +80,6 @@ describe('📝 УТИЛИТЫ - Логирование аудита', () => {
       const error = new Error('Database connection failed');
       createAuditLog.mockRejectedValue(error);
 
-      // Should not throw error
       await expect(logAuditEvent(auditData)).resolves.toBeUndefined();
     });
 

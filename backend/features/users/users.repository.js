@@ -15,7 +15,7 @@ async function getUserRoleByEmailOrId(email, userId) {
 
 async function getUserByEmail(email) {
   const result = await pool.query(
-    `SELECT u.user_id, u.email, u.password_hash,
+    `SELECT u.user_id, u.first_name, u.last_name, u.email, u.password_hash,
             (SELECT r.name_role
                FROM user_roles ur
                JOIN roles r ON r.role_id = ur.role_id
